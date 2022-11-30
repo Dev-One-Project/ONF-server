@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  ONF-server:
+    container_name: ONF-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/ONF/src
+    ports:
+      - 3000:3000
+    env_file:
+      - ./.env.docker
+    depends_on:
+      - ONF-db
+    networks:
+      - ONF-network
+
+  ONF-db:
+    container_name: ONF-db
+    image: mysql:latest
+    volumes:
+      - ./mysql/my.cnf:/etc/my.cnf
+      - mysql-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    env_file:
+      - ./.env.docker
+    networks:
+      - ONF-network
+
+  ONF-redis:
+    container_name: ONF-redis
+    image: redis:latest
+    ports:
+      - 6379:6379
+    env_file:
+      - ./.env.docker
+    networks:
+      - ONF-network
