@@ -43,4 +43,14 @@ export class MemberService {
 
     return result.affected ? true : false;
   }
+
+  async hardDelete({ memberId }) {
+    //TODO: get vacation list and delete all vacations
+    //TODO: get schedule list and delete all schedules
+    //TODO: get workcheck list and delete all workchecks
+
+    const result = await this.memberRepository.delete({ memberId });
+
+    return result.affected ? true : false;
+  }
 }
