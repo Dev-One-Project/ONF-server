@@ -11,9 +11,11 @@ import { VacationModule } from './apis/vacation/vacation.module';
 import { VacationCategoryModule } from './apis/vacationCategory/vacationCategory.module';
 import { AccountModule } from './apis/accounts/account.module';
 import { CompanyModule } from './apis/companies/company.module';
+import { WorkCheckModule } from './apis/workChecks/workCheck.module';
 
 @Module({
   imports: [
+    WorkCheckModule,
     CompanyModule,
     MemberModule,
     VacationCategoryModule,

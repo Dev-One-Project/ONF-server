@@ -14,7 +14,6 @@ type Member {
   leave: Int
 }
 
-
 type VacationCategory {
   id: String!
   vacationCategoryGroup: String!
@@ -26,12 +25,16 @@ type VacationCategory {
 }
 
 type Query {
-  """휴가유형 전체 찾기"""
+  """
+  휴가유형 전체 찾기
+  """
   fetchVacationCategorys: [VacationCategory!]!
 
-  """휴가유형ID를 적어서 하나의 유형 찾기"""
+  """
+  휴가유형ID를 적어서 하나의 유형 찾기
+  """
   fetchVacationCategory(vacationCategoryId: String!): VacationCategory!
-
+}
 type Company {
   id: String
   name: String
@@ -57,48 +60,88 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Query {
-  """회사 정보 조회"""
-  fetchCompanyDetail(companyId: String!): Company! @deprecated(reason: "Initializing Status / Need Update")
+  """
+  회사 정보 조회
+  """
+  fetchCompanyDetail(companyId: String!): Company!
+    @deprecated(reason: "Initializing Status / Need Update")
 
-
-  """멤버 전체 조회"""
+  """
+  멤버 전체 조회
+  """
   fetchMembers: [Member!]!
 
-  """memberId(사원ID)로 개별 조회"""
+  """
+  memberId(사원ID)로 개별 조회
+  """
   fetchMember(memberId: String!): Member!
+  fetchWorkChecks: [WorkCheck!]!
+  fetchWorkCheck(memberId: String!): WorkCheck!
 }
 
 type Mutation {
+  """
+  휴가유형 만들기
+  """
+  createVacationCategory(
+    createVacationCategoryInput: CreateVacationCategoryInput!
+  ): VacationCategory!
 
-  """휴가유형 만들기"""
-  createVacationCategory(createVacationCategoryInput: CreateVacationCategoryInput!): VacationCategory!
+  """
+  휴가유형Id와 Input을 적어 데이터 수정하기
+  """
+  updateVacationCategory(
+    vacationCategoryId: String!
+    updateVacationCategoryInput: UpdateVacationCategoryInput!
+  ): VacationCategory!
 
-  """휴가유형Id와 Input을 적어 데이터 수정하기"""
-  updateVacationCategory(vacationCategoryId: String!, updateVacationCategoryInput: UpdateVacationCategoryInput!): VacationCategory!
-
-  """휴가유형ID로 데이터 완전 삭제하기"""
+  """
+  휴가유형ID로 데이터 완전 삭제하기
+  """
   deleteVacationCategory(vacationCategoryId: String!): Boolean!
 
-  """회사 신규 가입"""
+  """
+  회사 신규 가입
+  """
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
 
-  """회사 정보 수정"""
-  updateCompany(companyId: String!, updateCompanyInput: CreateCompanyInput!): Company!
+  """
+  회사 정보 수정
+  """
+  updateCompany(
+    companyId: String!
+    updateCompanyInput: CreateCompanyInput!
+  ): Company!
 
-  """회사 정보 영구 삭제 / 복구 불가능하므로 사용 주의"""
+  """
+  회사 정보 영구 삭제 / 복구 불가능하므로 사용 주의
+  """
   deleteCompany(companyId: String!): Boolean!
 
-
-  """멤버 정보 입력"""
+  """
+  멤버 정보 입력
+  """
   createMember(createMemberInput: CreateMemberInput!): Member!
 
-  """멤버 정보 수정"""
-  updateMember(memberId: String!, updateMemberInput: UpdateMemberInput!): Member!
+  """
+  멤버 정보 수정
+  """
+  updateMember(
+    memberId: String!
+    updateMemberInput: UpdateMemberInput!
+  ): Member!
 
-  """멤버 정보 삭제"""
+  """
+  멤버 정보 삭제
+  """
   deleteMember(memberId: String!): Boolean!
+  createWorkCheck(createWorkCheckInput: CreateWorkCheckInput!): WorkCheck!
+  updateWorkCheck(
+    workCheckId: String!
+    updateWorkCheckInput: UpdateWorkCheckInput!
+  ): WorkCheck!
+  deleteWorkCheck(workCheckId: String!): Boolean!
 }
-
 
 input CreateVacationCategoryInput {
   vacationCategoryGroup: String!
@@ -116,13 +159,12 @@ input UpdateVacationCategoryInput {
   memo: String
   paidTime: Int
   deductionDays: Int
-
+}
 input CreateCompanyInput {
   name: String
   logoUrl: String
   rules: String
   membership: MEMBERSHIP_TYPE
-
 }
 
 input CreateMemberInput {
@@ -145,4 +187,22 @@ input UpdateMemberInput {
   invitationCode: String
   memo: String
   leave: Int
+}
+
+input CreateWorkCheckInput {
+  workDay: String!
+  quittingTime: String
+  breakStartTime: String
+  breakFinishTime: String
+  totalWorkTime: String
+  totalBreakTime: String
+}
+
+input UpdateWorkCheckInput {
+  workDay: String
+  quittingTime: String
+  breakStartTime: String
+  breakFinishTime: String
+  totalWorkTime: String
+  totalBreakTime: String
 }
