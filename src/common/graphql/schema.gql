@@ -14,7 +14,23 @@ type Member {
   leave: Int
 }
 
+type VacationCategory {
+  id: String!
+  vacationCategoryGroup: String!
+  name: String!
+  timeOption: String!
+  memo: String
+  paidTime: Int!
+  deductionDays: Float!
+}
+
 type Query {
+  """휴가유형 전체 찾기"""
+  fetchVacationCategorys: [VacationCategory!]!
+
+  """휴가유형ID를 적어서 하나의 유형 찾기"""
+  fetchVacationCategory(vacationCategoryId: String!): VacationCategory!
+
   """멤버 전체 조회"""
   fetchMembers: [Member!]!
 
@@ -23,6 +39,15 @@ type Query {
 }
 
 type Mutation {
+  """휴가유형 만들기"""
+  createVacationCategory(createVacationCategoryInput: CreateVacationCategoryInput!): VacationCategory!
+
+  """휴가유형Id와 Input을 적어 데이터 수정하기"""
+  updateVacationCategory(vacationCategoryId: String!, updateVacationCategoryInput: UpdateVacationCategoryInput!): VacationCategory!
+
+  """휴가유형ID로 데이터 완전 삭제하기"""
+  deleteVacationCategory(vacationCategoryId: String!): Boolean!
+
   """멤버 정보 입력"""
   createMember(createMemberInput: CreateMemberInput!): Member!
 
@@ -31,6 +56,24 @@ type Mutation {
 
   """멤버 정보 삭제"""
   deleteMember(memberId: String!): Boolean!
+}
+
+input CreateVacationCategoryInput {
+  vacationCategoryGroup: String!
+  name: String!
+  timeOption: String!
+  memo: String
+  paidTime: Int!
+  deductionDays: Int!
+}
+
+input UpdateVacationCategoryInput {
+  vacationCategoryGroup: String
+  name: String
+  timeOption: String
+  memo: String
+  paidTime: Int
+  deductionDays: Int
 }
 
 input CreateMemberInput {

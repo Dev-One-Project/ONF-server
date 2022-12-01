@@ -9,9 +9,11 @@ import { RedisClientOptions } from 'redis';
 import * as redisStore from 'cache-manager-redis-store';
 import { MemberModule } from './apis/members/member.module';
 import { VacationModule } from './apis/vacation/vacation.module';
+import { VacationCategoryModule } from './apis/vacationCategory/vacationCategory.module';
 
 @Module({
   imports: [
+    VacationCategoryModule,
     MemberModule,
     VacationModule,
     ConfigModule.forRoot({ isGlobal: true }),
