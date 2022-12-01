@@ -9,9 +9,11 @@ import * as redisStore from 'cache-manager-redis-store';
 import { MemberModule } from './apis/members/member.module';
 import { VacationModule } from './apis/vacation/vacation.module';
 import { AccountModule } from './apis/accounts/account.module';
+import { CompanyModule } from './apis/companies/company.module';
 
 @Module({
   imports: [
+    CompanyModule,
     MemberModule,
     VacationModule,
     AccountModule,
