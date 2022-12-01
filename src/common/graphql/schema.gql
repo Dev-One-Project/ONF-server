@@ -1,0 +1,56 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Member {
+  memberId: String!
+  lastName: String!
+  firstName: String!
+  isAdmin: Boolean
+  joinDate: String!
+  exitDate: String
+  invitationCode: String!
+  memo: String
+  leave: Int
+}
+
+type Query {
+  """멤버 전체 조회"""
+  fetchMembers: [Member!]!
+
+  """memberId(사원ID)로 개별 조회"""
+  fetchMember(memberId: String!): Member!
+}
+
+type Mutation {
+  """멤버 정보 입력"""
+  createMember(createMemberInput: CreateMemberInput!): Member!
+
+  """멤버 정보 수정"""
+  updateMember(memberId: String!, updateMemberInput: UpdateMemberInput!): Member!
+
+  """멤버 정보 삭제"""
+  deleteMember(memberId: String!): Boolean!
+}
+
+input CreateMemberInput {
+  lastName: String!
+  firstName: String!
+  isAdmin: Boolean = false
+  joinDate: String!
+  exitDate: String
+  invitationCode: String!
+  memo: String
+  leave: Int
+}
+
+input UpdateMemberInput {
+  lastName: String
+  firstName: String
+  isAdmin: Boolean = false
+  joinDate: String
+  exitDate: String
+  invitationCode: String
+  memo: String
+  leave: Int
+}
