@@ -11,15 +11,15 @@ export class MemberResolver {
   ) {}
 
   @Query(() => [Member], { description: '멤버 전체 조회' })
-  fetchMembers() {
-    return this.memberService.findAll();
+  async fetchMembers() {
+    return await this.memberService.findAll();
   }
 
   @Query(() => Member, { description: 'memberId(사원ID)로 개별 조회' })
-  fetchMember(
+  async fetchMember(
     @Args('memberId') memberId: string, //
   ) {
-    return this.memberService.findOne({ memberId });
+    return await this.memberService.findOne({ memberId });
   }
 
   @Mutation(() => Member, { description: '멤버 정보 입력' })
