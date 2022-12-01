@@ -17,13 +17,17 @@ export class VacationCategory {
 
   @Column()
   @Field(() => String)
+  vacationCategoryGroup: string;
+
+  @Column()
+  @Field(() => String)
   name: string;
 
   @Column()
   @Field(() => String)
   timeOption: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   memo: string;
 

@@ -8,6 +8,7 @@ import { RedisClientOptions } from 'redis';
 import * as redisStore from 'cache-manager-redis-store';
 import { MemberModule } from './apis/members/member.module';
 import { VacationModule } from './apis/vacation/vacation.module';
+import { VacationCategoryModule } from './apis/vacationCategory/vacationCategory.module';
 import { AccountModule } from './apis/accounts/account.module';
 import { CompanyModule } from './apis/companies/company.module';
 
@@ -15,6 +16,7 @@ import { CompanyModule } from './apis/companies/company.module';
   imports: [
     CompanyModule,
     MemberModule,
+    VacationCategoryModule,
     VacationModule,
     AccountModule,
     ConfigModule.forRoot({ isGlobal: true }),
