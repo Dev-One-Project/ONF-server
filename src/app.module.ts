@@ -7,9 +7,13 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { RedisClientOptions } from 'redis';
 import * as redisStore from 'cache-manager-redis-store';
+import { MemberModule } from './apis/members/member.module';
+import { VacationModule } from './apis/vacation/vacation.module';
 
 @Module({
   imports: [
+    MemberModule,
+    VacationModule,
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

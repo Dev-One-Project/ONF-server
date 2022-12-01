@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  ONF-server:
+  onf-server:
     container_name: ONF-server
     image: reg.brian-hong.tech/ONF/ONF-server:latest
     platform: linux/arm64/v8
@@ -13,7 +13,7 @@ services:
     networks:
       - ONF-network
 
-  ONF-redis:
+  onf-redis:
     container_name: ONF-redis
     image: redis:latest
     ports:
@@ -22,3 +22,6 @@ services:
       - ./.env
     networks:
       - ONF-network
+
+networks:
+  ONF-network:
