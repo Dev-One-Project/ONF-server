@@ -1,4 +1,4 @@
-import { Resolver } from '@nestjs/graphql';
+import { Injectable } from '@nestjs/common';
 
-@Resolver()
-export class VacationCategoryResolver {}
+@Injectable()
+export class VacationCategoryService {}
