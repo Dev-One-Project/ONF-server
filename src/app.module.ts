@@ -2,18 +2,19 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule, Module } from '@nestjs/common';
 import 'dotenv/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { RedisClientOptions } from 'redis';
 import * as redisStore from 'cache-manager-redis-store';
 import { MemberModule } from './apis/members/member.module';
 import { VacationModule } from './apis/vacation/vacation.module';
+import { AccountModule } from './apis/accounts/account.module';
 
 @Module({
   imports: [
     MemberModule,
     VacationModule,
+    AccountModule,
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -55,7 +56,5 @@ import { VacationModule } from './apis/vacation/vacation.module';
       isGlobal: true,
     }),
   ],
-  controllers: [AppController],
-  providers: [],
 })
 export class AppModule {}
