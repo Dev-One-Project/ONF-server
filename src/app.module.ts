@@ -12,9 +12,11 @@ import { VacationCategoryModule } from './apis/vacationCategory/vacationCategory
 import { AccountModule } from './apis/accounts/account.module';
 import { CompanyModule } from './apis/companies/company.module';
 import { WorkCheckModule } from './apis/workChecks/workCheck.module';
+import { AuthModule } from './apis/auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     WorkCheckModule,
     CompanyModule,
     MemberModule,
@@ -25,7 +27,7 @@ import { WorkCheckModule } from './apis/workChecks/workCheck.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'src/common/graphql/schema.gql',
-      context: ({ req }) => ({ req }),
+      context: ({ req, res }) => ({ req, res }),
       cors: {
         origin: [
           'http://localhost:3000',
