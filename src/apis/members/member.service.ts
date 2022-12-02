@@ -10,13 +10,17 @@ export class MemberService {
     private readonly memberRepository: Repository<Member>, //
   ) {}
 
-  async findAll() {
-    return await this.memberRepository.find();
+  async findAll({ companyId }) {
+    return await this.memberRepository
+      .createQueryBuilder('Member')
+      .leftJoinAndSelect('Member.company', 'company')
+      .where('Member.company = :id', { id: companyId })
+      .getMany();
   }
 
   async findOne({ memberId }) {
     return await this.memberRepository.findOne({
-      where: { memberId },
+      where: { id: memberId },
     });
   }
 
@@ -31,17 +35,11 @@ export class MemberService {
 
     const result = await this.memberRepository.save({
       ...findMemberId,
-      memberId: findMemberId.memberId,
+      memberId: findMemberId.id,
       ...updateMemberInput,
     });
 
     return result;
-  }
-
-  async delete({ memberId }) {
-    const result = await this.memberRepository.softDelete({ memberId });
-
-    return result.affected ? true : false;
   }
 
   async hardDelete({ memberId }) {
@@ -49,7 +47,7 @@ export class MemberService {
     //TODO: get schedule list and delete all schedules
     //TODO: get workcheck list and delete all workchecks
 
-    const result = await this.memberRepository.delete({ memberId });
+    const result = await this.memberRepository.delete({ id: memberId });
 
     return result.affected ? true : false;
   }

@@ -1,9 +1,11 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Company } from 'src/apis/companies/entities/company.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -13,7 +15,7 @@ import {
 export class Member {
   @PrimaryGeneratedColumn('uuid')
   @Field(() => String)
-  memberId: string;
+  id: string;
 
   @Column()
   @Field(() => String)
@@ -56,11 +58,13 @@ export class Member {
   @DeleteDateColumn({ nullable: true })
   deletedAt: Date;
 
+  @ManyToOne(() => Company)
+  @Field(() => Company)
+  company: Company;
+
   // Many to One 근로정보
 
   // Many to One 직무
 
   // Many to One 조직
-
-  // Many to One 회사
 }

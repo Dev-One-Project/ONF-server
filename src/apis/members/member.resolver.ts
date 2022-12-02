@@ -10,9 +10,11 @@ export class MemberResolver {
     private readonly memberService: MemberService, //
   ) {}
 
-  @Query(() => [Member], { description: '멤버 전체 조회' })
-  async fetchMembers() {
-    return await this.memberService.findAll();
+  @Query(() => [Member], { description: 'comanyId에 해당하는 멤버 전체 조회' })
+  async fetchMembers(
+    @Args('companyId') companyId: string, //
+  ) {
+    return await this.memberService.findAll({ companyId });
   }
 
   @Query(() => Member, { description: 'memberId(사원ID)로 개별 조회' })
@@ -41,6 +43,6 @@ export class MemberResolver {
   async deleteMember(
     @Args('memberId') memberId: string, //
   ) {
-    return await this.memberService.delete({ memberId });
+    return await this.memberService.hardDelete({ memberId });
   }
 }
