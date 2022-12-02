@@ -31,7 +31,7 @@ export class Member {
   @Field(() => String)
   joinDate: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   exitDate: string;
 
@@ -39,21 +39,21 @@ export class Member {
   @Field(() => String)
   invitationCode: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   memo: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Field(() => Int, { nullable: true })
   leave: number;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ nullable: true })
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ nullable: true })
   deletedAt: Date;
 
   // Many to One 근로정보
