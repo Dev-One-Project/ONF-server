@@ -13,12 +13,14 @@ import { AccountModule } from './apis/accounts/account.module';
 import { CompanyModule } from './apis/companies/company.module';
 import { WorkCheckModule } from './apis/workChecks/workCheck.module';
 import { AuthModule } from './apis/auth/auth.module';
+import { CategoryModule } from './apis/categories/category.module';
 
 @Module({
   imports: [
     AuthModule,
     WorkCheckModule,
     CompanyModule,
+    CategoryModule,
     MemberModule,
     VacationCategoryModule,
     VacationModule,
