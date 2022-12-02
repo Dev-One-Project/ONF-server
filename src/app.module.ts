@@ -10,9 +10,11 @@ import { MemberModule } from './apis/members/member.module';
 import { VacationModule } from './apis/vacation/vacation.module';
 import { AccountModule } from './apis/accounts/account.module';
 import { CompanyModule } from './apis/companies/company.module';
+import { AuthModule } from './apis/auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     CompanyModule,
     MemberModule,
     VacationModule,
@@ -21,7 +23,7 @@ import { CompanyModule } from './apis/companies/company.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'src/common/graphql/schema.gql',
-      context: ({ req }) => ({ req }),
+      context: ({ req, res }) => ({ req, res }),
       cors: {
         origin: [
           'http://localhost:3000',

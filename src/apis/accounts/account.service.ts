@@ -9,6 +9,13 @@ export class AccountService {
     @InjectRepository(Account)
     private readonly accountRepository: Repository<Account>,
   ) {}
+
+  async findOne({ email }) {
+    return this.accountRepository.findOne({
+      where: { email },
+    });
+  }
+
   async create({ email, hashedPassword: password }) {
     const user = await this.accountRepository.findOne({
       where: { email },
