@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CategoryService } from '../categories/category.service';
+import { MemberService } from '../members/member.service';
 import { Company } from './entities/company.entity';
 
 @Injectable()
@@ -8,6 +10,8 @@ export class CompanyService {
   constructor(
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
+    private readonly categoryService: CategoryService,
+    private readonly memberService: MemberService,
   ) {}
   private sqlInit = this.companyRepository.createQueryBuilder('company');
 
@@ -39,11 +43,18 @@ export class CompanyService {
   }
 
   async deleteCompany({ companyId }) {
-    //TODO: get member list and delete all members
-    // => use memberService.hardDelete({ memberId })
+    //get member list and delete all members
+    const members = await this.memberService.findAll({ companyId });
+    members.forEach(async (member) => {
+      await this.memberService.hardDelete({ memberId: member.id });
+    });
 
     //TODO: get holiday list and delete all holidays
-    //TODO: get category list and delete all categories
+    //get category list and delete all categories
+    const categories = await this.categoryService.findAll({ companyId });
+    categories.forEach(async (category) => {
+      await this.categoryService.delete({ categoryId: category.id });
+    });
     //TODO: get organization list and delete all organizations
     //TODO: get company config and delete all company configs
     //TODO: get vacation category list and delete all vacation categories
