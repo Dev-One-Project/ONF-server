@@ -3,7 +3,7 @@ version: '3.7'
 services:
   onf-server:
     container_name: ONF-server
-    image: reg.brian-hong.tech/ONF/ONF-server:latest
+    image: reg.brian-hong.tech/onf/onf-server:latest
     platform: linux/arm64/v8
     restart: unless-stopped
     ports:
