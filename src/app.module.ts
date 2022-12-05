@@ -53,6 +53,8 @@ import { AppController } from './app.controller';
           'Accept',
         ],
       },
+      playground: true,
+      introspection: true,
     }),
     TypeOrmModule.forRoot({
       type: process.env.DB_TYPE as 'mysql',
