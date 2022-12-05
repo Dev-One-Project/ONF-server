@@ -13,6 +13,7 @@ import { AccountModule } from './apis/accounts/account.module';
 import { CompanyModule } from './apis/companies/company.module';
 import { WorkCheckModule } from './apis/workChecks/workCheck.module';
 import { AuthModule } from './apis/auth/auth.module';
+import { ScheduleModule } from './apis/schedules/schedule.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthModule } from './apis/auth/auth.module';
     VacationCategoryModule,
     VacationModule,
     AccountModule,
+    ScheduleModule,
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

@@ -55,7 +55,7 @@ export class WorkCheckService {
   }
 
   async delete({ workCheckId }) {
-    const result = await this.workCheckRepository.softDelete({
+    const result = await this.workCheckRepository.delete({
       id: workCheckId,
     });
 

@@ -85,9 +85,12 @@ type Query {
 
   """휴가유형ID를 적어서 하나의 유형 찾기"""
   fetchVacationCategory(vacationCategoryId: String!): VacationCategory!
+  fetchAccount: Account!
 }
 
 type Mutation {
+  login(email: String!, password: String!): String!
+  restoreAccessToken: String!
   createWorkCheck(createWorkCheckInput: CreateWorkCheckInput!): WorkCheck!
   updateWorkCheck(workCheckId: String!, updateWorkCheckInput: UpdateWorkCheckInput!): WorkCheck!
   deleteWorkCheck(workCheckId: String!): Boolean!
