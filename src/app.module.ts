@@ -16,6 +16,7 @@ import { AuthModule } from './apis/auth/auth.module';
 import { ScheduleModule } from './apis/schedules/schedule.module';
 import { CategoryModule } from './apis/categories/category.module';
 import { OrganizationModule } from './apis/organization/organization.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -70,5 +71,6 @@ import { OrganizationModule } from './apis/organization/organization.module';
       isGlobal: true,
     }),
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

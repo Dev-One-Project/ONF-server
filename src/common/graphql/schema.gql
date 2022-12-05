@@ -65,6 +65,20 @@ type Category {
   company: Company
 }
 
+type Organization {
+  id: String
+  name: String
+  address: String
+  lat: String
+  lng: String
+  description: String
+  color: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  company: Company
+}
+
 type WorkCheck {
   id: String!
   workDay: String!
@@ -75,6 +89,13 @@ type WorkCheck {
   totalBreakTime: String
   updatedAt: DateTime
   deletedAt: DateTime
+  member: Member!
+}
+
+type Schedule {
+  id: String!
+  startWorkTime: String!
+  finishWorkTime: String!
   member: Member!
 }
 
@@ -91,6 +112,12 @@ type Query {
   """카테고리 상세 조회"""
   fetchCategoryDetail(categoryId: String!): Category!
 
+  """조직 리스트 조회"""
+  fetchOrganizations(companyId: String!): [Organization!]!
+
+  """조직 상세 조회"""
+  fetchOrganizationDetail(organizationId: String!): Organization!
+
   """comanyId에 해당하는 멤버 전체 조회"""
   fetchMembers(companyId: String!): [Member!]!
 
@@ -103,6 +130,7 @@ type Query {
   """휴가유형ID를 적어서 하나의 유형 찾기"""
   fetchVacationCategory(vacationCategoryId: String!): VacationCategory!
   fetchAccount: Account!
+  fetchMemberSchedule(memberId: String!): Schedule!
 }
 
 type Mutation {
@@ -130,6 +158,15 @@ type Mutation {
   """카테고리 정보 삭제"""
   deleteCategory(categoryId: String!): Boolean!
 
+  """조직 신규 생성"""
+  createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
+
+  """조직 정보 수정"""
+  updateOrganization(organizationId: String!, updateOrganizationInput: UpdateOrganizationInput!): Organization!
+
+  """조직 정보 삭제"""
+  deleteOrganization(organizationid: String!): Boolean!
+
   """멤버 정보 입력"""
   createMember(createMemberInput: CreateMemberInput!): Member!
 
@@ -148,6 +185,15 @@ type Mutation {
   """휴가유형ID로 데이터 완전 삭제하기"""
   deleteVacationCategory(vacationCategoryId: String!): Boolean!
   createAccount(email: String!, password: String!): Account!
+
+  """근무기록 생성"""
+  createSchedule(createScheduleInput: CreateScheduleInput!): Schedule!
+
+  """scheduleId(근무기록Id)로 근무기록 수정"""
+  updateSchedule(scheduleId: String!, updateScheduleInput: UpdateScheduleInput!): Schedule!
+
+  """근무기록 삭제"""
+  deleteSchedule(scheduleId: String!): Boolean!
 }
 
 input CreateWorkCheckInput {
@@ -180,6 +226,26 @@ input CreateCategoryInput {
   memo: String
   color: String!
   companyId: String!
+}
+
+input CreateOrganizationInput {
+  name: String!
+  address: String!
+  lat: String
+  lng: String
+  description: String
+  color: String!
+  companyId: String!
+}
+
+input UpdateOrganizationInput {
+  name: String
+  address: String
+  lat: String
+  lng: String
+  description: String
+  color: String
+  companyId: String
 }
 
 input CreateMemberInput {
@@ -220,4 +286,14 @@ input UpdateVacationCategoryInput {
   memo: String
   paidTime: Int
   deductionDays: Int
+}
+
+input CreateScheduleInput {
+  startWorkTime: String!
+  finishWorkTime: String!
+}
+
+input UpdateScheduleInput {
+  startWorkTime: String
+  finishWorkTime: String
 }
