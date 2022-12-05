@@ -10,14 +10,14 @@ export class AuthService {
   setRefreshToken({ user, res }) {
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id },
-      { secret: 'myRefreshKey', expiresIn: '4w' },
+      { secret: process.env.REFRESH_TOKEN_KEY, expiresIn: '4w' },
     );
-
-    // 개발환경
-    res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; path=/;`);
+    console.log(refreshToken),
+      // 개발환경
+      res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; path=/;`);
 
     // 배포환경
-    // res.setHeader('Access-Control-Allow-Origin', 'https:// ONF.com')
+    // res.setHeader('Access-Control-Allow-Origin', 'https://ONF.com')
     // res.setHeader(
     //     'Set-Cookie',
     //     `refreshToken=${refreshToken}; path=/; domain=.ONF.com; SameSite=None; Secure; httpOnly;`
@@ -27,7 +27,7 @@ export class AuthService {
   getAccessToken({ user }) {
     return this.jwtService.sign(
       { email: user.email, sub: user.id },
-      { secret: 'myAccessKey', expiresIn: '2h' },
+      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '20s' },
     );
   }
 }
