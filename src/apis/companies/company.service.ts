@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CategoryService } from '../categories/category.service';
-import { MemberService } from '../members/member.service';
+import { Category } from '../categories/entities/category.entity';
+import { Member } from '../members/entities/member.entity';
+import { Organization } from '../organization/entities/organization.entity';
 import { Company } from './entities/company.entity';
 
 @Injectable()
@@ -10,8 +11,12 @@ export class CompanyService {
   constructor(
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
-    private readonly categoryService: CategoryService,
-    private readonly memberService: MemberService,
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Organization)
+    private readonly organizationRepository: Repository<Organization>,
   ) {}
   private sqlInit = this.companyRepository.createQueryBuilder('company');
 
@@ -44,18 +49,55 @@ export class CompanyService {
 
   async deleteCompany({ companyId }) {
     //get member list and delete all members
-    const members = await this.memberService.findAll({ companyId });
+    const members = await this.memberRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
+
     members.forEach(async (member) => {
-      await this.memberService.hardDelete({ memberId: member.id });
+      await this.memberRepository
+        .createQueryBuilder('member')
+        .delete()
+        .from(Member)
+        .where('id = :memberId', { memberId: member.id })
+        .execute();
     });
 
     //TODO: get holiday list and delete all holidays
+
     //get category list and delete all categories
-    const categories = await this.categoryService.findAll({ companyId });
+    const categories = await this.categoryRepository
+      .createQueryBuilder('category')
+      .leftJoinAndSelect('category.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
+
     categories.forEach(async (category) => {
-      await this.categoryService.delete({ categoryId: category.id });
+      await this.categoryRepository
+        .createQueryBuilder('category')
+        .delete()
+        .from(Category)
+        .where('id = :categoryId', { categoryId: category.id })
+        .execute();
     });
-    //TODO: get organization list and delete all organizations
+
+    //get organization list and delete all organizations
+    const organizations = await this.organizationRepository
+      .createQueryBuilder('organization')
+      .leftJoinAndSelect('organization.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
+
+    organizations.forEach(async (organization) => {
+      await this.organizationRepository
+        .createQueryBuilder('organization')
+        .delete()
+        .from(Organization)
+        .where('id = :organizationId', { organizationId: organization.id })
+        .execute();
+    });
+
     //TODO: get company config and delete all company configs
     //TODO: get vacation category list and delete all vacation categories
     //TODO: get workinfo list and delete all workinfos

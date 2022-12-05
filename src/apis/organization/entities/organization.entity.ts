@@ -12,7 +12,7 @@ import {
 
 @Entity()
 @ObjectType()
-export class Category {
+export class Organization {
   @PrimaryGeneratedColumn('uuid')
   @Field(() => String, { nullable: true })
   id: string;
@@ -21,9 +21,21 @@ export class Category {
   @Field(() => String, { nullable: true })
   name: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: false })
   @Field(() => String, { nullable: true })
-  memo: string;
+  address: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  lat: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  lng: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  description: string;
 
   @Column({ nullable: false })
   @Field(() => String, { nullable: true })

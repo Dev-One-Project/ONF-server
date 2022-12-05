@@ -3,89 +3,91 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CompanyService } from '../companies/company.service';
 import { Member } from '../members/entities/member.entity';
-import { Category } from './entities/category.entity';
+import { Organization } from './entities/organization.entity';
 
 @Injectable()
-export class CategoryService {
+export class OrganizationService {
   constructor(
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Organization)
+    private readonly organizationRepository: Repository<Organization>,
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
     private readonly companyService: CompanyService,
   ) {}
-  private sqlInit = this.categoryRepository.createQueryBuilder('category');
+  private sqlInit =
+    this.organizationRepository.createQueryBuilder('organization');
 
   async findAll({ companyId }) {
     return await this.sqlInit
-      .leftJoinAndSelect('category.company', 'company')
+      .leftJoinAndSelect('organization.company', 'company')
       .where('company.id = :companyId', { companyId })
       .getMany();
   }
 
-  async getCategoryDetail({ categoryId }) {
+  async getOrganizationDetail({ organizationId }) {
     return await this.sqlInit
-      .leftJoinAndSelect('category.company', 'company')
-      .where('category.id = :categoryId', { categoryId })
+      .leftJoinAndSelect('organization.company', 'company')
+      .where('organization.id = :organizationId', { organizationId })
       .getOne();
   }
 
-  async create({ createCategoryInput }) {
+  async create({ createOrganizationInput }) {
     const company = await this.companyService.getCompanyDetail({
-      companyId: createCategoryInput.companyId,
+      companyId: createOrganizationInput.companyId,
     });
-    const category = this.categoryRepository.create({
-      ...createCategoryInput,
+    const organization = this.organizationRepository.create({
+      ...createOrganizationInput,
       company,
     });
     return await this.sqlInit
       .insert()
-      .into(Category)
-      .values(category)
+      .into(Organization)
+      .values(organization)
       .execute();
   }
 
-  async update({ categoryId, updateCategoryInput }) {
-    const category = this.getCategoryDetail({ categoryId });
+  async update({ organizationId, updateOrganizationInput }) {
+    const organization = this.getOrganizationDetail({ organizationId });
     const company = await this.companyService.getCompanyDetail({
-      companyId: updateCategoryInput.companyId,
+      companyId: updateOrganizationInput.companyId,
     });
     const updateData = {
-      ...category,
-      ...updateCategoryInput,
+      ...organization,
+      ...updateOrganizationInput,
       company,
     };
     return await this.sqlInit
-      .update(Category)
+      .update(Organization)
       .set(updateData)
-      .where('id = :categoryId', { categoryId })
+      .where('id = :organizationId', { organizationId })
       .execute();
   }
 
-  async delete({ categoryId }) {
+  async delete({ organizationId }) {
+    //TODO: get all workcheck by organizationId and remove relation with organization
     //TODO: get all schedule by organizationId and remove relation with organization
     //TODO: get all LeaveCategory by organizationId and remove relation with organization
 
     //TODO: get all member by organizationId and remove relation with organization
     // const members = await this.memberRepository
     //   .createQueryBuilder('member')
-    //   .leftJoinAndSelect('member.category', 'category')
-    //   .where('category.id = :categoryId', { categoryId })
+    //   .leftJoinAndSelect('member.organization', 'organization')
+    //   .where('organization.id = :organizationId', { organizationId })
     //   .getMany();
 
     // members.forEach(async (member) => {
     //   await this.memberRepository
     //     .createQueryBuilder('member')
     //     .update(Member)
-    //     .set({ category: null })
+    //     .set({ organization: null })
     //     .where('id = :memberId', { memberId: member.id })
     //     .execute();
     // });
 
     const result = await this.sqlInit
       .delete()
-      .from(Category)
-      .where('id = :categoryId', { categoryId })
+      .from(Organization)
+      .where('id = :organizationId', { organizationId })
       .execute();
 
     return result.affected ? true : false;
