@@ -10,4 +10,7 @@ export class CreateCategoryInput {
 
   @Field(() => String)
   color: string;
+
+  @Field(() => String)
+  companyId: string;
 }
