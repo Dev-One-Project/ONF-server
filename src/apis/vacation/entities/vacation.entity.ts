@@ -1,9 +1,14 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Company } from 'src/apis/companies/entities/company.entity';
+import { Member } from 'src/apis/members/entities/member.entity';
+import { VacationCategory } from 'src/apis/vacationCategory/entities/vacationCategory.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -15,29 +20,13 @@ export class Vacation {
   @Field(() => String)
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Field(() => Date)
   vacationEnd: Date;
 
   @Column()
   @Field(() => Date)
   vacationStart: Date;
-
-  @Column()
-  @Field(() => String)
-  vacationGroup: string;
-
-  @Column()
-  @Field(() => String)
-  vacationType: string;
-
-  @Column()
-  @Field(() => Int)
-  paidTime: number;
-
-  @Column()
-  @Field(() => Number)
-  deductionDays: number;
 
   @Column()
   @Field(() => String)
@@ -51,4 +40,16 @@ export class Vacation {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @ManyToOne(() => Member)
+  @Field(() => Member)
+  member: Member;
+
+  @ManyToOne(() => Company)
+  @Field(() => Company)
+  company: Company;
+
+  @ManyToOne(() => VacationCategory)
+  @Field(() => VacationCategory)
+  vacationCategory: VacationCategory;
 }
