@@ -17,6 +17,7 @@ import { ScheduleModule } from './apis/schedules/schedule.module';
 import { CategoryModule } from './apis/categories/category.module';
 import { OrganizationModule } from './apis/organization/organization.module';
 import { AppController } from './app.controller';
+import { RoleCategoryModule } from './apis/roleCategory/roleCategory.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AppController } from './app.controller';
     VacationModule,
     AccountModule,
     ScheduleModule,
+    RoleCategoryModule,
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
