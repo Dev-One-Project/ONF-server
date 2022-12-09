@@ -2,21 +2,15 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class CreateWorkCheckInput {
-  @Field(() => String)
-  workDay: string;
+  @Field(() => Date, { nullable: true })
+  workingTime: Date;
 
-  @Field(() => String, { nullable: true })
-  quittingTime: string;
+  @Field(() => Date, { nullable: true })
+  quittingTime: Date;
 
-  @Field(() => String, { nullable: true })
-  breakStartTime: string;
+  @Field(() => Date, { nullable: true })
+  breakStartTime: Date;
 
-  @Field(() => String, { nullable: true })
-  breakFinishTime: string;
-
-  @Field(() => String, { nullable: true })
-  totalWorkTime: string;
-
-  @Field(() => String, { nullable: true })
-  totalBreakTime: string;
+  @Field(() => Date, { nullable: true })
+  breakFinishTime: Date;
 }
