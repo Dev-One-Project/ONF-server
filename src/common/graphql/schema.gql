@@ -92,7 +92,6 @@ type Organization {
   description: String
   color: String
   createdAt: DateTime
-<<<<<<< HEAD
   updatedAt: DateTime
   deletedAt: DateTime
   company: Company
@@ -106,8 +105,6 @@ type WorkCheck {
   breakFinishTime: String
   totalWorkTime: String
   totalBreakTime: String
-=======
->>>>>>> 98000e5 (:sparkles: (workCheck): FEATURE: workCheck additional APIs)
   updatedAt: DateTime
   deletedAt: DateTime
   company: Company
@@ -120,30 +117,11 @@ type Schedule {
   member: Member!
 }
 
-<<<<<<< HEAD
 type Schedule {
   id: String!
   startWorkTime: String!
   finishWorkTime: String!
   member: Member!
-=======
-type WorkCheck {
-  id: String!
-  workDay: DateTime!
-  workingTime: DateTime
-  quittingTime: DateTime
-  breakStartTime: DateTime
-  breakFinishTime: DateTime
-  totalWorkTime: String
-  totalBreakTime: String
-  createdAt: DateTime
-  updatedAt: DateTime
-  deletedAt: DateTime
-  member: Member!
-  company: Company!
-  organization: Organization!
-  schedule: Schedule!
->>>>>>> 98000e5 (:sparkles: (workCheck): FEATURE: workCheck additional APIs)
 }
 
 type Query {
@@ -172,7 +150,6 @@ type Query {
   """
   fetchCategoryDetail(categoryId: String!): Category!
 
-<<<<<<< HEAD
   """
   조직 리스트 조회
   """
@@ -186,15 +163,6 @@ type Query {
   """
   comanyId에 해당하는 멤버 전체 조회
   """
-=======
-  """조직 리스트 조회"""
-  fetchOrganizations(companyId: String!): [Organization!]!
-
-  """조직 상세 조회"""
-  fetchOrganizationDetail(organizationId: String!): Organization!
-
-  """comanyId에 해당하는 멤버 전체 조회"""
->>>>>>> 98000e5 (:sparkles: (workCheck): FEATURE: workCheck additional APIs)
   fetchMembers(companyId: String!): [Member!]!
 
   """
@@ -236,7 +204,6 @@ type Query {
   fetchVacationWithDelete: [Vacation!]!
   fetchAccount: Account!
   fetchMemberSchedule(memberId: String!): Schedule!
-<<<<<<< HEAD
 
   """
   Fetch RoleCategory
@@ -247,38 +214,16 @@ type Query {
   Fetch RoleCategorys
   """
   fetchRoleCategorys: [RoleCategory!]!
-=======
->>>>>>> 98000e5 (:sparkles: (workCheck): FEATURE: workCheck additional APIs)
 }
 
 type Mutation {
   login(email: String!, password: String!): String!
   restoreAccessToken: String!
-<<<<<<< HEAD
   createWorkCheck(createWorkCheckInput: CreateWorkCheckInput!): WorkCheck!
   updateWorkCheck(
     workCheckId: String!
     updateWorkCheckInput: UpdateWorkCheckInput!
   ): WorkCheck!
-=======
-
-  """출근기록 생성"""
-  createStartWorkCheck(memberId: String!): WorkCheck!
-
-  """퇴근시간 생성 및 총 시간 자동생성"""
-  createFinishWorkCheck(workCheckId: String!): WorkCheck!
-
-  """휴게시작 시간 생성"""
-  createStartBreakTime(workCheckId: String!): WorkCheck!
-
-  """휴게종료 시간 생성 및 총 휴게시간 자동생성"""
-  createFinishBreakTime(workCheckId: String!): WorkCheck!
-
-  """출퇴근기록 수정"""
-  updateWorkCheck(workCheckId: String!, updateWorkCheckInput: UpdateWorkCheckInput!): WorkCheck!
-
-  """출퇴근기록 삭제"""
->>>>>>> 98000e5 (:sparkles: (workCheck): FEATURE: workCheck additional APIs)
   deleteWorkCheck(workCheckId: String!): Boolean!
 
   """
@@ -317,7 +262,6 @@ type Mutation {
   """
   deleteCategory(categoryId: String!): Boolean!
 
-<<<<<<< HEAD
   """
   조직 신규 생성
   """
@@ -341,18 +285,6 @@ type Mutation {
   """
   멤버 정보 입력
   """
-=======
-  """조직 신규 생성"""
-  createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
-
-  """조직 정보 수정"""
-  updateOrganization(organizationId: String!, updateOrganizationInput: UpdateOrganizationInput!): Organization!
-
-  """조직 정보 삭제"""
-  deleteOrganization(organizationid: String!): Boolean!
-
-  """멤버 정보 입력"""
->>>>>>> 98000e5 (:sparkles: (workCheck): FEATURE: workCheck additional APIs)
   createMember(createMemberInput: CreateMemberInput!): Member!
 
   """
@@ -411,7 +343,6 @@ type Mutation {
   """
   deleteVacation(vacationId: String!): Boolean!
   createAccount(email: String!, password: String!): Account!
-<<<<<<< HEAD
 
   """
   근무기록 생성
@@ -447,8 +378,6 @@ type Mutation {
   """
   deleteRoleCategory(roleCategoryId: String!): Boolean!
 }
-=======
->>>>>>> 98000e5 (:sparkles: (workCheck): FEATURE: workCheck additional APIs)
 
   """근무기록 생성"""
   createSchedule(createScheduleInput: CreateScheduleInput!): Schedule!
@@ -549,7 +478,6 @@ input CreateScheduleInput {
 input UpdateScheduleInput {
   startWorkTime: String
   finishWorkTime: String
-<<<<<<< HEAD
 }
 
 input CreateRoleCategoryInput {
@@ -578,6 +506,3 @@ input UpdateVacationInput {
   vacationCategoryId: String
   memberId: String
 }
-=======
-}
->>>>>>> 98000e5 (:sparkles: (workCheck): FEATURE: workCheck additional APIs)
