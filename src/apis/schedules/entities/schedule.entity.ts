@@ -1,5 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Category } from 'src/apis/categories/entities/category.entity';
 import { Member } from 'src/apis/members/entities/member.entity';
+import { Organization } from 'src/apis/organization/entities/organization.entity';
 import {
   Column,
   CreateDateColumn,
@@ -40,7 +42,11 @@ export class Schedule {
 
   // Many to One 근무 일정 유형
 
-  // Many to One 조직
+  @ManyToOne(() => Organization)
+  @Field(() => Organization)
+  organization: Organization;
 
-  // Many to One 직무
+  @ManyToOne(() => Category)
+  @Field(() => Category)
+  category: Category;
 }

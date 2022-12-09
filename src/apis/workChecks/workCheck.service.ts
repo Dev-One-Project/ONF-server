@@ -65,9 +65,25 @@ export class WorkCheckService {
       .getMany();
   }
 
+  async createMemo({ workCheckId, workCheckMemo }) {
+    const find = await this.workCheckRepository.findOne({
+      where: { id: workCheckId },
+    });
+
+    return await this.workCheckRepository.save({
+      ...find,
+      workCheckMemo,
+    });
+  }
+
   async createStartWork({ memberId }) {
+    const member = await this.memberRepository.findOne({
+      where: { id: memberId },
+    });
+
     const result = await this.workCheckRepository.save({
       member: memberId,
+      company: member.company,
       workDay: getToday(),
       workingTime: new Date(),
     });

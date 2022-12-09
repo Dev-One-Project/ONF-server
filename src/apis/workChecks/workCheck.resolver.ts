@@ -46,6 +46,19 @@ export class WorkCheckResolver {
 
   // 회사+조직조회
 
+  // 관리자용 출근기록 생성(시간 받아오기)
+
+  @Mutation(() => WorkCheck, { description: '근무노트 생성' })
+  async createWorkCheckMemo(
+    @Args('workCheckId') workCheckId: string, //
+    @Args('workCheckMemo') workCheckMemo: string, //
+  ) {
+    return await this.workCheckService.createMemo({
+      workCheckId,
+      workCheckMemo,
+    });
+  }
+
   @Mutation(() => WorkCheck, { description: '출근기록 생성' })
   async createStartWorkCheck(
     @Args('memberId') memberId: string, // guard 넣게 되면 빼야 될듯???
@@ -88,6 +101,8 @@ export class WorkCheckResolver {
       updateWorkCheckInput,
     });
   }
+
+  // 여러명 동시에 수정되는거도 만들어야함
 
   @Mutation(() => Boolean, { description: '출퇴근기록 삭제' })
   async deleteWorkCheck(
