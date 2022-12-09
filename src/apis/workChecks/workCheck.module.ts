@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member } from '../members/entities/member.entity';
+import { Organization } from '../organization/entities/organization.entity';
+import { Schedule } from '../schedules/entities/schedule.entity';
 import { WorkCheck } from './entities/workCheck.entity';
 import { WorkCheckResolver } from './workCheck.resolver';
 import { WorkCheckService } from './workCheck.service';
@@ -10,6 +12,8 @@ import { WorkCheckService } from './workCheck.service';
     TypeOrmModule.forFeature([
       WorkCheck, //
       Member,
+      Organization,
+      Schedule,
     ]),
   ],
   providers: [
