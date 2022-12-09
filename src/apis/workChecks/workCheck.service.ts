@@ -9,8 +9,6 @@ import {
   updateTotalTime,
 } from 'src/common/libraries/utils';
 import { minusNineHour } from 'src/common/libraries/utils';
-import { dayOfTheWeek } from 'src/common/libraries/utils';
-import { WorkCheckOutput } from './dto/workCheck.output';
 
 @Injectable()
 export class WorkCheckService {
