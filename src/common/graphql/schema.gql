@@ -104,6 +104,8 @@ type Schedule {
   startWorkTime: String!
   finishWorkTime: String!
   member: Member!
+  organization: Organization!
+  category: Category!
 }
 
 type WorkCheck {
@@ -115,6 +117,7 @@ type WorkCheck {
   breakFinishTime: DateTime
   totalWorkTime: String
   totalBreakTime: String
+  workCheckMemo: String
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
@@ -185,6 +188,9 @@ type Query {
 type Mutation {
   login(email: String!, password: String!): String!
   restoreAccessToken: String!
+
+  """근무노트 생성"""
+  createWorkCheckMemo(workCheckId: String!, workCheckMemo: String!): WorkCheck!
 
   """출근기록 생성"""
   createStartWorkCheck(memberId: String!): WorkCheck!

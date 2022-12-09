@@ -52,6 +52,10 @@ export class WorkCheck {
   @Field(() => String, { nullable: true })
   totalBreakTime: string;
 
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  workCheckMemo: string;
+
   @CreateDateColumn()
   @Field(() => Date, { nullable: true })
   createdAt: Date;
