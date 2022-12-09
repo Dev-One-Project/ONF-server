@@ -14,6 +14,8 @@ export class MemberService {
     return await this.memberRepository
       .createQueryBuilder('Member')
       .leftJoinAndSelect('Member.company', 'company')
+      .leftJoinAndSelect('Member.category', 'category')
+      .leftJoinAndSelect('Member.organization', 'organization')
       .where('Member.company = :id', { id: companyId })
       .getMany();
   }
@@ -21,6 +23,7 @@ export class MemberService {
   async findOne({ memberId }) {
     return await this.memberRepository.findOne({
       where: { id: memberId },
+      relations: ['company', 'category', 'organization'],
     });
   }
 
@@ -40,6 +43,12 @@ export class MemberService {
     });
 
     return result;
+  }
+
+  async softDelete({ memberId }) {
+    const result = await this.memberRepository.softDelete({ id: memberId });
+
+    return result.affected ? true : false;
   }
 
   async hardDelete({ memberId }) {

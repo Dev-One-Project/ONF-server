@@ -1,11 +1,14 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Category } from 'src/apis/categories/entities/category.entity';
 import { Company } from 'src/apis/companies/entities/company.entity';
+import { Organization } from 'src/apis/organization/entities/organization.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -19,11 +22,11 @@ export class Member {
 
   @Column()
   @Field(() => String)
-  lastName: string;
+  name: string;
 
   @Column()
   @Field(() => String)
-  firstName: string;
+  phone: string;
 
   @Column({ default: false })
   @Field(() => Boolean, { nullable: true, defaultValue: false })
@@ -62,9 +65,13 @@ export class Member {
   @Field(() => Company)
   company: Company;
 
-  // Many to One 근로정보
+  // One to One 근로정보
 
-  // Many to One 직무
+  @ManyToOne(() => Category)
+  @Field(() => Category)
+  category: Category;
 
-  // Many to One 조직
+  @ManyToOne(() => Organization)
+  @Field(() => Organization)
+  organization: Organization;
 }

@@ -39,7 +39,14 @@ export class MemberResolver {
     return await this.memberService.update({ memberId, updateMemberInput });
   }
 
-  @Mutation(() => Boolean, { description: '멤버 정보 삭제' })
+  @Mutation(() => Boolean, { description: '멤버 정보 소프트 삭제' })
+  async softDeleteMember(
+    @Args('memberId') memberId: string, //
+  ) {
+    return await this.memberService.softDelete({ memberId });
+  }
+
+  @Mutation(() => Boolean, { description: '멤버 정보 완전 삭제' })
   async deleteMember(
     @Args('memberId') memberId: string, //
   ) {
