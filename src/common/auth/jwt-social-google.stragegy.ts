@@ -21,10 +21,10 @@ export class JwtGoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ) {
     // console.log(accessToken);
     // console.log(refreshToken);
-    // console.log(profile);
+    console.log('구글프로필:', profile.provider);
     return {
-      email: profile.emails[0].value,
-      hashedPassword: profile.id,
+      email: `${profile.emails[0].value}(${profile.provider})`,
+      password: profile.id,
       name: profile.displayName,
     };
   }
