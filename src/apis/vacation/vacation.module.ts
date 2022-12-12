@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Company } from '../companies/entities/company.entity';
 import { Member } from '../members/entities/member.entity';
 import { VacationCategory } from '../vacationCategory/entities/vacationCategory.entity';
 import { Vacation } from './entities/vacation.entity';
@@ -12,6 +13,7 @@ import { VacationService } from './vacation.service';
       Vacation,
       Member, //
       VacationCategory,
+      Company,
     ]),
   ],
   providers: [

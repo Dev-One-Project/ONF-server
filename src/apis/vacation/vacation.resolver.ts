@@ -11,8 +11,10 @@ export class VacationResolver {
   ) {}
 
   @Query(() => [Vacation], { description: '(관리자) 휴가 전체 조회' })
-  async fetchVacations() {
-    return await this.vacationService.findAll();
+  async fetchVacations(
+    @Args('companyId') companyId: string, //
+  ) {
+    return await this.vacationService.findAll({ companyId });
   }
 
   @Query(() => [Vacation], { description: '(관리자) 기간 내 휴가 조회' })
@@ -45,16 +47,16 @@ export class VacationResolver {
     return await this.vacationService.create({ createVacationInput });
   }
 
-  // @Mutation(() => Vacation, { description: '(관리자) 휴가 수정하기' })
-  // async updateVacation(
-  //   @Args('vacationId') vacationId: string,
-  //   @Args('updateVacation') updateVacationInput: UpdateVacationInput,
-  // ) {
-  //   return await this.vacationService.update({
-  //     vacationId,
-  //     updateVacationInput,
-  //   });
-  // }
+  @Mutation(() => [Vacation], { description: '(관리자) 휴가 수정하기' })
+  async updateVacation(
+    // @Args('vacationId') vacationId: string,
+    @Args('updateVacationInput') updateVacationInput: UpdateVacationInput,
+  ) {
+    return await this.vacationService.update({
+      // vacationId,
+      updateVacationInput,
+    });
+  }
 
   @Mutation(() => Boolean, { description: '(관리자) 휴가 삭제 - DB에는 유지' })
   async softdeleteVacation(
