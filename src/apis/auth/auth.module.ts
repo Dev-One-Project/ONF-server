@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtRefreshStrategy } from 'src/common/auth/jwt-refresh.strategy';
 import { JwtGoogleStrategy } from 'src/common/auth/jwt-social-google.stragegy';
+import { JwtKakaoStrategy } from 'src/common/auth/jwt-social-kakao.stragegy';
 import { AccountService } from '../accounts/account.service';
 import { Account } from '../accounts/entites/account.entity';
 import { AuthController } from './auth.controller';
@@ -19,6 +20,7 @@ import { AuthService } from './auth.service';
   providers: [
     JwtRefreshStrategy, //
     JwtGoogleStrategy,
+    JwtKakaoStrategy,
     AuthResolver,
     AuthService,
     AccountService,

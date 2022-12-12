@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { AccountService } from '../accounts/account.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService, //
+    private readonly accountService: AccountService,
   ) {}
 
   setRefreshToken({ user, res }) {
@@ -29,5 +31,18 @@ export class AuthService {
       { email: user.email, sub: user.id },
       { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '20s' },
     );
+  }
+  async socialLogin({ res, req }) {
+    let user = await this.accountService.findOne({ email: req.user.email });
+
+    if (!user) {
+      user = await this.accountService.create({
+        email: req.user.email,
+        hashedPassword: req.user.password,
+      });
+    }
+
+    this.setRefreshToken({ user, res });
+    res.redirect('http://localhost:5000/frontend/social-login.html');
   }
 }

@@ -20,7 +20,7 @@ export class AccountService {
     const user = await this.accountRepository.findOne({
       where: { email },
     });
-    console.log(user);
+    // console.log(user);
     if (user) throw new ConflictException('이미 등록된 이메일입니다.');
     return await this.accountRepository.save({ email, password });
   }
