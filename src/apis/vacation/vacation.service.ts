@@ -18,9 +18,15 @@ export class VacationService {
 
     @InjectRepository(VacationCategory)
     private readonly vacationCategoryRepository: Repository<VacationCategory>,
+
+    @InjectRepository(Company)
+    private readonly companyRepository: Repository<Company>,
   ) {}
 
-  async findAll() {
+  async findAll({ companyId }) {
+    await this.companyRepository.findOne({
+      where: { id: companyId },
+    });
     return this.vacationRepository.find({
       relations: ['member', 'company', 'vacationCategory'],
     });
@@ -106,31 +112,83 @@ export class VacationService {
     return result;
   }
 
-  // async update({ vacationId, updateVacationInput }) {
-  //   const vacationOne = await this.vacationRepository.findOne({
-  //     where: { id: vacationId },
-  //   });
+  async update({ updateVacationInput }) {
+    const member = await this.memberRepository.findOne({
+      where: { id: updateVacationInput.memberId },
+      relations: ['company'],
+    });
+    const leaves = await this.vacationRepository.find({
+      relations: ['member', 'company'],
+    });
 
-  //   const member = await this.memberRepository.findOne({
-  //     where: { id: updateVacationInput.memberId },
-  //     relations: ['company'],
-  //   });
-  //   const category = await this.vacationCategoryRepository.findOne({
-  //     where: { id: updateVacationInput.vacationCategoryId },
-  //   });
-  //   // if(category.deductionDays === )
-  //   const result = updateVacationInput.vacations.map(async (date) => {
-  //     member.leave -= category.deductionDays;
-  //     const vacation = this.vacationRepository.save({
-  //       ...vacationOne,
-  //       vacationCategory: category,
-  //       vacationStart: date,
-  //       vacationEnd: date,
-  //       ...updateVacationInput,
-  //     });
-  //   });
-  // }
+    const category = await this.vacationCategoryRepository.findOne({
+      where: { id: updateVacationInput.vacationCategoryId },
+    });
 
+    if (category.deductionDays < updateVacationInput.vacations.length) {
+      const answer = await updateVacationInput.vacations.map(async (date) => {
+        member.leave -= category.deductionDays;
+        const vacationNew = [];
+        for (let i = 0; i <= leaves.length; i++) {
+          const result = await this.vacationRepository.save({
+            member: member,
+            company: member.company,
+            vacationCategory: category,
+            ...leaves[i],
+            vacationStart: date,
+            vacationEnd: date,
+            ...updateVacationInput,
+          });
+          vacationNew.push(result);
+          // console.log(result);
+        }
+        return vacationNew;
+      });
+      await this.memberRepository.save(member);
+      return answer;
+    } else if (category.deductionDays > updateVacationInput.vacations.length) {
+      const answer = await updateVacationInput.vacations.map(async (date) => {
+        member.leave += category.deductionDays;
+        const vacationNew = [];
+        for (let i = 0; i <= leaves.length; i++) {
+          const result = await this.vacationRepository.save({
+            member: member,
+            company: member.company,
+            vacationCategory: category,
+            ...leaves[i],
+            vacationStart: date,
+            vacationEnd: date,
+            ...updateVacationInput,
+          });
+          vacationNew.push(result);
+        }
+        return vacationNew;
+      });
+      // console.log(answer);
+      await this.memberRepository.save(member);
+      return answer;
+    } else {
+      const answer = await updateVacationInput.vacations.map(async (date) => {
+        const vacationNew = [];
+        for (let i = 0; i <= leaves.length; i++) {
+          const result = await this.vacationRepository.save({
+            member: member,
+            company: member.company,
+            vacationCategory: category,
+            ...leaves[i],
+            vacationStart: date,
+            vacationEnd: date,
+            ...updateVacationInput,
+          });
+          vacationNew.push(result);
+        }
+        return vacationNew;
+      });
+      // console.log(answer);
+      await this.memberRepository.save(member);
+      return answer;
+    }
+  }
   async softdelete({ vacationId }) {
     const result = await this.vacationRepository.softDelete({
       id: vacationId,

@@ -38,18 +38,18 @@ export class Vacation {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ nullable: true })
   deletedAt: Date;
 
-  @ManyToOne(() => Member)
-  @Field(() => Member)
+  @ManyToOne(() => Member, { nullable: true })
+  @Field(() => Member, { nullable: true })
   member: Member;
 
-  @ManyToOne(() => Company)
-  @Field(() => Company)
+  @ManyToOne(() => Company, { nullable: true })
+  @Field(() => Company, { nullable: true })
   company: Company;
 
-  @ManyToOne(() => VacationCategory)
-  @Field(() => VacationCategory)
+  @ManyToOne(() => VacationCategory, { nullable: true })
+  @Field(() => VacationCategory, { nullable: true })
   vacationCategory: VacationCategory;
 }
