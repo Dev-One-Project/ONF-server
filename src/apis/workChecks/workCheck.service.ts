@@ -145,16 +145,16 @@ export class WorkCheckService {
       // relations: ['member', 'organization', 'schedule'],
     });
 
-    const arr = Object.entries(findWorkCheck);
-    const qqq = Object.keys(updateWorkCheckInput);
+    const originArr = Object.entries(findWorkCheck);
+    const updateKey = Object.keys(updateWorkCheckInput);
 
-    const sibal = {};
+    const updateObj = {};
 
     await Promise.all(
-      qqq.map((a) => {
-        return arr.filter((x) => {
+      updateKey.map((a) => {
+        return originArr.filter((x) => {
           if (x[0] === a) {
-            return (sibal[a] = updateWorkCheckInput[a]);
+            return (updateObj[a] = updateWorkCheckInput[a]);
           }
         });
       }),
@@ -168,7 +168,7 @@ export class WorkCheckService {
     return await this.workCheckRepository.save({
       ...findWorkCheck,
       id: workCheckId,
-      ...sibal,
+      ...updateObj,
     });
   }
 
