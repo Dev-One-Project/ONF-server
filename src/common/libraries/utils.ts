@@ -62,26 +62,14 @@ export const dayOfTheWeek = () => {
 //   return `${total[0]}시간 ${total[1]}분`;
 // };
 
-export const totalTime = (start: Date, end: Date): string => {
-  const total = new Date((end as any) - (start as any));
-
-  const hour = total.getHours();
-  const minutes = total.getMinutes();
-
-  return `${hour}시간 ${minutes}분`; // 휴게시간 빼줘야함
-};
-
-export const updateTotalTime = (start: Date, end: Date): string => {
-  const total = new Date((end as any) - (start as any));
-
-  const hour = total.getHours();
-  const minutes = total.getMinutes();
-
-  return `${hour - 9}시간 ${minutes}분`;
-};
-
 export const minusNineHour = (time: Date): Date => {
   time.setHours(time.getHours() - 9);
+
+  return time;
+};
+
+export const plusNineHour = (time: Date): Date => {
+  time?.setHours(time.getHours() + 9);
 
   return time;
 };

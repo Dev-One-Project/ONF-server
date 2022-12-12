@@ -42,15 +42,7 @@ export class WorkCheck {
 
   @Column({ nullable: true })
   @Field(() => Date, { nullable: true })
-  breakFinishTime: Date;
-
-  @Column({ nullable: true })
-  @Field(() => String, { nullable: true })
-  totalWorkTime: string;
-
-  @Column({ nullable: true })
-  @Field(() => String, { nullable: true })
-  totalBreakTime: string;
+  breakEndTime: Date;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
