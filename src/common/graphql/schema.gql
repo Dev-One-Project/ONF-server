@@ -114,9 +114,7 @@ type WorkCheck {
   workingTime: DateTime
   quittingTime: DateTime
   breakStartTime: DateTime
-  breakFinishTime: DateTime
-  totalWorkTime: String
-  totalBreakTime: String
+  breakEndTime: DateTime
   workCheckMemo: String
   createdAt: DateTime
   updatedAt: DateTime
@@ -195,14 +193,14 @@ type Mutation {
   """출근기록 생성"""
   createStartWorkCheck(memberId: String!): WorkCheck!
 
-  """퇴근시간 생성 및 총 시간 자동생성"""
-  createFinishWorkCheck(workCheckId: String!): WorkCheck!
+  """퇴근시간 생성"""
+  createEndWorkCheck(workCheckId: String!): WorkCheck!
 
   """휴게시작 시간 생성"""
   createStartBreakTime(workCheckId: String!): WorkCheck!
 
-  """휴게종료 시간 생성 및 총 휴게시간 자동생성"""
-  createFinishBreakTime(workCheckId: String!): WorkCheck!
+  """휴게종료 시간 생성"""
+  createEndBreakTime(workCheckId: String!): WorkCheck!
 
   """출퇴근기록 수정"""
   updateWorkCheck(workCheckId: String!, updateWorkCheckInput: UpdateWorkCheckInput!): WorkCheck!
@@ -286,10 +284,16 @@ type Mutation {
 }
 
 input UpdateWorkCheckInput {
+  workDay: DateTime
   workingTime: DateTime
   quittingTime: DateTime
   breakStartTime: DateTime
-  breakFinishTime: DateTime
+  breakEndTime: DateTime
+  workCheckMemo: String
+  memberId: String
+  scheduleId: String
+  organizationId: String
+  categoryId: String
 }
 
 input CreateCompanyInput {
