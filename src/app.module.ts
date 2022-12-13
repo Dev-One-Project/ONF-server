@@ -18,10 +18,12 @@ import { CategoryModule } from './apis/categories/category.module';
 import { OrganizationModule } from './apis/organization/organization.module';
 import { AppController } from './app.controller';
 import { RoleCategoryModule } from './apis/roleCategory/roleCategory.module';
+import { VacationIssuesModule } from './apis/vacationIssues/vacationIssues.module';
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
 @Module({
   imports: [
+    VacationIssuesModule,
     AuthModule,
     WorkCheckModule,
     CompanyModule,
