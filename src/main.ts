@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import { json, urlencoded } from 'express';
 
 async function bootstrap() {
+  const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(graphqlUploadExpress());
   app.use(json({ limit: '50mb' }));
@@ -14,12 +15,7 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'static'));
 
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'https://localhost:3000',
-      'http://localhost:4000',
-      'https://localhost:4000',
-    ],
+    origin: ALLOWED_HOSTS,
     credentials: true,
   });
   // const payload = {

@@ -19,6 +19,7 @@ import { OrganizationModule } from './apis/organization/organization.module';
 import { AppController } from './app.controller';
 import { RoleCategoryModule } from './apis/roleCategory/roleCategory.module';
 
+const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
 @Module({
   imports: [
     AuthModule,
@@ -35,15 +36,11 @@ import { RoleCategoryModule } from './apis/roleCategory/roleCategory.module';
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
+      cache: 'bounded',
       autoSchemaFile: 'src/common/graphql/schema.gql',
       context: ({ req, res }) => ({ req, res }),
       cors: {
-        origin: [
-          'http://localhost:3000',
-          'https://localhost:3000',
-          'http://localhost:4000',
-          'https://localhost:4000',
-        ],
+        origin: ALLOWED_HOSTS,
         credentials: true,
         exposedHeaders: ['Set-Cookie', 'Cookie'],
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
