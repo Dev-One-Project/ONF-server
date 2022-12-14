@@ -75,11 +75,11 @@ export class WorkCheckService {
   }
 
   async findMonth({ companyId, month }) {
-    const aaa = getDatesStartToEnd(month);
+    const monthStartToEnd = getDatesStartToEnd(month);
     const result = [];
 
     await Promise.all(
-      aaa.map(async (date) => {
+      monthStartToEnd.map(async (date) => {
         const start = new Date(date);
         const copyDate = new Date(date);
         const end = new Date(copyDate.setDate(copyDate.getDate() + 1));
@@ -114,7 +114,7 @@ export class WorkCheckService {
     minusNineHour(breakStartTime);
     minusNineHour(breakEndTime);
 
-    // 회사ID는 어떻게 넣을까
+    // 회사ID는 어떻게 넣을까(가드로 해결)
     return await this.workCheckRepository.save({
       ...createWorkCheckInput,
       comapny: companyId,
