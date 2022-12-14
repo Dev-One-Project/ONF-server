@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Category } from 'src/apis/categories/entities/category.entity';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Member } from 'src/apis/members/entities/member.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
@@ -75,4 +76,8 @@ export class WorkCheck {
   @ManyToOne(() => Schedule)
   @Field(() => Schedule)
   schedule: Schedule;
+
+  @ManyToOne(() => Category)
+  @Field(() => Category)
+  category: Category;
 }

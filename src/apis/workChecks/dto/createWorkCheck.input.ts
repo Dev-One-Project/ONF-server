@@ -23,12 +23,12 @@ export class CreateWorkCheckInput {
   @Field(() => String, { nullable: false })
   memberId: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: false })
   scheduleId: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: false })
   organizationId: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: false })
   categoryId: string;
 }

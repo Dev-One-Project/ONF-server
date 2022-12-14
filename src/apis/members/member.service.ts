@@ -28,18 +28,29 @@ export class MemberService {
   }
 
   async create({ createMemberInput }) {
+    console.log(createMemberInput);
+    const { companyId, organizationId, categoryId, ...rest } =
+      createMemberInput;
+
     return await this.memberRepository.save({
-      ...createMemberInput,
+      ...rest,
+      company: { id: companyId },
+      organization: { id: organizationId },
+      category: { id: categoryId },
     });
   }
 
   async update({ memberId, updateMemberInput }) {
     const findMemberId = await this.findOne({ memberId });
 
+    const { organizationId, categoryId, ...rest } = updateMemberInput;
+
     const result = await this.memberRepository.save({
       ...findMemberId,
-      memberId: findMemberId.id,
-      ...updateMemberInput,
+      id: findMemberId.id,
+      ...rest,
+      organization: { id: organizationId },
+      category: { id: categoryId },
     });
 
     return result;
