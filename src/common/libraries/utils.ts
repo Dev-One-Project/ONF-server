@@ -63,7 +63,7 @@ export const dayOfTheWeek = () => {
 // };
 
 export const minusNineHour = (time: Date): Date => {
-  time.setHours(time.getHours() - 9);
+  time?.setHours(time.getHours() - 9);
 
   return time;
 };
@@ -72,4 +72,19 @@ export const plusNineHour = (time: Date): Date => {
   time?.setHours(time.getHours() + 9);
 
   return time;
+};
+
+export const getDatesStartToEnd = (month) => {
+  const result = [];
+  const arr = month.split('-');
+  const end = new Date(arr[0], arr[1], 0).getDate();
+
+  const startDate = new Date(`${arr[0]}-${arr[1]}`);
+  const endDate = new Date(`${arr[0]}-${arr[1]}-${end}`);
+
+  while (startDate <= endDate) {
+    result.push(startDate.toISOString().split('T')[0]);
+    startDate.setDate(startDate.getDate() + 1);
+  }
+  return result;
 };

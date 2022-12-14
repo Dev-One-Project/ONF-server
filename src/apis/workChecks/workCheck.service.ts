@@ -1,9 +1,9 @@
-import { All, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Member } from '../members/entities/member.entity';
 import { WorkCheck } from './entities/workCheck.entity';
-import { getToday } from 'src/common/libraries/utils';
+import { getDatesStartToEnd, getToday } from 'src/common/libraries/utils';
 import { minusNineHour } from 'src/common/libraries/utils';
 
 @Injectable()
@@ -23,6 +23,7 @@ export class WorkCheckService {
       .leftJoinAndSelect('WorkCheck.company', 'company')
       .leftJoinAndSelect('WorkCheck.organization', 'organization')
       .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+      .leftJoinAndSelect('WorkCheck.category', 'category')
       .where('WorkCheck.company = :id', { id: companyId })
       .orderBy('WorkCheck.createdAt', 'DESC')
       .getMany();
@@ -35,30 +36,93 @@ export class WorkCheckService {
       .leftJoinAndSelect('WorkCheck.company', 'company')
       .leftJoinAndSelect('WorkCheck.organization', 'organization')
       .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+      .leftJoinAndSelect('WorkCheck.category', 'category')
       .where('WorkCheck.member = :id', { id: memberId })
       .orderBy('WorkCheck.createdAt', 'DESC')
       .getMany();
   }
 
-  async findDateMemberWorkCheck({ companyId, startDate, endDate }) {
-    // const start = new Date(startDate);
-    // start.setHours(0, 0, 0, 0);
-
-    // const end = new Date(endDate);
+  async findDateMemberWorkCheck({
+    companyId,
+    organizationId,
+    startDate,
+    endDate,
+  }) {
     endDate.setDate(endDate.getDate() + 1);
 
-    return await this.workCheckRepository
-      .createQueryBuilder('WorkCheck')
-      .leftJoinAndSelect('WorkCheck.member', 'member')
-      .leftJoinAndSelect('WorkCheck.company', 'company')
-      .leftJoinAndSelect('WorkCheck.organization', 'organization')
-      .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
-      .where('WorkCheck.company = :id', { id: companyId })
-      .andWhere(
-        `WorkCheck.createdAt BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
-      )
-      .orderBy('WorkCheck.createdAt', 'DESC')
-      .getMany();
+    const result = await Promise.all(
+      organizationId.map(async (organizationId: string) => {
+        return await this.workCheckRepository
+          .createQueryBuilder('WorkCheck')
+          .leftJoinAndSelect('WorkCheck.member', 'member')
+          .leftJoinAndSelect('WorkCheck.company', 'company')
+          .leftJoinAndSelect('WorkCheck.organization', 'organization')
+          .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+          .leftJoinAndSelect('WorkCheck.category', 'category')
+          .where('WorkCheck.company = :companyId', { companyId })
+          .andWhere('WorkCheck.organization = :organizationId', {
+            organizationId,
+          })
+          .andWhere(
+            `WorkCheck.createdAt BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
+          )
+          .orderBy('WorkCheck.createdAt', 'DESC')
+          .getMany();
+      }),
+    );
+
+    return result.flat();
+  }
+
+  async findMonth({ companyId, month }) {
+    const monthStartToEnd = getDatesStartToEnd(month);
+    const result = [];
+
+    await Promise.all(
+      monthStartToEnd.map(async (date) => {
+        const start = new Date(date);
+        const copyDate = new Date(date);
+        const end = new Date(copyDate.setDate(copyDate.getDate() + 1));
+
+        const data = await this.workCheckRepository
+          .createQueryBuilder('WorkCheck')
+          .leftJoinAndSelect('WorkCheck.member', 'member')
+          .leftJoinAndSelect('WorkCheck.company', 'company')
+          .leftJoinAndSelect('WorkCheck.organization', 'organization')
+          .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+          .leftJoinAndSelect('WorkCheck.category', 'category')
+          .where('WorkCheck.company = :id', { id: companyId })
+          .andWhere(
+            `WorkCheck.WorkDay BETWEEN '${start.toISOString()}' AND '${end.toISOString()}'`,
+          )
+          .orderBy('WorkCheck.WorkDay', 'DESC')
+          .getMany();
+
+        data ? result.push(data) : data;
+      }),
+    );
+
+    return result;
+  }
+
+  async createAdmin({ companyId, createWorkCheckInput }) {
+    const { workingTime, quittingTime, breakStartTime, breakEndTime } =
+      createWorkCheckInput;
+
+    minusNineHour(workingTime);
+    minusNineHour(quittingTime);
+    minusNineHour(breakStartTime);
+    minusNineHour(breakEndTime);
+
+    // 회사ID는 어떻게 넣을까(가드로 해결)
+    return await this.workCheckRepository.save({
+      ...createWorkCheckInput,
+      comapny: companyId,
+      member: createWorkCheckInput.memberId,
+      schedule: createWorkCheckInput.scheduleId,
+      organization: createWorkCheckInput.organizationId,
+      category: createWorkCheckInput.categoryId,
+    });
   }
 
   async createMemo({ workCheckId, workCheckMemo }) {
@@ -83,6 +147,9 @@ export class WorkCheckService {
     const result = await this.workCheckRepository.save({
       member: memberId,
       company: member.company,
+      organization: member.organization,
+      category: member.category,
+      // schedule 후에 추가
       workDay: getToday(),
       workingTime: new Date(),
     });
@@ -94,11 +161,6 @@ export class WorkCheckService {
     const origin = await this.workCheckRepository.findOne({
       where: { id: workCheckId },
     });
-
-    // const startWork = origin.workingTime;
-    // const originStartWork = new Date(startWork);
-
-    // startWork.setHours(startWork.getHours() + 9);
 
     return await this.workCheckRepository.save({
       ...origin,
@@ -124,11 +186,6 @@ export class WorkCheckService {
       where: { id: workCheckId },
     });
 
-    // const startBreak = origin.breakStartTime;
-    // const originStartBreak = new Date(startBreak);
-
-    // startBreak.setHours(startBreak.getHours() + 9);
-
     return await this.workCheckRepository.save({
       ...origin,
       id: workCheckId,
@@ -137,12 +194,9 @@ export class WorkCheckService {
   }
 
   async update({ workCheckId, updateWorkCheckInput }) {
-    const { workingTime, quittingTime, breakStartTime, breakEndTime } =
-      updateWorkCheckInput;
-
     const findWorkCheck = await this.workCheckRepository.findOne({
       where: { id: workCheckId },
-      // relations: ['member', 'organization', 'schedule'],
+      relations: ['member', 'organization', 'schedule', 'category'],
     });
 
     const originArr = Object.entries(findWorkCheck);
@@ -160,6 +214,9 @@ export class WorkCheckService {
       }),
     );
 
+    const { workingTime, quittingTime, breakStartTime, breakEndTime } =
+      updateWorkCheckInput;
+
     workingTime?.setHours(workingTime.getHours() - 9);
     quittingTime?.setHours(quittingTime.getHours() - 9);
     breakStartTime?.setHours(breakStartTime.getHours() - 9);
@@ -169,6 +226,8 @@ export class WorkCheckService {
       ...findWorkCheck,
       id: workCheckId,
       ...updateObj,
+      organization: updateWorkCheckInput?.organizationId,
+      category: updateWorkCheckInput?.categoryId,
     });
   }
 
