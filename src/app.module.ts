@@ -19,10 +19,12 @@ import { OrganizationModule } from './apis/organization/organization.module';
 import { AppController } from './app.controller';
 import { RoleCategoryModule } from './apis/roleCategory/roleCategory.module';
 import { VacationIssuesModule } from './apis/vacationIssues/vacationIssues.module';
+import { InvitationCodeModule } from './apis/invitationCode/invitationCode.module';
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
 @Module({
   imports: [
+    InvitationCodeModule,
     VacationIssuesModule,
     AuthModule,
     WorkCheckModule,

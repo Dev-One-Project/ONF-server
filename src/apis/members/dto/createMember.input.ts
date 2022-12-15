@@ -17,9 +17,6 @@ export class CreateMemberInput {
   @Field(() => String, { nullable: true })
   exitDate: string;
 
-  @Field(() => String)
-  invitationCode: string;
-
   @Field(() => String, { nullable: true })
   memo: string;
 
