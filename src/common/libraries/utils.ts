@@ -88,3 +88,21 @@ export const getDatesStartToEnd = (month) => {
   }
   return result;
 };
+
+export const getEmailTemplate = (company, code) => {
+  return `
+  <html>
+  <div style="display: flex; flex-direction: column; align-items: center;">
+  <div width: 500px>
+      <h1>${company}에 초대되었습니다!</h1>
+      <hr />
+      <div>
+          <p style="font-size: 30px; font-weight:600; color:#111;">합류코드 : ${code}</p>
+          <p style="font-size: 30px; font-weight:600; color:#111;">지금 바로 합류하세요!</p>
+
+      </div>
+      <hr />
+  </div>
+  </div>
+</html>`;
+};

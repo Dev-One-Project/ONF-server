@@ -40,13 +40,17 @@ export class Member {
   @Field(() => String, { nullable: true })
   exitDate: string;
 
-  @Column()
-  @Field(() => String)
-  invitationCode: string;
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  inivitationCode: string;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   memo: string;
+
+  @Column({ default: false })
+  @Field(() => Boolean, { defaultValue: false })
+  isJoin: boolean;
 
   @Column({ nullable: true })
   @Field(() => Int, { nullable: true })
