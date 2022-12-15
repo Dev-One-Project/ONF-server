@@ -34,6 +34,95 @@ export class VacationIssuesService {
     });
   }
 
+  async findDetailDate({ companyId, baseDate }) {
+    const members = await this.memberRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
+
+    const memberArr = await Promise.all(members);
+    const result = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const temp = await this.vacationIssueRepository
+          .createQueryBuilder('vacationIssue')
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('member.id = :membersId', {
+            membersId: member.id,
+          })
+          .andWhere('vacationIssue.startingPoint >= :baseDate', {
+            baseDate,
+          })
+          .orderBy('vacationIssue.startingPoint', 'DESC')
+          .getMany()
+          .then((res) => {
+            return res;
+          });
+        if (temp.length > 0) result.push(temp);
+      }),
+    );
+    return result;
+  }
+
+  async findDetailDateWithDelete({ companyId, baseDate }) {
+    const members = await this.memberRepository
+      .createQueryBuilder('member')
+      .withDeleted()
+      .leftJoinAndSelect('member.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
+
+    const memberArr = await Promise.all(members);
+    const result = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const temp = await this.vacationIssueRepository
+          .createQueryBuilder('vacationIssue')
+          .withDeleted()
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('member.id = :membersId', {
+            membersId: member.id,
+          })
+          .andWhere('vacationIssue.startingPoint >= :baseDate', {
+            baseDate,
+          })
+          .orderBy('vacationIssue.startingPoint', 'DESC')
+          .getMany()
+          .then((res) => {
+            return res;
+          });
+        if (temp.length > 0) result.push(temp);
+      }),
+    );
+    return result;
+  }
+
+  async findVacationIssueWithDelete() {
+    return await this.vacationIssueRepository.find({
+      relations: ['member'],
+      withDeleted: true,
+    });
+  }
+
+  async findVacationIssueWithDate({ startDate, endDate }) {
+    return await this.vacationIssueRepository
+      .createQueryBuilder('vacationIssue')
+      .leftJoinAndSelect('vacationIssue.member', 'member')
+      .leftJoinAndSelect('vacationIssue.company', 'company')
+      .leftJoinAndSelect('vacationIssue.organization', 'organization')
+      .where('vacationIssue.startingPoint BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      })
+      .orderBy('vacationIssue.expirationDate', 'DESC')
+      .getMany();
+  }
+
   async create({ createVacationIssueInput }) {
     const member = await this.memberRepository.findOne({
       where: { id: createVacationIssueInput.memberId },
