@@ -20,6 +20,7 @@ import { AppController } from './app.controller';
 import { RoleCategoryModule } from './apis/roleCategory/roleCategory.module';
 import { VacationIssuesModule } from './apis/vacationIssues/vacationIssues.module';
 import { InvitationCodeModule } from './apis/invitationCode/invitationCode.module';
+import { HolidayModule } from './apis/holidays/holiday.module';
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
 @Module({
@@ -37,6 +38,7 @@ const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
     AccountModule,
     ScheduleModule,
     RoleCategoryModule,
+    HolidayModule,
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
