@@ -34,7 +34,7 @@ export class VacationIssuesService {
     });
   }
 
-  async findDetailDate({ companyId, baseDate }) {
+  async fetchVacationIssueBaseDate({ companyId, baseDate }) {
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.company', 'company')
@@ -53,7 +53,7 @@ export class VacationIssuesService {
           .where('member.id = :membersId', {
             membersId: member.id,
           })
-          .andWhere('vacationIssue.startingPoint >= :baseDate', {
+          .andWhere('vacationIssue.startingPoint <= :baseDate', {
             baseDate,
           })
           .orderBy('vacationIssue.startingPoint', 'DESC')
@@ -61,13 +61,16 @@ export class VacationIssuesService {
           .then((res) => {
             return res;
           });
+        for (let i = 0; i < temp.length; i++) {
+          temp[i].expirationDate = baseDate;
+        }
         if (temp.length > 0) result.push(temp);
       }),
     );
     return result;
   }
 
-  async findDetailDateWithDelete({ companyId, baseDate }) {
+  async fetchVacationIssueWithBaseDateDelete({ companyId, baseDate }) {
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .withDeleted()
@@ -88,7 +91,77 @@ export class VacationIssuesService {
           .where('member.id = :membersId', {
             membersId: member.id,
           })
-          .andWhere('vacationIssue.startingPoint >= :baseDate', {
+          .andWhere('vacationIssue.startingPoint <= :baseDate', {
+            baseDate,
+          })
+          .orderBy('vacationIssue.startingPoint', 'DESC')
+          .getMany()
+          .then((res) => {
+            return res;
+          });
+        for (let i = 0; i < temp.length; i++) {
+          temp[i].expirationDate = baseDate;
+        }
+        if (temp.length > 0) result.push(temp);
+      }),
+    );
+    return result;
+  }
+
+  async findWithDetailDate({ companyId, baseDate }) {
+    const members = await this.memberRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
+
+    const memberArr = await Promise.all(members);
+    const result = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const temp = await this.vacationIssueRepository
+          .createQueryBuilder('vacationIssue')
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('member.id = :membersId', {
+            membersId: member.id,
+          })
+          .andWhere('vacationIssue.startingPoint <= :baseDate', {
+            baseDate,
+          })
+          .orderBy('vacationIssue.startingPoint', 'DESC')
+          .getMany()
+          .then((res) => {
+            return res;
+          });
+        if (temp.length > 0) result.push(temp);
+      }),
+    );
+    return result;
+  }
+  async findWithDetailDateDelete({ companyId, baseDate }) {
+    const members = await this.memberRepository
+      .createQueryBuilder('member')
+      .withDeleted()
+      .leftJoinAndSelect('member.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
+
+    const memberArr = await Promise.all(members);
+    const result = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const temp = await this.vacationIssueRepository
+          .createQueryBuilder('vacationIssue')
+          .withDeleted()
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('member.id = :membersId', {
+            membersId: member.id,
+          })
+          .andWhere('vacationIssue.startingPoint <= :baseDate', {
             baseDate,
           })
           .orderBy('vacationIssue.startingPoint', 'DESC')
