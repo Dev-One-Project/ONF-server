@@ -1,7 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Category } from 'src/apis/categories/entities/category.entity';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
+import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
 import {
   Column,
   CreateDateColumn,
@@ -42,10 +42,6 @@ export class Member {
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
-  inivitationCode: string;
-
-  @Column({ nullable: true })
-  @Field(() => String, { nullable: true })
   memo: string;
 
   @Column({ default: false })
@@ -71,9 +67,9 @@ export class Member {
 
   // One to One 근로정보
 
-  @ManyToOne(() => Category)
-  @Field(() => Category)
-  category: Category;
+  @ManyToOne(() => RoleCategory)
+  @Field(() => RoleCategory)
+  roleCategory: RoleCategory;
 
   @ManyToOne(() => Organization)
   @Field(() => Organization)

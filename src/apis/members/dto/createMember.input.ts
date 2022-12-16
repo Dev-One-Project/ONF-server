@@ -30,5 +30,5 @@ export class CreateMemberInput {
   organizationId: string;
 
   @Field(() => String, { nullable: true })
-  categoryId: string;
+  roleCategoryId: string;
 }

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Category } from '../categories/entities/category.entity';
 import { Member } from '../members/entities/member.entity';
 import { Organization } from '../organization/entities/organization.entity';
+import { RoleCategory } from '../roleCategory/entities/roleCategory.entity';
 import { Company } from './entities/company.entity';
 
 @Injectable()
@@ -13,8 +13,8 @@ export class CompanyService {
     private readonly companyRepository: Repository<Company>,
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(RoleCategory)
+    private readonly roleCategoryRepository: Repository<RoleCategory>,
     @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
   ) {}
@@ -67,17 +67,17 @@ export class CompanyService {
     //TODO: get holiday list and delete all holidays
 
     //get category list and delete all categories
-    const categories = await this.categoryRepository
-      .createQueryBuilder('category')
-      .leftJoinAndSelect('category.company', 'company')
+    const categories = await this.roleCategoryRepository
+      .createQueryBuilder('roleCategory')
+      .leftJoinAndSelect('roleCategory.company', 'company')
       .where('company.id = :companyId', { companyId })
       .getMany();
 
     categories.forEach(async (category) => {
-      await this.categoryRepository
+      await this.roleCategoryRepository
         .createQueryBuilder('category')
         .delete()
-        .from(Category)
+        .from(RoleCategory)
         .where('id = :categoryId', { categoryId: category.id })
         .execute();
     });

@@ -23,7 +23,7 @@ export class WorkCheckService {
       .leftJoinAndSelect('WorkCheck.company', 'company')
       .leftJoinAndSelect('WorkCheck.organization', 'organization')
       .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
-      .leftJoinAndSelect('WorkCheck.category', 'category')
+      .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
       .where('WorkCheck.company = :id', { id: companyId })
       .orderBy('WorkCheck.createdAt', 'DESC')
       .getMany();
@@ -36,7 +36,7 @@ export class WorkCheckService {
       .leftJoinAndSelect('WorkCheck.company', 'company')
       .leftJoinAndSelect('WorkCheck.organization', 'organization')
       .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
-      .leftJoinAndSelect('WorkCheck.category', 'category')
+      .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
       .where('WorkCheck.member = :id', { id: memberId })
       .orderBy('WorkCheck.createdAt', 'DESC')
       .getMany();
@@ -50,6 +50,7 @@ export class WorkCheckService {
   }) {
     endDate.setDate(endDate.getDate() + 1);
 
+    // TODO : 지점ID 없이 검색할때 전체 조회
     const result = await Promise.all(
       organizationId.map(async (organizationId: string) => {
         return await this.workCheckRepository
@@ -58,7 +59,7 @@ export class WorkCheckService {
           .leftJoinAndSelect('WorkCheck.company', 'company')
           .leftJoinAndSelect('WorkCheck.organization', 'organization')
           .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
-          .leftJoinAndSelect('WorkCheck.category', 'category')
+          .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
           .where('WorkCheck.company = :companyId', { companyId })
           .andWhere('WorkCheck.organization = :organizationId', {
             organizationId,
@@ -90,8 +91,8 @@ export class WorkCheckService {
           .leftJoinAndSelect('WorkCheck.company', 'company')
           .leftJoinAndSelect('WorkCheck.organization', 'organization')
           .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
-          .leftJoinAndSelect('WorkCheck.category', 'category')
-          .where('WorkCheck.company = :id', { id: companyId })
+          .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+          .where('WorkCheck.company = :companyId', { companyId })
           .andWhere(
             `WorkCheck.WorkDay BETWEEN '${start.toISOString()}' AND '${end.toISOString()}'`,
           )
@@ -121,7 +122,7 @@ export class WorkCheckService {
       member: createWorkCheckInput.memberId,
       schedule: createWorkCheckInput.scheduleId,
       organization: createWorkCheckInput.organizationId,
-      category: createWorkCheckInput.categoryId,
+      roleCategory: createWorkCheckInput.roleCategoryId,
     });
   }
 
@@ -139,7 +140,7 @@ export class WorkCheckService {
   async createStartWork({ memberId }) {
     const member = await this.memberRepository.findOne({
       where: { id: memberId },
-      relations: ['company', 'category', 'organization'],
+      relations: ['company', 'roleCategory', 'organization'],
     });
 
     // 당일에 한번 찍었으면 또 안생기게 검증 로직 써야함
@@ -148,7 +149,7 @@ export class WorkCheckService {
       member: memberId,
       company: member.company,
       organization: member.organization,
-      category: member.category,
+      roleCategory: member.roleCategory,
       // schedule 후에 추가
       workDay: getToday(),
       workingTime: new Date(),
@@ -196,7 +197,7 @@ export class WorkCheckService {
   async update({ workCheckId, updateWorkCheckInput }) {
     const findWorkCheck = await this.workCheckRepository.findOne({
       where: { id: workCheckId },
-      relations: ['member', 'organization', 'schedule', 'category'],
+      relations: ['member', 'organization', 'schedule', 'roleCategory'],
     });
 
     const originArr = Object.entries(findWorkCheck);
@@ -227,7 +228,7 @@ export class WorkCheckService {
       id: workCheckId,
       ...updateObj,
       organization: updateWorkCheckInput?.organizationId,
-      category: updateWorkCheckInput?.categoryId,
+      roleCategory: updateWorkCheckInput?.roleCategoryId,
     });
   }
 

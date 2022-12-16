@@ -1,8 +1,8 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Category } from 'src/apis/categories/entities/category.entity';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Member } from 'src/apis/members/entities/member.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
+import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
 import { Schedule } from 'src/apis/schedules/entities/schedule.entity';
 import {
   Column,
@@ -77,7 +77,7 @@ export class WorkCheck {
   @Field(() => Schedule)
   schedule: Schedule;
 
-  @ManyToOne(() => Category)
-  @Field(() => Category)
-  category: Category;
+  @ManyToOne(() => RoleCategory)
+  @Field(() => RoleCategory)
+  roleCategory: RoleCategory;
 }

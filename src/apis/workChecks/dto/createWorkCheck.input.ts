@@ -30,5 +30,5 @@ export class CreateWorkCheckInput {
   organizationId: string;
 
   @Field(() => String, { nullable: false })
-  categoryId: string;
+  roleCategoryId: string;
 }
