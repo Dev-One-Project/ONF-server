@@ -33,26 +33,54 @@ export class VacationIssuesResolver {
   }
 
   @Query(() => [[VacationIssue]], {
-    description: '기준일자 기준으로 휴가발생 조회하기',
+    description: '관리자 EndDate가 기준일자인 휴가발생 조회하기',
   })
   async fetchVacationIssueBaseDate(
     @Args('baseDate') baseDate: Date,
     @Args('companyId') companyId: string,
   ) {
-    return await this.vacationIssuesService.findDetailDate({
+    return await this.vacationIssuesService.fetchVacationIssueBaseDate({
       companyId,
       baseDate,
     });
   }
 
   @Query(() => [[VacationIssue]], {
-    description: '관지라 기준일자 기준으로 퇴사자랑 같이 조회',
+    description: '관지라 EndDate가 기준일자이고, 퇴사자랑 같이 조회',
   })
-  async fetchVacationIssueWithDetailDelete(
+  async fetchVacationIssueWithBaseDateDelete(
     @Args('baseDate') baseDate: Date,
     @Args('companyId') companyId: string,
   ) {
-    return await this.vacationIssuesService.findDetailDateWithDelete({
+    return await this.vacationIssuesService.fetchVacationIssueWithBaseDateDelete(
+      {
+        companyId,
+        baseDate,
+      },
+    );
+  }
+
+  @Query(() => [[VacationIssue]], {
+    description: '관리자 기준일자 기준으로 앞에 발생된 휴가 목록 조회',
+  })
+  async fetchVacationIssueDetailDate(
+    @Args('baseDate') baseDate: Date,
+    @Args('companyId') companyId: string,
+  ) {
+    return await this.vacationIssuesService.findWithDetailDate({
+      companyId,
+      baseDate,
+    });
+  }
+
+  @Query(() => [[VacationIssue]], {
+    description: '관리자 기준일자 기준으로 앞에 발생된 휴가 퇴사자랑 같이 조회',
+  })
+  async fetchVacationIssueDetailDateDelete(
+    @Args('baseDate') baseDate: Date,
+    @Args('companyId') companyId: string,
+  ) {
+    return await this.vacationIssuesService.findWithDetailDateDelete({
       companyId,
       baseDate,
     });
