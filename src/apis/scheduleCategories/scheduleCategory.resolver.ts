@@ -1,6 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateScheduleCategoryInput } from './dto/createScheduleCategory.input';
-import { UpdateScheduleCategoryInput } from './dto/updateCreateScheduleCategory.input';
+import { UpdateScheduleCategoryInput } from './dto/updateScheduleCategory.input';
 import { ScheduleCategory } from './entities/scheduleCategory.entity';
 import { ScheduleCategoryService } from './scheduleCategory.service';
 
