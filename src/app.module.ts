@@ -21,10 +21,12 @@ import { InvitationCodeModule } from './apis/invitationCode/invitationCode.modul
 import { ScheduleCategoryModule } from './apis/scheduleCategories/scheduleCategory.module';
 import { HolidayModule } from './apis/holidays/holiday.module';
 import { GlobalConfigModule } from './apis/globalConfig/globalConfig.module';
+import { ScheduleTemplateModule } from './apis/scheduleTemplates/scheduleTemplate.module';
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
 @Module({
   imports: [
+    ScheduleTemplateModule,
     ScheduleCategoryModule,
     InvitationCodeModule,
     VacationIssuesModule,

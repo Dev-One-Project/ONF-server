@@ -10,18 +10,17 @@ export class ScheduleCategoryService {
     private readonly scheduleCategoryRepository: Repository<ScheduleCategory>, //
   ) {}
 
-  async findAll({ companyId }) {
-    return await this.scheduleCategoryRepository.find({
-      where: { company: { id: companyId } },
-    });
+  async findAll() {
+    return await this.scheduleCategoryRepository.find();
   }
 
   async create({ createScheduleCategoryInput }) {
-    const { companyId, ...scheduleCategory } = createScheduleCategoryInput;
+    // const { companyId, ...scheduleCategory } = createScheduleCategoryInput;
 
     return await this.scheduleCategoryRepository.save({
-      ...scheduleCategory,
-      company: companyId,
+      // ...scheduleCategory,
+      // company: companyId,
+      ...createScheduleCategoryInput,
     });
   }
 

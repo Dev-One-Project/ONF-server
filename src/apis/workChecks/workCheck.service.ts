@@ -175,6 +175,8 @@ export class WorkCheckService {
       where: { id: workCheckId },
     });
 
+    // TODO : 츨근 후 근무중인 상태만 누를수있게하기
+
     return await this.workCheckRepository.save({
       ...origin,
       id: workCheckId,

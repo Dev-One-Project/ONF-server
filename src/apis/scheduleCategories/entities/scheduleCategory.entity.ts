@@ -29,7 +29,7 @@ export class ScheduleCategory {
   @Field(() => Boolean, { nullable: true, defaultValue: false })
   isNotHolidayWork: boolean;
 
-  @ManyToOne(() => Company)
-  @Field(() => Company)
-  company: Company;
+  // @ManyToOne(() => Company)
+  // @Field(() => Company)
+  // company: Company;
 }

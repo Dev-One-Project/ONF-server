@@ -11,10 +11,9 @@ export class ScheduleCategoryResolver {
   ) {}
 
   @Query(() => [ScheduleCategory], { description: '근무일정 유형 전체 조회' })
-  async fetchScheduleCategories(
-    @Args('companyId') companyId: string, // 가드 추가되면 뺄거임
-  ) {
-    return await this.scheduleCategoryService.findAll({ companyId });
+  async fetchAllScheduleCategories() {
+    // @Args('companyId') companyId: string, // 가드 추가되면 뺄거임
+    return await this.scheduleCategoryService.findAll();
   }
 
   @Mutation(() => ScheduleCategory, { description: '근무일정 유형 생성' })
