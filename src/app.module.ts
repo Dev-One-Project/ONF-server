@@ -14,23 +14,23 @@ import { CompanyModule } from './apis/companies/company.module';
 import { WorkCheckModule } from './apis/workChecks/workCheck.module';
 import { AuthModule } from './apis/auth/auth.module';
 import { ScheduleModule } from './apis/schedules/schedule.module';
-import { CategoryModule } from './apis/categories/category.module';
 import { OrganizationModule } from './apis/organization/organization.module';
 import { AppController } from './app.controller';
 import { RoleCategoryModule } from './apis/roleCategory/roleCategory.module';
 import { VacationIssuesModule } from './apis/vacationIssues/vacationIssues.module';
 import { InvitationCodeModule } from './apis/invitationCode/invitationCode.module';
+import { ScheduleCategoryModule } from './apis/scheduleCategories/scheduleCategory.module';
 import { HolidayModule } from './apis/holidays/holiday.module';
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
 @Module({
   imports: [
+    ScheduleCategoryModule,
     InvitationCodeModule,
     VacationIssuesModule,
     AuthModule,
     WorkCheckModule,
     CompanyModule,
-    CategoryModule,
     OrganizationModule,
     MemberModule,
     VacationCategoryModule,

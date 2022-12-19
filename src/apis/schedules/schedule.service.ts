@@ -14,7 +14,7 @@ export class ScheduleService {
     const result = await this.scheduleRepository
       .createQueryBuilder('Schedule')
       .leftJoinAndSelect('Schedule.member', 'member')
-      .leftJoinAndSelect('Schedule.category', 'category')
+      .leftJoinAndSelect('Schedule.roleCategory', 'roleCategory')
       .leftJoinAndSelect('Schedule.organization', 'organization')
       .where('Schedule.member = :id', { id: memberId })
       .getOne();

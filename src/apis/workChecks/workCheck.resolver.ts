@@ -43,7 +43,7 @@ export class WorkCheckResolver {
   })
   async fetchDateMemberWorkChecks(
     @Args('companyId') companyId: string, //
-    @Args({ name: 'organizationId', type: () => [String] })
+    @Args({ name: 'organizationId', type: () => [String], nullable: true })
     organizationId: string[],
     @Args('startDate') startDate: Date,
     @Args('endDate') endDate: Date,

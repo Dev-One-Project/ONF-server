@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as nodemailer from 'nodemailer';
-import { getEmailTemplate } from 'src/common/libraries/utils';
+import { checkEmail, getEmailTemplate } from 'src/common/libraries/utils';
 import { Repository } from 'typeorm';
 import { Company } from '../companies/entities/company.entity';
 import { Member } from '../members/entities/member.entity';
@@ -22,8 +22,6 @@ export class InvitationCodeService {
     const EMAIL_USER = process.env.EMAIL_USER;
     const EMAIL_SENDER = process.env.EMAIL_SENDER;
     const EMAIL_PASS = process.env.EMAIL_PASS;
-
-    // TODO : 이메일 검증 추가
 
     const company = await this.companyRepository.findOne({
       where: { id: companyId },
@@ -49,7 +47,12 @@ export class InvitationCodeService {
       },
     });
 
-    if (isCode.invitationCode) {
+    const validateEmail = checkEmail(email);
+    if (!validateEmail) {
+      throw new ConflictException('이메일 형식이 올바르지 않습니다');
+    }
+
+    if (isCode) {
       const template = getEmailTemplate(company.name, isCode.invitationCode);
 
       await transporter
@@ -63,35 +66,33 @@ export class InvitationCodeService {
         .catch((err) => console.log(err));
 
       return '재전송완료';
-    } else {
-      await transporter
-        .sendMail({
-          from: EMAIL_SENDER,
-          to: email,
-          subject: `${admin.name}님이 ${company.name}에 초대하였습니다.`,
-          html: template,
-        })
-        .then((send) => console.log(send))
-        .catch((err) => console.log(err));
-
-      await this.invitationCodeRepository.save({
-        member: memberId,
-        compnay: companyId,
-        invitationCode: code,
-      });
-
-      await this.memberRepository.update(
-        { id: memberId },
-        { inivitationCode: code },
-      );
-
-      return '전송완료';
     }
+
+    await transporter
+      .sendMail({
+        from: EMAIL_SENDER,
+        to: email,
+        subject: `${admin.name}님이 ${company.name}에 초대하였습니다.`,
+        html: template,
+      })
+      .then((send) => console.log(send))
+      .catch((err) => console.log(err));
+
+    await this.invitationCodeRepository.save({
+      member: memberId,
+      compnay: companyId,
+      invitationCode: code,
+    });
+
+    return '전송완료';
   }
 
   async check({ memberId, invitationCode }) {
     const saveCode = await this.invitationCodeRepository.findOne({
-      where: { member: memberId },
+      where: { member: { id: memberId } },
+      relations: {
+        member: true,
+      },
     });
 
     if (saveCode.invitationCode !== invitationCode) {
@@ -100,7 +101,7 @@ export class InvitationCodeService {
 
     await this.memberRepository.update({ id: memberId }, { isJoin: true });
 
-    await this.invitationCodeRepository.delete({ id: memberId });
+    await this.invitationCodeRepository.delete({ member: { id: memberId } });
 
     return '합류완료';
   }
