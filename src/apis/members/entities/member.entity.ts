@@ -66,11 +66,11 @@ export class Member {
 
   // One to One 근로정보
 
-  @ManyToOne(() => RoleCategory)
-  @Field(() => RoleCategory)
+  @ManyToOne(() => RoleCategory, { nullable: true })
+  @Field(() => RoleCategory, { nullable: true })
   roleCategory: RoleCategory;
 
-  @ManyToOne(() => Organization)
-  @Field(() => Organization)
+  @ManyToOne(() => Organization, { nullable: true })
+  @Field(() => Organization, { nullable: true })
   organization: Organization;
 }

@@ -18,6 +18,6 @@ export class CreateScheduleCategoryInput {
   isNotHolidayWork: boolean;
 
   // 가드 추가되면 뺄꺼임
-  @Field(() => String)
-  companyId: string;
+  // @Field(() => String)
+  // companyId: string;
 }
