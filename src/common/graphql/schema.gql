@@ -2,13 +2,24 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type RoleCategory {
-  id: String!
-  duty: String!
-  memo: String
-  colorCode: String!
-  company: Company!
+type GlobalConfig {
+  id: String
+  allowedCheckInBefore: Int
+  allowedCheckInAfter: Int
+  isWorkLogEnabled: Boolean
+  isVacationEnabled: Boolean
+  isScheduleEnabled: Boolean
+  isCheckInEnabled: Boolean
+  isCheckOutEnabled: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
+  company: Company
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Company {
   id: String
@@ -20,6 +31,7 @@ type Company {
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
+  globalConfig: GlobalConfig
 }
 
 enum MEMBERSHIP_TYPE {
@@ -29,10 +41,23 @@ enum MEMBERSHIP_TYPE {
   ENTERPRISE
 }
 
+<<<<<<< HEAD
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+=======
+type Category {
+  id: String
+  name: String
+  memo: String
+  color: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  company: Company
+}
+>>>>>>> eda1f6e (:sparkles: (GlobalConfig): FEATURE: company global configuration)
 
 type Organization {
   id: String
@@ -128,6 +153,7 @@ type VacationIssue {
   organization: Organization!
 }
 
+<<<<<<< HEAD
 type ScheduleCategory {
   id: String!
   scheduleCategoryName: String!
@@ -136,6 +162,14 @@ type ScheduleCategory {
   isOvertime: Boolean
   isNotHolidayWork: Boolean
   company: Company!
+=======
+type Holiday {
+  id: String!
+  dateName: String
+  locdate: String
+  premuimRate: Int
+  year: String
+>>>>>>> eda1f6e (:sparkles: (GlobalConfig): FEATURE: company global configuration)
 }
 
 type Query {
@@ -151,11 +185,25 @@ type Query {
   """관리자 비활성화된 사원도 같이조회"""
   fetchVacationIssueWithDelete: [VacationIssue!]!
 
+<<<<<<< HEAD
   """기준일자 기준으로 휴가발생 조회하기"""
   fetchVacationIssueBaseDate(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
 
   """관지라 기준일자 기준으로 퇴사자랑 같이 조회"""
   fetchVacationIssueWithDetailDelete(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
+=======
+  """관리자 EndDate가 기준일자인 휴가발생 조회하기"""
+  fetchVacationIssueBaseDate(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
+
+  """관지라 EndDate가 기준일자이고, 퇴사자랑 같이 조회"""
+  fetchVacationIssueWithBaseDateDelete(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
+
+  """관리자 기준일자 기준으로 앞에 발생된 휴가 목록 조회"""
+  fetchVacationIssueDetailDate(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
+
+  """관리자 기준일자 기준으로 앞에 발생된 휴가 퇴사자랑 같이 조회"""
+  fetchVacationIssueDetailDateDelete(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
+>>>>>>> eda1f6e (:sparkles: (GlobalConfig): FEATURE: company global configuration)
 
   """휴가 발생특정날짜 모두조회"""
   fetchVacationIssueWithDate(startDate: DateTime!, endDate: DateTime!): [VacationIssue!]!
@@ -207,11 +255,8 @@ type Query {
   fetchAccount: Account!
   fetchMemberSchedule(memberId: String!): Schedule!
 
-  """Fetch RoleCategory"""
-  fetchRoleCategory(roleCategoryId: String!): RoleCategory!
-
-  """Fetch RoleCategorys"""
-  fetchRoleCategorys: [RoleCategory!]!
+  """Fetch Holidays in ASC order"""
+  fetchHolidays: [Holiday!]!
 }
 
 type Mutation {
@@ -325,13 +370,14 @@ type Mutation {
 
   """근무기록 삭제"""
   deleteSchedule(scheduleId: String!): Boolean!
-  createRoleCategory(createRoleCategoryInput: CreateRoleCategoryInput!): RoleCategory!
 
-  """Update RoleCategory"""
-  updateRoleCategory(roleCategoryId: String!, updateRoleCategoryInput: UpdateRoleCategoryInput!): RoleCategory!
+  """Create Holiday such as company founding anniversary"""
+  createHoliday(createHolidayInput: CreateHolidayInput!): Holiday!
 
-  """Delte RoleCategory by useing roleCategoryId"""
-  deleteRoleCategory(roleCategoryId: String!): Boolean!
+  """
+  Create holidays such as "설날"
+  """
+  createHolidays: String!
 }
 
 input CreateScheduleCategoryInput {
@@ -489,16 +535,8 @@ input UpdateScheduleInput {
   finishWorkTime: String
 }
 
-input CreateRoleCategoryInput {
-  duty: String!
-  memo: String!
-  colorCode: String!
-  companyId: String!
-}
-
-input UpdateRoleCategoryInput {
-  duty: String
-  memo: String
-  colorCode: String
-  companyId: String
+input CreateHolidayInput {
+  dateName: String
+  locdate: String
+  premuimRate: Int
 }

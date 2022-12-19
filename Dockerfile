@@ -2,6 +2,7 @@ FROM node:16-alpine
 
 WORKDIR /ONF/
 COPY ./package.json /ONF/
+COPY ./yarn.lock /ONF/
 RUN yarn install
 
 RUN apk add tzdata && ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime

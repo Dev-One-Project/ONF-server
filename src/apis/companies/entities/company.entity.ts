@@ -1,11 +1,11 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
+import { GlobalConfig } from 'src/apis/globalConfig/entities/globalConfig.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -64,6 +64,7 @@ export class Company {
   @Field(() => Date, { nullable: true })
   deletedAt: Date;
 
-  @OneToMany(() => RoleCategory, (roleCategory) => roleCategory.company)
-  roleCategorys: RoleCategory[];
+  @OneToOne(() => GlobalConfig)
+  @Field(() => GlobalConfig, { nullable: true })
+  globalConfig: GlobalConfig;
 }

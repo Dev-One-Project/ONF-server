@@ -38,7 +38,7 @@ export class RoleCategory {
   @DeleteDateColumn({ nullable: true })
   deletedAt: Date | null;
 
-  @ManyToOne(() => Company, (company) => company.roleCategorys)
+  @ManyToOne(() => Company)
   @Field(() => Company)
   company: Company;
 }
