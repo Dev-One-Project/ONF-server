@@ -1,6 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateScheduleCategoryInput } from './dto/createScheduleCategory.input';
-import { UpdateScheduleCategoryInput } from './dto/updateCreateScheduleCategory.input';
+import { UpdateScheduleCategoryInput } from './dto/updateScheduleCategory.input';
 import { ScheduleCategory } from './entities/scheduleCategory.entity';
 import { ScheduleCategoryService } from './scheduleCategory.service';
 
@@ -11,10 +11,9 @@ export class ScheduleCategoryResolver {
   ) {}
 
   @Query(() => [ScheduleCategory], { description: '근무일정 유형 전체 조회' })
-  async fetchScheduleCategories(
-    @Args('companyId') companyId: string, // 가드 추가되면 뺄거임
-  ) {
-    return await this.scheduleCategoryService.findAll({ companyId });
+  async fetchAllScheduleCategories() {
+    // @Args('companyId') companyId: string, // 가드 추가되면 뺄거임
+    return await this.scheduleCategoryService.findAll();
   }
 
   @Mutation(() => ScheduleCategory, { description: '근무일정 유형 생성' })
