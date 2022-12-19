@@ -5,6 +5,7 @@ import { Member } from '../members/entities/member.entity';
 import { Organization } from '../organization/entities/organization.entity';
 import { RoleCategory } from '../roleCategory/entities/roleCategory.entity';
 import { Company } from './entities/company.entity';
+import { GlobalConfig } from '../globalConfig/entities/globalConfig.entity';
 
 @Injectable()
 export class CompanyService {
@@ -17,6 +18,8 @@ export class CompanyService {
     private readonly roleCategoryRepository: Repository<RoleCategory>,
     @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
+    @InjectRepository(GlobalConfig)
+    private readonly globalConfigRepository: Repository<GlobalConfig>,
   ) {}
   private sqlInit = this.companyRepository.createQueryBuilder('company');
 
@@ -98,7 +101,9 @@ export class CompanyService {
         .execute();
     });
 
-    //TODO: get company config and delete all company configs
+    //delete globalConfig
+    this.globalConfigRepository.createQueryBuilder('globalConfig').delete();
+
     //TODO: get vacation category list and delete all vacation categories
     //TODO: get workinfo list and delete all workinfos
     //TODO: get schedule category list and delete all schedule categories

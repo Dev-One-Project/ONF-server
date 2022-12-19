@@ -4,6 +4,8 @@ WORKDIR /ONF/
 COPY ./package.json /ONF/
 RUN yarn install --production --network-timeout 1000000
 
+RUN apk add tzdata && ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+
 COPY . /ONF/
 RUN yarn build
 CMD ["yarn", "start"]

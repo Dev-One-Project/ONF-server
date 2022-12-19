@@ -7,10 +7,17 @@ import { RoleCategory } from '../roleCategory/entities/roleCategory.entity';
 import { Organization } from './entities/organization.entity';
 import { OrganizationResolver } from './organization.resolver';
 import { OrganizationService } from './organization.service';
+import { GlobalConfig } from '../globalConfig/entities/globalConfig.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Organization, Company, Member, RoleCategory]),
+    TypeOrmModule.forFeature([
+      Organization,
+      Company,
+      Member,
+      RoleCategory,
+      GlobalConfig,
+    ]),
   ],
   providers: [OrganizationResolver, OrganizationService, CompanyService],
 })
