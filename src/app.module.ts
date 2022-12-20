@@ -22,6 +22,7 @@ import { ScheduleCategoryModule } from './apis/scheduleCategories/scheduleCatego
 import { HolidayModule } from './apis/holidays/holiday.module';
 import { GlobalConfigModule } from './apis/globalConfig/globalConfig.module';
 import { ScheduleTemplateModule } from './apis/scheduleTemplates/scheduleTemplate.module';
+import { FileModule } from './apis/files/file.module';
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
 @Module({
@@ -41,6 +42,7 @@ const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
     ScheduleModule,
     HolidayModule,
     GlobalConfigModule,
+    FileModule,
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
