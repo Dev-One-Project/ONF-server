@@ -10,8 +10,8 @@ async function bootstrap() {
   const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(graphqlUploadExpress());
-  app.use(json({ limit: '50mb' }));
-  app.use(urlencoded({ limit: '50mb', extended: true }));
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ limit: '10mb', extended: true }));
   app.useStaticAssets(join(__dirname, '..', 'static'));
 
   app.enableCors({

@@ -6,6 +6,14 @@ export const getToday = () => {
   return new Date(`${year}-${month}-${day}`);
 };
 
+export const getTodayString = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  return `${year}-${month}-${day}`;
+};
+
 export const dayOfTheWeek = () => {
   const weekday = ['일', '월', '화', '수', '목', '금', '토'];
 
