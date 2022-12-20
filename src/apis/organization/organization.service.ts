@@ -14,18 +14,18 @@ export class OrganizationService {
     private readonly memberRepository: Repository<Member>,
     private readonly companyService: CompanyService,
   ) {}
-  private sqlInit =
-    this.organizationRepository.createQueryBuilder('organization');
 
   async findAll({ companyId }) {
-    return await this.sqlInit
+    return await this.organizationRepository
+      .createQueryBuilder('organization')
       .leftJoinAndSelect('organization.company', 'company')
       .where('company.id = :companyId', { companyId })
       .getMany();
   }
 
   async getOrganizationDetail({ organizationId }) {
-    return await this.sqlInit
+    return await this.organizationRepository
+      .createQueryBuilder('organization')
       .leftJoinAndSelect('organization.company', 'company')
       .where('organization.id = :organizationId', { organizationId })
       .getOne();
@@ -39,11 +39,7 @@ export class OrganizationService {
       ...createOrganizationInput,
       company,
     });
-    return await this.sqlInit
-      .insert()
-      .into(Organization)
-      .values(organization)
-      .execute();
+    return await this.organizationRepository.save(organization);
   }
 
   async update({ organizationId, updateOrganizationInput }) {
@@ -56,11 +52,7 @@ export class OrganizationService {
       ...updateOrganizationInput,
       company,
     };
-    return await this.sqlInit
-      .update(Organization)
-      .set(updateData)
-      .where('id = :organizationId', { organizationId })
-      .execute();
+    return await this.organizationRepository.save(updateData);
   }
 
   async delete({ organizationId }) {
@@ -68,23 +60,24 @@ export class OrganizationService {
     //TODO: get all schedule by organizationId and remove relation with organization
     //TODO: get all LeaveCategory by organizationId and remove relation with organization
 
-    //TODO: get all member by organizationId and remove relation with organization
-    // const members = await this.memberRepository
-    //   .createQueryBuilder('member')
-    //   .leftJoinAndSelect('member.organization', 'organization')
-    //   .where('organization.id = :organizationId', { organizationId })
-    //   .getMany();
+    //get all member by organizationId and remove relation with organization
+    const members = await this.memberRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.organization', 'organization')
+      .where('organization.id = :organizationId', { organizationId })
+      .getMany();
 
-    // members.forEach(async (member) => {
-    //   await this.memberRepository
-    //     .createQueryBuilder('member')
-    //     .update(Member)
-    //     .set({ organization: null })
-    //     .where('id = :memberId', { memberId: member.id })
-    //     .execute();
-    // });
+    members.forEach(async (member) => {
+      await this.memberRepository
+        .createQueryBuilder('member')
+        .update(Member)
+        .set({ organization: null })
+        .where('id = :memberId', { memberId: member.id })
+        .execute();
+    });
 
-    const result = await this.sqlInit
+    const result = await this.organizationRepository
+      .createQueryBuilder('organization')
       .delete()
       .from(Organization)
       .where('id = :organizationId', { organizationId })
