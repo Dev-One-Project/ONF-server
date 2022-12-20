@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as nodemailer from 'nodemailer';
 import { checkEmail, getEmailTemplate } from 'src/common/libraries/utils';
 import { Repository } from 'typeorm';
+import { Account } from '../accounts/entites/account.entity';
 import { Company } from '../companies/entities/company.entity';
 import { Member } from '../members/entities/member.entity';
 import { InvitationCode } from './entities/invitationCode.entity';
@@ -12,10 +13,15 @@ export class InvitationCodeService {
   constructor(
     @InjectRepository(InvitationCode)
     private readonly invitationCodeRepository: Repository<InvitationCode>, //
+
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
+
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+
+    @InjectRepository(Account)
+    private readonly accountRepository: Repository<Account>,
   ) {}
 
   async send({ companyId, memberId, email }) {
@@ -27,8 +33,11 @@ export class InvitationCodeService {
       where: { id: companyId },
     });
 
-    const admin = await this.memberRepository.findOne({
-      where: { company: { id: companyId }, isAdmin: true },
+    const admin = await this.accountRepository.findOne({
+      where: { company: { id: companyId } },
+      relations: {
+        member: true,
+      },
     });
 
     const isCode = await this.invitationCodeRepository.findOne({
@@ -59,7 +68,7 @@ export class InvitationCodeService {
         .sendMail({
           from: EMAIL_SENDER,
           to: email,
-          subject: `${admin.name}님이 ${company.name}에 초대하였습니다.`,
+          subject: `${admin.member.name}님이 ${company.name}에 초대하였습니다.`,
           html: template,
         })
         .then((send) => console.log(send))
@@ -72,7 +81,7 @@ export class InvitationCodeService {
       .sendMail({
         from: EMAIL_SENDER,
         to: email,
-        subject: `${admin.name}님이 ${company.name}에 초대하였습니다.`,
+        subject: `${admin.member.name}님이 ${company.name}에 초대하였습니다.`,
         html: template,
       })
       .then((send) => console.log(send))
@@ -102,6 +111,10 @@ export class InvitationCodeService {
     await this.memberRepository.update({ id: memberId }, { isJoin: true });
 
     await this.invitationCodeRepository.delete({ member: { id: memberId } });
+
+    // TODO : account테이블에서 memberId 넣어줘야함 근데 어떻게?
+    // TODO : 예약전송 찾아보고 만들기
+    // await this.accountRepository.update
 
     return '합류완료';
   }

@@ -29,7 +29,7 @@ export class AuthService {
   getAccessToken({ user }) {
     return this.jwtService.sign(
       { email: user.email, sub: user.id },
-      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '20s' },
+      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '3000s' },
     );
   }
   async socialLogin({ res, req }) {

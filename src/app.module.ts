@@ -23,10 +23,12 @@ import { HolidayModule } from './apis/holidays/holiday.module';
 import { GlobalConfigModule } from './apis/globalConfig/globalConfig.module';
 import { ScheduleTemplateModule } from './apis/scheduleTemplates/scheduleTemplate.module';
 import { FileModule } from './apis/files/file.module';
+import { NoticeBoardModule } from './apis/noticeBoards/noticeBoard.module';
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
 @Module({
   imports: [
+    NoticeBoardModule,
     ScheduleTemplateModule,
     ScheduleCategoryModule,
     InvitationCodeModule,
