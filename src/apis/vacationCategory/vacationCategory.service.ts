@@ -9,8 +9,13 @@ export class VacationCategoryService {
     @InjectRepository(VacationCategory)
     private readonly vacationCategoryReoisitory: Repository<VacationCategory>,
   ) {}
-  async findAll() {
-    return await this.vacationCategoryReoisitory.find();
+  async findAll({ organizationid }) {
+    return await this.vacationCategoryReoisitory
+      .createQueryBuilder('vacationCategory')
+      .leftJoinAndSelect('vacationCategory.organization', 'organization')
+      .leftJoinAndSelect('vacationCategory.roleCategory', 'roleCategory')
+      .where('organization.id = :organizationid', { organizationid })
+      .getMany();
   }
 
   async findOne({ vacationCategoryId }) {

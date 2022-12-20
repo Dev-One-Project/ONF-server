@@ -1,9 +1,12 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Organization } from 'src/apis/organization/entities/organization.entity';
+import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -14,10 +17,6 @@ export class VacationCategory {
   @PrimaryGeneratedColumn('uuid')
   @Field(() => String)
   id: string;
-
-  @Column()
-  @Field(() => String)
-  vacationCategoryGroup: string;
 
   @Column()
   @Field(() => String)
@@ -38,6 +37,14 @@ export class VacationCategory {
   @Column()
   @Field(() => Number)
   deductionDays: number;
+
+  @ManyToOne(() => Organization)
+  @Field(() => Organization)
+  organization: Organization;
+
+  @ManyToOne(() => RoleCategory)
+  @Field(() => RoleCategory)
+  roleCategory: RoleCategory;
 
   @CreateDateColumn()
   createdAt: Date;
