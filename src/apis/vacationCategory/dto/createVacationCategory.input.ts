@@ -19,4 +19,10 @@ export class CreateVacationCategoryInput {
 
   @Field(() => Int)
   deductionDays: number;
+
+  @Field(() => String)
+  organizationId: string;
+
+  @Field(() => String)
+  roleCategoryId: string;
 }

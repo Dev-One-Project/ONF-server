@@ -11,8 +11,10 @@ export class VacationCategoryResolver {
   ) {}
 
   @Query(() => [VacationCategory], { description: '휴가유형 전체 찾기' })
-  async fetchVacationCategorys() {
-    return await this.vacationCategoryService.findAll();
+  async fetchVacationCategorys(
+    @Args('organizationid') organizationid: string, //
+  ) {
+    return await this.vacationCategoryService.findAll({ organizationid });
   }
 
   @Query(() => VacationCategory, {
