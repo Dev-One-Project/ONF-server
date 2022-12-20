@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
 import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
@@ -27,9 +28,9 @@ export class Member {
   @Field(() => String)
   phone: string;
 
-  @Column({ default: false })
-  @Field(() => Boolean, { nullable: true, defaultValue: false })
-  isAdmin: boolean;
+  // @Column({ default: false })
+  // @Field(() => Boolean, { nullable: true, defaultValue: false })
+  // isAdmin: boolean;
 
   @Column()
   @Field(() => String)
