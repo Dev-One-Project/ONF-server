@@ -5,10 +5,14 @@ import { FileUpload } from 'graphql-upload';
 import * as Minio from 'minio';
 import { getTodayString } from 'src/common/libraries/utils';
 import { v4 as uuid } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class FileService {
-  constructor(private readonly fileRepository: Repository<File>) {}
+  constructor(
+    @InjectRepository(File)
+    private readonly fileRepository: Repository<File>,
+  ) {}
 
   async uploadOne({ data }: { data: FileUpload }) {
     // Setup Minio Client
