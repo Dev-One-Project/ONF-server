@@ -37,13 +37,13 @@ export class WorkCheck {
   @Field(() => Date, { nullable: true })
   quittingTime: Date;
 
-  @Column({ nullable: true })
-  @Field(() => Date, { nullable: true })
-  breakStartTime: Date;
+  // @Column({ nullable: true })
+  // @Field(() => Date, { nullable: true })
+  // breakStartTime: Date;
 
-  @Column({ nullable: true })
-  @Field(() => Date, { nullable: true })
-  breakEndTime: Date;
+  // @Column({ nullable: true })
+  // @Field(() => Date, { nullable: true })
+  // breakEndTime: Date;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })

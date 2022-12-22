@@ -1,7 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Company } from 'src/apis/companies/entities/company.entity';
 import { Member } from 'src/apis/members/entities/member.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
 import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
+import { ScheduleCategory } from 'src/apis/scheduleCategories/entities/scheduleCategory.entity';
+import { ScheduleTemplate } from 'src/apis/scheduleTemplates/entities/scheduleTemplate.entity';
 import {
   Column,
   CreateDateColumn,
@@ -19,13 +22,21 @@ export class Schedule {
   @Field(() => String)
   id: string;
 
-  @Column()
-  @Field(() => String)
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
   startWorkTime: string;
 
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  endWorkTime: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  memo: string;
+
   @Column()
-  @Field(() => String)
-  finishWorkTime: string;
+  @Field(() => Date)
+  date: Date;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -33,14 +44,13 @@ export class Schedule {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn()
-  deletedAt: Date;
-
   @ManyToOne(() => Member)
   @Field(() => Member)
   member: Member;
 
-  // Many to One 근무 일정 유형
+  @ManyToOne(() => Company)
+  @Field(() => Company)
+  company: Company;
 
   @ManyToOne(() => Organization)
   @Field(() => Organization)
@@ -49,4 +59,12 @@ export class Schedule {
   @ManyToOne(() => RoleCategory)
   @Field(() => RoleCategory)
   roleCategory: RoleCategory;
+
+  @ManyToOne(() => ScheduleTemplate)
+  @Field(() => ScheduleTemplate)
+  scheduleTemplate: ScheduleTemplate;
+
+  @ManyToOne(() => ScheduleCategory)
+  @Field(() => ScheduleCategory)
+  scheduleCategory: ScheduleCategory;
 }

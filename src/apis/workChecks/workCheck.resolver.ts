@@ -72,7 +72,7 @@ export class WorkCheckResolver {
   async createWorkCheckMemo(
     @Args('workCheckId') workCheckId: string, //
     @Args('workCheckMemo') workCheckMemo: string,
-  ) {
+  ): Promise<WorkCheck> {
     return await this.workCheckService.createMemo({
       workCheckId,
       workCheckMemo,
@@ -101,33 +101,33 @@ export class WorkCheckResolver {
     return result;
   }
 
-  @Mutation(() => WorkCheck, {
-    description: '휴게시작 시간 자동 생성(자동 휴게시간 설정 때는 X)',
-  })
-  async createStartBreakTime(
-    @Args('workCheckId') workCheckId: string, //
-  ) {
-    const result = await this.workCheckService.createStartBreak({
-      workCheckId,
-    });
+  // @Mutation(() => WorkCheck, {
+  //   description: '휴게시작 시간 자동 생성(자동 휴게시간 설정 때는 X)',
+  // })
+  // async createStartBreakTime(
+  //   @Args('workCheckId') workCheckId: string, //
+  // ) {
+  //   const result = await this.workCheckService.createStartBreak({
+  //     workCheckId,
+  //   });
 
-    plusNineHour(result.breakStartTime);
+  //   plusNineHour(result.breakStartTime);
 
-    return result;
-  }
+  //   return result;
+  // }
 
-  @Mutation(() => WorkCheck, {
-    description: '휴게종료 시간 자동 생성',
-  })
-  async createEndBreakTime(
-    @Args('workCheckId') workCheckId: string, //
-  ) {
-    const result = await this.workCheckService.createEndBreak({ workCheckId });
+  // @Mutation(() => WorkCheck, {
+  //   description: '휴게종료 시간 자동 생성',
+  // })
+  // async createEndBreakTime(
+  //   @Args('workCheckId') workCheckId: string, //
+  // ) {
+  //   const result = await this.workCheckService.createEndBreak({ workCheckId });
 
-    plusNineHour(result.breakEndTime);
+  //   plusNineHour(result.breakEndTime);
 
-    return result;
-  }
+  //   return result;
+  // }
 
   @Mutation(() => WorkCheck, { description: '출퇴근기록 수정' })
   async updateWorkCheck(
@@ -141,8 +141,8 @@ export class WorkCheckResolver {
 
     plusNineHour(result.workingTime);
     plusNineHour(result.quittingTime);
-    plusNineHour(result.breakStartTime);
-    plusNineHour(result.breakEndTime);
+    // plusNineHour(result.breakStartTime);
+    // plusNineHour(result.breakEndTime);
 
     return result;
   }
