@@ -1,4 +1,5 @@
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Account } from 'src/apis/accounts/entites/account.entity';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
 import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
@@ -8,6 +9,7 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -23,13 +25,13 @@ export class Member {
   @Field(() => String)
   name: string;
 
-  @Column()
-  @Field(() => String)
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
   phone: string;
 
-  @Column({ default: false })
-  @Field(() => Boolean, { nullable: true, defaultValue: false })
-  isAdmin: boolean;
+  // @Column({ default: false })
+  // @Field(() => Boolean, { nullable: true, defaultValue: false })
+  // isAdmin: boolean;
 
   @Column()
   @Field(() => String)
@@ -73,4 +75,6 @@ export class Member {
   @ManyToOne(() => Organization, { nullable: true })
   @Field(() => Organization, { nullable: true })
   organization: Organization;
+  @OneToOne(() => Account, (account) => account.member)
+  account: Account;
 }

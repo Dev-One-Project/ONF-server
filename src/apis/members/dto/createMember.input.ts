@@ -20,11 +20,6 @@ export class CreateMemberInput {
   @Field(() => String, { nullable: true })
   memo: string;
 
-  @Field(() => Int, { nullable: true })
-  leave: number;
-
-  // isJoin 추가하기
-
   @Field(() => String)
   companyId: string;
 

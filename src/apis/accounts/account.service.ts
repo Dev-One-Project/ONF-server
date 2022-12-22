@@ -11,8 +11,14 @@ export class AccountService {
   ) {}
 
   async findOne({ email }) {
-    return this.accountRepository.findOne({
-      where: { email },
+    return await this.accountRepository.findOne({
+      where: {
+        email, //
+      },
+      relations: {
+        member: true,
+        company: true,
+      },
     });
   }
 
@@ -20,7 +26,6 @@ export class AccountService {
     const user = await this.accountRepository.findOne({
       where: { email },
     });
-    // console.log(user);
     if (user) throw new ConflictException('이미 등록된 이메일입니다.');
     return await this.accountRepository.save({ email, password });
   }

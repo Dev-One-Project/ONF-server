@@ -170,31 +170,31 @@ export class WorkCheckService {
     });
   }
 
-  async createStartBreak({ workCheckId }) {
-    const origin = await this.workCheckRepository.findOne({
-      where: { id: workCheckId },
-    });
+  // async createStartBreak({ workCheckId }) {
+  //   const origin = await this.workCheckRepository.findOne({
+  //     where: { id: workCheckId },
+  //   });
 
-    // TODO : 츨근 후 근무중인 상태만 누를수있게하기
+  //   // TODO : 츨근 후 근무중인 상태만 누를수있게하기
 
-    return await this.workCheckRepository.save({
-      ...origin,
-      id: workCheckId,
-      breakStartTime: new Date(),
-    });
-  }
+  //   return await this.workCheckRepository.save({
+  //     ...origin,
+  //     id: workCheckId,
+  //     breakStartTime: new Date(),
+  //   });
+  // }
 
-  async createEndBreak({ workCheckId }) {
-    const origin = await this.workCheckRepository.findOne({
-      where: { id: workCheckId },
-    });
+  // async createEndBreak({ workCheckId }) {
+  //   const origin = await this.workCheckRepository.findOne({
+  //     where: { id: workCheckId },
+  //   });
 
-    return await this.workCheckRepository.save({
-      ...origin,
-      id: workCheckId,
-      breakEndTime: new Date(),
-    });
-  }
+  //   return await this.workCheckRepository.save({
+  //     ...origin,
+  //     id: workCheckId,
+  //     breakEndTime: new Date(),
+  //   });
+  // }
 
   async update({ workCheckId, updateWorkCheckInput }) {
     const findWorkCheck = await this.workCheckRepository.findOne({

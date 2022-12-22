@@ -3,8 +3,11 @@ import { Field, InputType } from '@nestjs/graphql';
 @InputType()
 export class CreateScheduleInput {
   @Field(() => String)
-  startWorkTime: string;
+  scheduleTemplateId: string;
 
-  @Field(() => String)
-  finishWorkTime: string;
+  @Field(() => [String])
+  organizationId: string[];
+
+  @Field(() => [String])
+  memberId: string[];
 }

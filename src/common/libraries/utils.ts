@@ -115,9 +115,25 @@ export const getEmailTemplate = (company, code) => {
 </html>`;
 };
 
-export const checkEmail = (email) => {
+export const checkEmail = (email: string) => {
   const regex =
     /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
 
   return email != '' && email != 'undefined' && regex.test(email);
+};
+
+export const currentWeek = (today) => {
+  // const today = new Date();
+  const sunday = today.getTime() - 86400000 * today.getDay();
+
+  today.setTime(sunday);
+
+  const week = [today.toISOString().slice(0, 10)];
+
+  for (let i = 1; i < 7; i++) {
+    today.setTime(today.getTime() + 86400000);
+    week.push(today.toISOString().slice(0, 10));
+  }
+
+  return [week[0], week[week.length - 1]];
 };
