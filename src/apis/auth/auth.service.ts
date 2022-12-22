@@ -14,9 +14,9 @@ export class AuthService {
       { email: user.email, sub: user.id },
       { secret: process.env.REFRESH_TOKEN_KEY, expiresIn: '4w' },
     );
-    console.log(refreshToken),
-      // 개발환경
-      res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; path=/;`);
+    // console.log(user, res),
+    // 개발환경
+    res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; path=/;`);
 
     // 배포환경
     // res.setHeader('Access-Control-Allow-Origin', 'https://ONF.com')
@@ -29,7 +29,7 @@ export class AuthService {
   getAccessToken({ user }) {
     return this.jwtService.sign(
       { email: user.email, sub: user.id },
-      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '20s' },
+      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '3w' },
     );
   }
   async socialLogin({ res, req }) {
@@ -41,7 +41,6 @@ export class AuthService {
         hashedPassword: req.user.password,
       });
     }
-
     this.setRefreshToken({ user, res });
     res.redirect('http://localhost:5000/frontend/social-login.html');
   }

@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Account } from 'src/apis/accounts/entites/account.entity';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
 import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
@@ -8,6 +9,7 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -73,4 +75,6 @@ export class Member {
   @ManyToOne(() => Organization, { nullable: true })
   @Field(() => Organization, { nullable: true })
   organization: Organization;
+  @OneToOne(() => Account, (account) => account.member)
+  account: Account;
 }
