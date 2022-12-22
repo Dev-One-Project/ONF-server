@@ -11,11 +11,11 @@ export class CreateWorkCheckInput {
   @Field(() => Date, { nullable: true })
   quittingTime: Date;
 
-  @Field(() => Date, { nullable: true })
-  breakStartTime: Date;
+  // @Field(() => Date, { nullable: true })
+  // breakStartTime: Date;
 
-  @Field(() => Date, { nullable: true })
-  breakEndTime: Date;
+  // @Field(() => Date, { nullable: true })
+  // breakEndTime: Date;
 
   @Field(() => String, { nullable: true })
   workCheckMemo: Date;

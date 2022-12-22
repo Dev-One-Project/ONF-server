@@ -25,8 +25,8 @@ export class Member {
   @Field(() => String)
   name: string;
 
-  @Column()
-  @Field(() => String)
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
   phone: string;
 
   // @Column({ default: false })

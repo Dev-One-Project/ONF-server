@@ -10,39 +10,65 @@ export class ScheduleResolver {
     private readonly scheduleService: ScheduleService, //
   ) {}
 
-  // 조직에 속한 멤버들의 근무기록들 조회(예정)
+  @Query(() => [Schedule], { description: '이번주 근무일정 조회' })
+  async fetchWeekSchedule(
+    @Args('today') today: Date, //
+    @Args('companyId') companyId: string,
+  ) {
+    return await this.scheduleService.weekFind({ today, companyId });
+  }
 
-  @Query(() => Schedule)
+  // 이거 없어도 되려나????
+  @Query(() => [Schedule], { description: '멤버의 근무일정 조회' })
   async fetchMemberSchedule(
     @Args('memberId') memberId: string, //
   ) {
     return await this.scheduleService.findMemberScheduleDetail({ memberId });
   }
 
-  @Mutation(() => Schedule, { description: '근무기록 생성' })
+  @Mutation(() => [Schedule], { description: '근무일정 생성' })
   async createSchedule(
-    @Args('createScheduleInput') createScheduleInput: CreateScheduleInput, //
+    @Args({ name: 'dates', type: () => [Date] }) dates: Date[],
+    @Args('createScheduleInput') createScheduleInput: CreateScheduleInput,
   ) {
-    return await this.scheduleService.create({ createScheduleInput });
+    return await this.scheduleService.create({ dates, createScheduleInput });
   }
 
-  @Mutation(() => Schedule, {
-    description: 'scheduleId(근무기록Id)로 근무기록 수정',
-  })
-  async updateSchedule(
+  @Mutation(() => Schedule, { description: '근무일정 단일 수정' })
+  async updateOneSchedule(
     @Args('scheduleId') scheduleId: string, //
     @Args('updateScheduleInput') updateScheduleInput: UpdateScheduleInput,
   ) {
-    return await this.scheduleService.update({
+    return await this.scheduleService.updateOne({
       scheduleId,
       updateScheduleInput,
     });
   }
 
-  @Mutation(() => Boolean, { description: '근무기록 삭제' })
-  async deleteSchedule(
+  @Mutation(() => [Schedule], {
+    description: 'scheduleId로 찾은 근무일정 다수 수정',
+  })
+  async updateAllSchedule(
+    @Args({ name: 'scheduleId', type: () => [String] }) scheduleId: string[], //
+    @Args('updateScheduleInput') updateScheduleInput: UpdateScheduleInput,
+  ) {
+    return await this.scheduleService.updateAll({
+      scheduleId,
+      updateScheduleInput,
+    });
+  }
+
+  @Mutation(() => Boolean, { description: '근무일정 단일 삭제' })
+  async deleteOneSchedule(
     @Args('scheduleId') scheduleId: string, //
   ) {
-    return await this.scheduleService.delete({ scheduleId });
+    return await this.scheduleService.deleteOne({ scheduleId });
+  }
+
+  @Mutation(() => String, { description: '근무일정 다수 삭제' })
+  async deleteAllSchedule(
+    @Args({ name: 'scheduleId', type: () => [String] }) scheduleId: string[],
+  ) {
+    return await this.scheduleService.deleteAll({ scheduleId });
   }
 }
