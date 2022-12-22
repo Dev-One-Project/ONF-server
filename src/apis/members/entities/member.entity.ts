@@ -29,9 +29,9 @@ export class Member {
   @Field(() => String)
   phone: string;
 
-  @Column({ default: false })
-  @Field(() => Boolean, { nullable: true, defaultValue: false })
-  isAdmin: boolean;
+  // @Column({ default: false })
+  // @Field(() => Boolean, { nullable: true, defaultValue: false })
+  // isAdmin: boolean;
 
   @Column()
   @Field(() => String)

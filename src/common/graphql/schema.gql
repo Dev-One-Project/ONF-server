@@ -41,24 +41,6 @@ enum MEMBERSHIP_TYPE {
   ENTERPRISE
 }
 
-<<<<<<< HEAD
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-=======
-type Category {
-  id: String
-  name: String
-  memo: String
-  color: String
-  createdAt: DateTime
-  updatedAt: DateTime
-  deletedAt: DateTime
-  company: Company
-}
->>>>>>> eda1f6e (:sparkles: (GlobalConfig): FEATURE: company global configuration)
-
 type Organization {
   id: String
   name: String
@@ -73,11 +55,18 @@ type Organization {
   company: Company
 }
 
+type RoleCategory {
+  id: String!
+  duty: String!
+  memo: String
+  colorCode: String!
+  company: Company!
+}
+
 type Member {
   id: String!
   name: String!
   phone: String!
-  isAdmin: Boolean
   joinDate: String!
   exitDate: String
   memo: String
@@ -111,6 +100,8 @@ type Vacation {
 type Account {
   id: String!
   email: String!
+  member: Member
+  company: Company
 }
 
 type Schedule {
@@ -153,7 +144,6 @@ type VacationIssue {
   organization: Organization!
 }
 
-<<<<<<< HEAD
 type ScheduleCategory {
   id: String!
   scheduleCategoryName: String!
@@ -161,22 +151,14 @@ type ScheduleCategory {
   memo: String
   isOvertime: Boolean
   isNotHolidayWork: Boolean
-<<<<<<< HEAD
-  company: Company!
-=======
-=======
 }
 
->>>>>>> 8612f66 (:sparkles: (scheduleTempate): FEATURE: 근무일정 템플릿 APIs)
 type Holiday {
   id: String!
   dateName: String
   locdate: String
   premuimRate: Int
   year: String
-<<<<<<< HEAD
->>>>>>> eda1f6e (:sparkles: (GlobalConfig): FEATURE: company global configuration)
-=======
 }
 
 type ScheduleTemplate {
@@ -189,10 +171,21 @@ type ScheduleTemplate {
   scheduleCategory: ScheduleCategory
   organization: Organization!
   roleCategory: RoleCategory!
->>>>>>> 8612f66 (:sparkles: (scheduleTempate): FEATURE: 근무일정 템플릿 APIs)
+}
+
+type NoticeBoard {
+  id: String!
+  title: String!
+  contents: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  account: Account!
 }
 
 type Query {
+  fetchAllNoticeBoards: [NoticeBoard!]!
+  fetchOneNoticeBoard(noticeBoardId: String!): NoticeBoard!
+
   """근무일정 템플릿 전체 조회"""
   fetchAllScheduleTemplates: [ScheduleTemplate!]!
 
@@ -208,22 +201,9 @@ type Query {
   """관리자 비활성화된 사원도 같이조회"""
   fetchVacationIssueWithDelete: [VacationIssue!]!
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  """기준일자 기준으로 휴가발생 조회하기"""
-  fetchVacationIssueBaseDate(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
-
-  """관지라 기준일자 기준으로 퇴사자랑 같이 조회"""
-  fetchVacationIssueWithDetailDelete(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
-=======
   """관리자 EndDate가 기준일자인 휴가발생 조회하기"""
   fetchVacationIssueBaseDate(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
 
-=======
-  """관리자 EndDate가 기준일자인 휴가발생 조회하기"""
-  fetchVacationIssueBaseDate(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
-
->>>>>>> 8612f66 (:sparkles: (scheduleTempate): FEATURE: 근무일정 템플릿 APIs)
   """관지라 EndDate가 기준일자이고, 퇴사자랑 같이 조회"""
   fetchVacationIssueWithBaseDateDelete(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
 
@@ -232,10 +212,6 @@ type Query {
 
   """관리자 기준일자 기준으로 앞에 발생된 휴가 퇴사자랑 같이 조회"""
   fetchVacationIssueDetailDateDelete(baseDate: DateTime!, companyId: String!): [[VacationIssue!]!]!
-<<<<<<< HEAD
->>>>>>> eda1f6e (:sparkles: (GlobalConfig): FEATURE: company global configuration)
-=======
->>>>>>> 8612f66 (:sparkles: (scheduleTempate): FEATURE: 근무일정 템플릿 APIs)
 
   """휴가 발생특정날짜 모두조회"""
   fetchVacationIssueWithDate(startDate: DateTime!, endDate: DateTime!): [VacationIssue!]!
@@ -287,20 +263,16 @@ type Query {
   fetchAccount: Account!
   fetchMemberSchedule(memberId: String!): Schedule!
 
-<<<<<<< HEAD
-=======
-  """Fetch RoleCategory"""
-  fetchRoleCategory(roleCategoryId: String!): RoleCategory!
-
-  """Fetch RoleCategorys"""
-  fetchRoleCategorys: [RoleCategory!]!
-
->>>>>>> 8612f66 (:sparkles: (scheduleTempate): FEATURE: 근무일정 템플릿 APIs)
   """Fetch Holidays in ASC order"""
   fetchHolidays: [Holiday!]!
+  fetchGlobalConfig(companyId: String!): GlobalConfig!
 }
 
 type Mutation {
+  createNoticeBoard(createNoticeBoardInput: CreateNoticeBoardInput!): NoticeBoard!
+  updateNoticeBoard(noticeBoardId: String!, updateNoticeBoardInput: UpdateNoticeBoardInput!): NoticeBoard!
+  deleteNoticeBoard(noticeBoardId: String!): Boolean!
+
   """근무일정 템플릿 생성"""
   createScheduleTemplate(createScheduleTemplateInput: CreateScheduleTemplateInput!): ScheduleTemplate!
 
@@ -424,21 +396,22 @@ type Mutation {
   """Create Holiday such as company founding anniversary"""
   createHoliday(createHolidayInput: CreateHolidayInput!): Holiday!
 
-<<<<<<< HEAD
-=======
-  """Delte RoleCategory by useing roleCategoryId"""
-  deleteRoleCategory(roleCategoryId: String!): Boolean!
-
-  """Create Holiday such as company founding anniversary"""
-  createHoliday(createHolidayInput: CreateHolidayInput!): Holiday!
-
->>>>>>> 8612f66 (:sparkles: (scheduleTempate): FEATURE: 근무일정 템플릿 APIs)
   """
   Create holidays such as "설날"
   """
   createHolidays: String!
-<<<<<<< HEAD
-=======
+  createGlobalConfig(createGlobalConfigInput: CreateGlobalConfigInput!): GlobalConfig!
+  updateGlobalConfig(updateGlobalConfigInput: UpdateGlobalConfigInput!): GlobalConfig!
+}
+
+input CreateNoticeBoardInput {
+  title: String!
+  contents: String!
+}
+
+input UpdateNoticeBoardInput {
+  title: String
+  contents: String
 }
 
 input CreateScheduleTemplateInput {
@@ -461,7 +434,6 @@ input UpdateScheduleTemplatInput {
   scheduleCategoryId: String
   organizationId: String
   roleCategoryId: String
->>>>>>> 8612f66 (:sparkles: (scheduleTempate): FEATURE: 근무일정 템플릿 APIs)
 }
 
 input CreateScheduleCategoryInput {
@@ -617,25 +589,29 @@ input UpdateScheduleInput {
   finishWorkTime: String
 }
 
-<<<<<<< HEAD
-=======
-input CreateRoleCategoryInput {
-  duty: String!
-  memo: String!
-  colorCode: String!
-  companyId: String!
-}
-
-input UpdateRoleCategoryInput {
-  duty: String
-  memo: String
-  colorCode: String
-  companyId: String
-}
-
->>>>>>> 8612f66 (:sparkles: (scheduleTempate): FEATURE: 근무일정 템플릿 APIs)
 input CreateHolidayInput {
   dateName: String
   locdate: String
   premuimRate: Int
+}
+
+input CreateGlobalConfigInput {
+  allowedCheckInBefore: Int = 10
+  allowedCheckInAfter: Int = 12
+  isWorkLogEnabled: Boolean = false
+  isVacationEnabled: Boolean = false
+  isScheduleEnabled: Boolean = false
+  isCheckInEnabled: Boolean = false
+  isCheckOutEnabled: Boolean = false
+  companyId: String!
+}
+
+input UpdateGlobalConfigInput {
+  allowedCheckInBefore: Int = 10
+  allowedCheckInAfter: Int = 12
+  isWorkLogEnabled: Boolean = false
+  isVacationEnabled: Boolean = false
+  isScheduleEnabled: Boolean = false
+  isCheckInEnabled: Boolean = false
+  isCheckOutEnabled: Boolean = false
 }
