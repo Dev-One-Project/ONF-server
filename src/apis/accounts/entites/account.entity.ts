@@ -1,6 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Member } from 'src/apis/members/entities/member.entity';
+import { Role } from 'src/common/types/enum.role';
 import {
   Column,
   Entity,
@@ -19,6 +20,10 @@ export class Account {
   @Column()
   @Field(() => String)
   email: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  role: Role;
 
   @Column()
   password: string;
