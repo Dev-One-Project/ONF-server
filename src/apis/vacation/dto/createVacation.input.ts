@@ -2,13 +2,13 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class CreateVacationInput {
-  @Field(() => [Date], { nullable: true })
+  @Field(() => [Date])
   vacations: Date[];
 
   @Field(() => String, { nullable: true })
   description: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   vacationCategoryId: string;
 
   @Field(() => String)

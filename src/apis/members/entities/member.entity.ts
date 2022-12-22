@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
 import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
@@ -47,8 +47,8 @@ export class Member {
   @Field(() => Boolean, { defaultValue: false })
   isJoin: boolean;
 
-  @Column({ nullable: true })
-  @Field(() => Int, { nullable: true })
+  @Column({ type: 'float', nullable: true })
+  @Field(() => Float, { nullable: true })
   leave: number;
 
   @CreateDateColumn()
