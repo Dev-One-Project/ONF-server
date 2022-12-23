@@ -50,7 +50,7 @@ export class WorkCheckService {
   }) {
     endDate.setDate(endDate.getDate() + 1);
 
-    // TODO : 지점ID 없이 검색할때 전체 조회
+    // TODO : 지점ID 없이 검색할때 빈 배열
     const result = await Promise.all(
       organizationId.map(async (organizationId: string) => {
         return await this.workCheckRepository

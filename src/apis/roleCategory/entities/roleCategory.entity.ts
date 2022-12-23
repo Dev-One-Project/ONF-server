@@ -1,10 +1,12 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Company } from 'src/apis/companies/entities/company.entity';
+import { ScheduleTemplate } from 'src/apis/scheduleTemplates/entities/scheduleTemplate.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -41,4 +43,11 @@ export class RoleCategory {
   @ManyToOne(() => Company)
   @Field(() => Company)
   company: Company;
+
+  @ManyToMany(
+    () => ScheduleTemplate,
+    (scheduleTemplate) => scheduleTemplate.roleCategory,
+  )
+  @Field(() => [ScheduleTemplate])
+  scheduleTemplate: ScheduleTemplate[];
 }

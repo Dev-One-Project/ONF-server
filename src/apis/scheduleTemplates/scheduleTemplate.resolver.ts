@@ -37,10 +37,20 @@ export class ScheduleTemplateResolver {
     });
   }
 
-  @Mutation(() => Boolean, { description: '근무일정 템플릿 삭제' })
-  async deleteScheduleTemplate(
+  @Mutation(() => Boolean, { description: '근무일정 템플릿 단일 삭제' })
+  async deleteOneScheduleTemplate(
     @Args('scheduleTemplateId') scheduleTemplateId: string, //
   ) {
-    return await this.scheduleTemplateService.delete({ scheduleTemplateId });
+    return await this.scheduleTemplateService.deleteOne({ scheduleTemplateId });
+  }
+
+  @Mutation(() => String, { description: '근무일정 템플릿 다수 삭제' })
+  async deleteManyScheduleTemplate(
+    @Args({ name: 'scheduleTemplateId', type: () => [String] })
+    scheduleTemplateId: string[],
+  ) {
+    return await this.scheduleTemplateService.deleteMany({
+      scheduleTemplateId,
+    });
   }
 }

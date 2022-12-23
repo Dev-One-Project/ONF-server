@@ -23,9 +23,9 @@ export class CreateScheduleTemplateInput {
   @Field(() => String, { nullable: true })
   scheduleCategoryId: ScheduleCategory;
 
-  @Field(() => String)
-  organizationId: Organization;
+  @Field(() => [String])
+  organizationId: Organization[];
 
-  @Field(() => String)
-  roleCategoryId: RoleCategory;
+  @Field(() => [String])
+  roleCategoryId: RoleCategory[];
 }
