@@ -21,6 +21,51 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Organization {
+  id: String
+  name: String
+  address: String
+  lat: String
+  lng: String
+  description: String
+  color: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  company: Company
+  scheduleTemplate: [ScheduleTemplate!]!
+}
+
+type ScheduleCategory {
+  id: String!
+  scheduleCategoryName: String!
+  colorCode: String!
+  memo: String
+  isOvertime: Boolean
+  isNotHolidayWork: Boolean
+}
+
+type ScheduleTemplate {
+  id: String!
+  name: String!
+  startTime: String!
+  endTime: String!
+  colorCode: String!
+  memo: String
+  scheduleCategory: ScheduleCategory
+  organization: [Organization!]!
+  roleCategory: [RoleCategory!]!
+}
+
+type RoleCategory {
+  id: String!
+  duty: String!
+  memo: String
+  colorCode: String!
+  company: Company!
+  scheduleTemplate: [ScheduleTemplate!]!
+}
+
 type Company {
   id: String
   name: String
@@ -41,36 +86,18 @@ enum MEMBERSHIP_TYPE {
   ENTERPRISE
 }
 
-type Organization {
-  id: String
-  name: String
-  address: String
-  lat: String
-  lng: String
-  description: String
-  color: String
-  createdAt: DateTime
-  updatedAt: DateTime
-  deletedAt: DateTime
-  company: Company
-}
-
-type RoleCategory {
+type Account {
   id: String!
-  duty: String!
-  memo: String
-  colorCode: String!
-  company: Company!
+  email: String!
+  role: String
+  member: Member
+  company: Company
 }
 
 type Member {
   id: String!
   name: String!
-<<<<<<< HEAD
-  phone: String!
-=======
   phone: String
->>>>>>> 11c0187 (:sparkles: (schedule): MODIFY: schedule APIs & Entity)
   joinDate: String!
   exitDate: String
   memo: String
@@ -100,34 +127,6 @@ type Vacation {
   member: Member
   company: Company
   vacationCategory: VacationCategory
-}
-
-type Account {
-  id: String!
-  email: String!
-  member: Member
-  company: Company
-}
-
-type ScheduleCategory {
-  id: String!
-  scheduleCategoryName: String!
-  colorCode: String!
-  memo: String
-  isOvertime: Boolean
-  isNotHolidayWork: Boolean
-}
-
-type ScheduleTemplate {
-  id: String!
-  name: String!
-  startTime: String!
-  endTime: String!
-  colorCode: String!
-  memo: String
-  scheduleCategory: ScheduleCategory
-  organization: Organization!
-  roleCategory: RoleCategory!
 }
 
 type Schedule {
@@ -173,18 +172,6 @@ type VacationIssue {
   organization: Organization!
 }
 
-<<<<<<< HEAD
-type ScheduleCategory {
-  id: String!
-  scheduleCategoryName: String!
-  colorCode: String!
-  memo: String
-  isOvertime: Boolean
-  isNotHolidayWork: Boolean
-}
-
-=======
->>>>>>> 11c0187 (:sparkles: (schedule): MODIFY: schedule APIs & Entity)
 type Holiday {
   id: String!
   dateName: String
@@ -197,14 +184,7 @@ type File {
   id: String!
   url: String!
   name: String!
-<<<<<<< HEAD
-  startTime: String!
-  endTime: String!
-  colorCode: String!
-  memo: String
-  scheduleCategory: ScheduleCategory
-  organization: Organization!
-  roleCategory: RoleCategory!
+  createdAt: DateTime!
 }
 
 type NoticeBoard {
@@ -219,17 +199,12 @@ type NoticeBoard {
 type Query {
   fetchAllNoticeBoards: [NoticeBoard!]!
   fetchOneNoticeBoard(noticeBoardId: String!): NoticeBoard!
-=======
-  createdAt: DateTime!
-}
 
-type Query {
   """Fetch RoleCategory"""
   fetchRoleCategory(roleCategoryId: String!): RoleCategory!
 
   """Fetch RoleCategorys"""
   fetchRoleCategorys: [RoleCategory!]!
->>>>>>> 11c0187 (:sparkles: (schedule): MODIFY: schedule APIs & Entity)
 
   """근무일정 템플릿 전체 조회"""
   fetchAllScheduleTemplates: [ScheduleTemplate!]!
@@ -306,25 +281,23 @@ type Query {
   """(관리자) 퇴사자와 함께 조회"""
   fetchVacationWithDelete: [Vacation!]!
   fetchAccount: Account!
+  fetchAccounts: Account!
+
+  """이번주 근무일정 조회"""
   fetchWeekSchedule(today: DateTime!, companyId: String!): [Schedule!]!
 
-<<<<<<< HEAD
-=======
   """멤버의 근무일정 조회"""
   fetchMemberSchedule(memberId: String!): [Schedule!]!
 
->>>>>>> 11c0187 (:sparkles: (schedule): MODIFY: schedule APIs & Entity)
   """Fetch Holidays in ASC order"""
   fetchHolidays: [Holiday!]!
   fetchGlobalConfig(companyId: String!): GlobalConfig!
 }
 
 type Mutation {
-<<<<<<< HEAD
   createNoticeBoard(createNoticeBoardInput: CreateNoticeBoardInput!): NoticeBoard!
   updateNoticeBoard(noticeBoardId: String!, updateNoticeBoardInput: UpdateNoticeBoardInput!): NoticeBoard!
   deleteNoticeBoard(noticeBoardId: String!): Boolean!
-=======
   createRoleCategory(createRoleCategoryInput: CreateRoleCategoryInput!): RoleCategory!
 
   """Update RoleCategory"""
@@ -332,7 +305,6 @@ type Mutation {
 
   """Delte RoleCategory by useing roleCategoryId"""
   deleteRoleCategory(roleCategoryId: String!): Boolean!
->>>>>>> 11c0187 (:sparkles: (schedule): MODIFY: schedule APIs & Entity)
 
   """근무일정 템플릿 생성"""
   createScheduleTemplate(createScheduleTemplateInput: CreateScheduleTemplateInput!): ScheduleTemplate!
@@ -340,8 +312,11 @@ type Mutation {
   """근무일정 템플릿 수정"""
   updateScheduleTemplate(scheduleTemplateId: String!, updateScheduleTemplateInput: UpdateScheduleTemplatInput!): ScheduleTemplate!
 
-  """근무일정 템플릿 삭제"""
+  """근무일정 템플릿 단일 삭제"""
   deleteScheduleTemplate(scheduleTemplateId: String!): Boolean!
+
+  """근무일정 템플릿 다수 삭제"""
+  deleteManyScheduleTemplate(scheduleTemplateId: [String!]!): String!
 
   """근무일정 유형 생성"""
   createScheduleCategory(createScheduleCategoryInput: CreateScheduleCategoryInput!): ScheduleCategory!
@@ -452,7 +427,7 @@ type Mutation {
   deleteOneSchedule(scheduleId: String!): Boolean!
 
   """근무일정 다수 삭제"""
-  deleteAllSchedule(scheduleId: [String!]!): String!
+  deleteManySchedule(scheduleId: [String!]!): String!
 
   """Create Holiday such as company founding anniversary"""
   createHoliday(createHolidayInput: CreateHolidayInput!): Holiday!
@@ -463,7 +438,12 @@ type Mutation {
   createHolidays: String!
   createGlobalConfig(createGlobalConfigInput: CreateGlobalConfigInput!): GlobalConfig!
   updateGlobalConfig(updateGlobalConfigInput: UpdateGlobalConfigInput!): GlobalConfig!
-<<<<<<< HEAD
+
+  """Upload a single file / Max file size apporximatly 10M"""
+  uploadSingleFile(file: Upload!): File!
+
+  """Upload multiple files / Max total size approximatly 10M"""
+  uploadMultipleFiles(files: [Upload!]!): [File!]!
 }
 
 input CreateNoticeBoardInput {
@@ -474,13 +454,6 @@ input CreateNoticeBoardInput {
 input UpdateNoticeBoardInput {
   title: String
   contents: String
-=======
-
-  """Upload a single file / Max file size apporximatly 10M"""
-  uploadSingleFile(file: Upload!): File!
-
-  """Upload multiple files / Max total size approximatly 10M"""
-  uploadMultipleFiles(files: [Upload!]!): [File!]!
 }
 
 input CreateRoleCategoryInput {
@@ -495,7 +468,6 @@ input UpdateRoleCategoryInput {
   memo: String
   colorCode: String
   companyId: String
->>>>>>> 11c0187 (:sparkles: (schedule): MODIFY: schedule APIs & Entity)
 }
 
 input CreateScheduleTemplateInput {
@@ -505,8 +477,8 @@ input CreateScheduleTemplateInput {
   colorCode: String!
   memo: String
   scheduleCategoryId: String
-  organizationId: String!
-  roleCategoryId: String!
+  organizationId: [String!]!
+  roleCategoryId: [String!]!
 }
 
 input UpdateScheduleTemplatInput {
@@ -516,8 +488,8 @@ input UpdateScheduleTemplatInput {
   colorCode: String
   memo: String
   scheduleCategoryId: String
-  organizationId: String
-  roleCategoryId: String
+  organizationId: [String!]
+  roleCategoryId: [String!]
 }
 
 input CreateScheduleCategoryInput {
@@ -663,7 +635,6 @@ input UpdateVacationInput {
 
 input CreateScheduleInput {
   scheduleTemplateId: String!
-  organizationId: [String!]!
   memberId: [String!]!
 }
 
@@ -672,12 +643,8 @@ input UpdateScheduleInput {
   organizationId: String
   roleCategoryId: String
   startWorkTime: String
-<<<<<<< HEAD
-  finishWorkTime: String
-=======
   EndWorkTime: String
   memo: String
->>>>>>> 11c0187 (:sparkles: (schedule): MODIFY: schedule APIs & Entity)
 }
 
 input CreateHolidayInput {
@@ -705,11 +672,7 @@ input UpdateGlobalConfigInput {
   isScheduleEnabled: Boolean = false
   isCheckInEnabled: Boolean = false
   isCheckOutEnabled: Boolean = false
-<<<<<<< HEAD
-}
-=======
 }
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
->>>>>>> 11c0187 (:sparkles: (schedule): MODIFY: schedule APIs & Entity)

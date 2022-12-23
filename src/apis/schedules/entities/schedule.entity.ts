@@ -8,7 +8,6 @@ import { ScheduleTemplate } from 'src/apis/scheduleTemplates/entities/scheduleTe
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,

@@ -33,7 +33,7 @@ export class NoticeBoardResolver {
     @Args('createNoticeBoardInput')
     createNoticeBoardInput: CreateNoticeBoardInput, //
   ) {
-    const user = context.req.email;
+    const user = context.req.user.email;
 
     return await this.noticeBoardService.create({
       user,

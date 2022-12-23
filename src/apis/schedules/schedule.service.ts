@@ -47,22 +47,8 @@ export class ScheduleService {
     return result;
   }
 
-  async findMemberScheduleDetail({ memberId }) {
-    const result = await this.scheduleRepository
-      .createQueryBuilder('Schedule')
-      .leftJoinAndSelect('Schedule.member', 'member')
-      .leftJoinAndSelect('Schedule.roleCategory', 'roleCategory')
-      .leftJoinAndSelect('Schedule.organization', 'organization')
-      .where('Schedule.member = :id', { id: memberId })
-      .getOne();
-
-    return result;
-  }
-
   async create({ dates, createScheduleInput }) {
-    // 날짜가 배열로 들어옴
-    const { scheduleTemplateId, organizationId, memberId } =
-      createScheduleInput;
+    const { scheduleTemplateId, memberId } = createScheduleInput;
 
     const template = await this.scheduleTemplateRepository.findOne({
       where: { id: scheduleTemplateId },
@@ -74,30 +60,26 @@ export class ScheduleService {
     await Promise.all(
       dates.map(async (date: Date) => {
         await Promise.all(
-          organizationId.map(async (organizationId: string) => {
-            await Promise.all(
-              memberId.map(async (member) => {
-                const info = await this.memberRepository.findOne({
-                  where: { id: member, organization: { id: organizationId } },
-                  relations: ['organization', 'company', 'roleCategory'],
-                });
+          memberId.map(async (member) => {
+            const info = await this.memberRepository.findOne({
+              where: { id: member },
+              relations: ['organization', 'company', 'roleCategory'],
+            });
 
-                if (info) {
-                  const schedule = await this.scheduleRepository.save({
-                    date,
-                    scheduleTemplate: scheduleTemplateId,
-                    startWorkTime: template.startTime,
-                    endWorkTime: template.endTime,
-                    member,
-                    scheduleCategory: template.scheduleCategory,
-                    company: info.company,
-                    organization: info.organization,
-                    roleCategory: info.roleCategory,
-                  });
-                  result.push(schedule);
-                }
-              }),
-            );
+            if (info) {
+              const schedule = await this.scheduleRepository.save({
+                date,
+                scheduleTemplate: scheduleTemplateId,
+                startWorkTime: template.startTime,
+                endWorkTime: template.endTime,
+                member,
+                scheduleCategory: template.scheduleCategory,
+                company: info.company,
+                organization: info.organization,
+                roleCategory: info.roleCategory,
+              });
+              result.push(schedule);
+            }
           }),
         );
       }),
@@ -142,7 +124,7 @@ export class ScheduleService {
     return result.affected ? true : false;
   }
 
-  async deleteAll({ scheduleId }) {
+  async deleteMany({ scheduleId }) {
     await Promise.all(
       scheduleId.map(async (schedule) => {
         await this.scheduleRepository.delete({ id: schedule });

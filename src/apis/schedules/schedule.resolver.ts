@@ -13,18 +13,12 @@ export class ScheduleResolver {
   @Query(() => [Schedule], { description: '이번주 근무일정 조회' })
   async fetchWeekSchedule(
     @Args('today') today: Date, //
-    @Args('companyId') companyId: string,
+    @Args('companyId') companyId: string, // 컴퍼니빼고 지점넣어야할듯 + 직무
   ) {
     return await this.scheduleService.weekFind({ today, companyId });
   }
 
-  // 이거 없어도 되려나????
-  @Query(() => [Schedule], { description: '멤버의 근무일정 조회' })
-  async fetchMemberSchedule(
-    @Args('memberId') memberId: string, //
-  ) {
-    return await this.scheduleService.findMemberScheduleDetail({ memberId });
-  }
+  // 시작날짜+끝날짜 + 지점 조회
 
   @Mutation(() => [Schedule], { description: '근무일정 생성' })
   async createSchedule(
@@ -66,9 +60,9 @@ export class ScheduleResolver {
   }
 
   @Mutation(() => String, { description: '근무일정 다수 삭제' })
-  async deleteAllSchedule(
+  async deleteManySchedule(
     @Args({ name: 'scheduleId', type: () => [String] }) scheduleId: string[],
   ) {
-    return await this.scheduleService.deleteAll({ scheduleId });
+    return await this.scheduleService.deleteMany({ scheduleId });
   }
 }
