@@ -84,6 +84,7 @@ export class VacationService {
   }
 
   async create({ createVacationInput }) {
+    // 1. 직원 조회하기
     const member = await this.memberRepository.findOne({
       where: { id: createVacationInput.memberId },
       relations: ['company'],
@@ -91,19 +92,23 @@ export class VacationService {
     if (!member) {
       throw new UnprocessableEntityException('해당 직원을 찾을 수 없습니다.');
     }
+
+    // 1. 휴가 생성 시 category를 조회
     const category = await this.vacationCategoryRepository.findOne({
       where: { id: createVacationInput.vacationCategoryId },
     });
-    const result = createVacationInput.vacations.map(async (date) => {
+    // 2. 휴가 생성할 경우 멤버의 잔여휴가를 차감 한다.
+    const result = createVacationInput.vacations.map(async (date: Date) => {
       member.leave -= category.deductionDays;
       const vacation = this.vacationRepository.create({
-        vacationEnd: date,
-        vacationStart: date,
+        vacationEndDate: date,
+        vacationStartDate: date,
         description: createVacationInput.description,
         member: member,
         company: member.company,
         vacationCategory: category,
       });
+
       return await this.vacationRepository.save(vacation);
     });
 
@@ -112,82 +117,61 @@ export class VacationService {
     return result;
   }
 
-  async update({ updateVacationInput }) {
+  async update({ vacationId, updateVacationInput }) {
     const member = await this.memberRepository.findOne({
       where: { id: updateVacationInput.memberId },
       relations: ['company'],
     });
-    const leaves = await this.vacationRepository.find({
-      relations: ['member', 'company'],
+
+    const leave = await this.vacationRepository.findOne({
+      where: { id: vacationId },
+      relations: ['member', 'company', 'vacationCategory'],
     });
 
     const category = await this.vacationCategoryRepository.findOne({
       where: { id: updateVacationInput.vacationCategoryId },
     });
 
-    if (category.deductionDays < updateVacationInput.vacations.length) {
-      const answer = await updateVacationInput.vacations.map(async (date) => {
-        member.leave -= category.deductionDays;
-        const vacationNew = [];
-        for (let i = 0; i <= leaves.length; i++) {
-          const result = await this.vacationRepository.save({
-            member: member,
-            company: member.company,
-            vacationCategory: category,
-            ...leaves[i],
-            vacationStart: date,
-            vacationEnd: date,
-            ...updateVacationInput,
-          });
-          vacationNew.push(result);
-          // console.log(result);
-        }
-        return vacationNew;
-      });
-      await this.memberRepository.save(member);
-      return answer;
-    } else if (category.deductionDays > updateVacationInput.vacations.length) {
-      const answer = await updateVacationInput.vacations.map(async (date) => {
-        member.leave += category.deductionDays;
-        const vacationNew = [];
-        for (let i = 0; i <= leaves.length; i++) {
-          const result = await this.vacationRepository.save({
-            member: member,
-            company: member.company,
-            vacationCategory: category,
-            ...leaves[i],
-            vacationStart: date,
-            vacationEnd: date,
-            ...updateVacationInput,
-          });
-          vacationNew.push(result);
-        }
-        return vacationNew;
-      });
-      // console.log(answer);
-      await this.memberRepository.save(member);
-      return answer;
-    } else {
-      const answer = await updateVacationInput.vacations.map(async (date) => {
-        const vacationNew = [];
-        for (let i = 0; i <= leaves.length; i++) {
-          const result = await this.vacationRepository.save({
-            member: member,
-            company: member.company,
-            vacationCategory: category,
-            ...leaves[i],
-            vacationStart: date,
-            vacationEnd: date,
-            ...updateVacationInput,
-          });
-          vacationNew.push(result);
-        }
-        return vacationNew;
-      });
-      // console.log(answer);
-      await this.memberRepository.save(member);
-      return answer;
+    const isExist = await this.vacationRepository
+      .createQueryBuilder('vacation')
+      .leftJoinAndSelect('vacation.member', 'member')
+      .leftJoinAndSelect('vacation.company', 'company')
+      .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
+      .where('vacation.vacationStartDate <= :date1', {
+        date1: updateVacationInput.vacationStartDate,
+      })
+      .andWhere('vacation.vacationEndDate >= :date2', {
+        date2: updateVacationInput.vacationStartDate,
+      })
+      .andWhere('member.id = :memberId', { memberId: member.id })
+      .getOne();
+
+    if (isExist) {
+      throw new UnprocessableEntityException(
+        '설정하신 날짜는 이미 기간 내에 포함되어 있습니다.',
+      );
     }
+
+    // console.log(double);
+    if (
+      Number(leave.vacationCategory.deductionDays) !== category.deductionDays
+    ) {
+      member.leave +=
+        Number(leave.vacationCategory.deductionDays) - category.deductionDays;
+    }
+    const result = await this.vacationRepository.save({
+      ...leave,
+      description: updateVacationInput.description,
+      vacationStartDate: updateVacationInput.vacationStartDate,
+      vacationEndDate: updateVacationInput.vacationEndDate,
+      vacationCategory: category,
+    });
+
+    await this.memberRepository.save({
+      ...member,
+    });
+    console.log(result);
+    return result;
   }
   async softdelete({ vacationId }) {
     const result = await this.vacationRepository.softDelete({

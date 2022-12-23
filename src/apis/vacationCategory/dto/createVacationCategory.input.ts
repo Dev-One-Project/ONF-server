@@ -3,9 +3,6 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 @InputType()
 export class CreateVacationCategoryInput {
   @Field(() => String)
-  vacationCategoryGroup: string;
-
-  @Field(() => String)
   name: string;
 
   @Field(() => String)
@@ -17,7 +14,7 @@ export class CreateVacationCategoryInput {
   @Field(() => Int)
   paidTime: number;
 
-  @Field(() => Int)
+  @Field(() => Number)
   deductionDays: number;
 
   @Field(() => String)

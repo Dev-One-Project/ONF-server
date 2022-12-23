@@ -47,13 +47,13 @@ export class VacationResolver {
     return await this.vacationService.create({ createVacationInput });
   }
 
-  @Mutation(() => [Vacation], { description: '(관리자) 휴가 수정하기' })
+  @Mutation(() => Vacation, { description: '(관리자) 휴가 수정하기' })
   async updateVacation(
-    // @Args('vacationId') vacationId: string,
+    @Args('vacationId') vacationId: string,
     @Args('updateVacationInput') updateVacationInput: UpdateVacationInput,
   ) {
     return await this.vacationService.update({
-      // vacationId,
+      vacationId,
       updateVacationInput,
     });
   }

@@ -17,19 +17,19 @@ import {
 @ObjectType()
 export class Vacation {
   @PrimaryGeneratedColumn('uuid')
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   id: string;
 
+  @Column({ type: 'datetime' })
+  @Field(() => Date)
+  vacationStartDate: Date;
+
+  @Column({ type: 'datetime', nullable: true })
+  @Field(() => Date, { nullable: true })
+  vacationEndDate: Date;
+
   @Column({ nullable: true })
-  @Field(() => Date)
-  vacationEnd: Date;
-
-  @Column()
-  @Field(() => Date)
-  vacationStart: Date;
-
-  @Column()
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   description: string;
 
   @CreateDateColumn()
@@ -38,7 +38,7 @@ export class Vacation {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn()
   deletedAt: Date;
 
   @ManyToOne(() => Member, { nullable: true })
