@@ -34,7 +34,17 @@ export class VacationIssuesService {
     });
   }
 
-  async fetchVacationIssueBaseDate({ companyId, baseDate }) {
+  async fetchVacationIssueBaseDate({
+    startDate,
+    endDate,
+    companyId,
+    organizationId,
+    baseDate,
+  }) {
+    await this.findWithOrganization({ companyId, organizationId });
+
+    await this.findVacationIssueWithDate({ startDate, endDate });
+
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.company', 'company')
@@ -70,7 +80,15 @@ export class VacationIssuesService {
     return result;
   }
 
-  async fetchVacationIssueWithBaseDateDelete({ companyId, baseDate }) {
+  async fetchVacationIssueWithBaseDateDelete({
+    startDate,
+    endDate,
+    companyId,
+    baseDate,
+    organizationId,
+  }) {
+    await this.findWithOrganization({ companyId, organizationId });
+    await this.findVacationIssueWithDate({ startDate, endDate });
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .withDeleted()
@@ -108,7 +126,15 @@ export class VacationIssuesService {
     return result;
   }
 
-  async findWithDetailDate({ companyId, baseDate }) {
+  async findWithDetailDate({
+    startDate,
+    endDate,
+    companyId,
+    baseDate,
+    organizationId,
+  }) {
+    await this.findWithOrganization({ companyId, organizationId });
+    await this.findVacationIssueWithDate({ startDate, endDate });
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.company', 'company')
@@ -140,7 +166,15 @@ export class VacationIssuesService {
     );
     return result;
   }
-  async findWithDetailDateDelete({ companyId, baseDate }) {
+  async findWithDetailDateDelete({
+    startDate,
+    endDate,
+    companyId,
+    baseDate,
+    organizationId,
+  }) {
+    await this.findWithOrganization({ companyId, organizationId });
+    await this.findVacationIssueWithDate({ startDate, endDate });
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .withDeleted()
@@ -194,6 +228,24 @@ export class VacationIssuesService {
       })
       .orderBy('vacationIssue.expirationDate', 'DESC')
       .getMany();
+  }
+
+  async findWithOrganization({ companyId, organizationId }) {
+    console.log(organizationId);
+    const result = await Promise.all(
+      organizationId.map(async (organizationId: string) => {
+        return await this.vacationIssueRepository
+          .createQueryBuilder('vacationIssue')
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('company.id = :companyId', { companyId })
+          .andWhere('organization.id = :organizationId', { organizationId })
+          .getMany();
+      }),
+    );
+    console.log(result);
+    return result.flat();
   }
 
   async create({ createVacationIssueInput }) {

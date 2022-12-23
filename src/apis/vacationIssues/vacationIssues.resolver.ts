@@ -1,5 +1,4 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { QueryResult } from 'typeorm';
 import { CreateVacationIssueInput } from './dto/createVacationissue.input';
 import { UpdateVacationIssueInput } from './dto/updateVacationissue.input';
 import { VacationIssue } from './entities/vacationIssue.entity';
@@ -11,25 +10,11 @@ export class VacationIssuesResolver {
     private readonly vacationIssuesService: VacationIssuesService, //
   ) {}
 
-  @Query(() => [VacationIssue], { description: '관리자 휴가 발생 조회' })
-  async fetchVacationIssues(
-    @Args('companyId') companyId: string, //
-  ) {
-    return await this.vacationIssuesService.findAll({ companyId });
-  }
-
   @Query(() => VacationIssue, { description: '관리자 휴가 발생Id 조회' })
   async fetchVacationIssue(
     @Args('vacationIssueId') vacationIssueId: string, //
   ) {
     return await this.vacationIssuesService.findOne({ vacationIssueId });
-  }
-
-  @Query(() => [VacationIssue], {
-    description: '관리자 비활성화된 사원도 같이조회',
-  })
-  async fetchVacationIssueWithDelete() {
-    return await this.vacationIssuesService.findVacationIssueWithDelete();
   }
 
   @Query(() => [[VacationIssue]], {
@@ -38,10 +23,17 @@ export class VacationIssuesResolver {
   async fetchVacationIssueBaseDate(
     @Args('baseDate') baseDate: Date,
     @Args('companyId') companyId: string,
+    @Args({ name: 'organizationId', type: () => [String] })
+    organizationId: string[],
+    @Args('startDate', { nullable: true }) startDate: Date,
+    @Args('endDate', { nullable: true }) endDate: Date,
   ) {
     return await this.vacationIssuesService.fetchVacationIssueBaseDate({
+      startDate,
+      endDate,
       companyId,
       baseDate,
+      organizationId,
     });
   }
 
@@ -51,11 +43,18 @@ export class VacationIssuesResolver {
   async fetchVacationIssueWithBaseDateDelete(
     @Args('baseDate') baseDate: Date,
     @Args('companyId') companyId: string,
+    @Args({ name: 'organizationId', type: () => [String] })
+    organizationId: string[],
+    @Args('startDate', { nullable: true }) startDate: Date,
+    @Args('endDate', { nullable: true }) endDate: Date,
   ) {
     return await this.vacationIssuesService.fetchVacationIssueWithBaseDateDelete(
       {
+        startDate,
+        endDate,
         companyId,
         baseDate,
+        organizationId,
       },
     );
   }
@@ -66,10 +65,17 @@ export class VacationIssuesResolver {
   async fetchVacationIssueDetailDate(
     @Args('baseDate') baseDate: Date,
     @Args('companyId') companyId: string,
+    @Args({ name: 'organizationId', type: () => [String] })
+    organizationId: string[],
+    @Args('startDate', { nullable: true }) startDate: Date,
+    @Args('endDate', { nullable: true }) endDate: Date,
   ) {
     return await this.vacationIssuesService.findWithDetailDate({
+      startDate,
+      endDate,
       companyId,
       baseDate,
+      organizationId,
     });
   }
 
@@ -79,23 +85,30 @@ export class VacationIssuesResolver {
   async fetchVacationIssueDetailDateDelete(
     @Args('baseDate') baseDate: Date,
     @Args('companyId') companyId: string,
+    @Args('startDate', { nullable: true }) startDate: Date,
+    @Args('endDate', { nullable: true }) endDate: Date,
+    @Args({ name: 'organizationId', type: () => [String] })
+    organizationId: string[],
   ) {
     return await this.vacationIssuesService.findWithDetailDateDelete({
+      startDate,
+      endDate,
       companyId,
       baseDate,
+      organizationId,
     });
   }
 
-  @Query(() => [VacationIssue], { description: '휴가 발생특정날짜 모두조회' })
-  async fetchVacationIssueWithDate(
-    @Args('startDate') startDate: Date,
-    @Args('endDate') endDate: Date,
-  ) {
-    return await this.vacationIssuesService.findVacationIssueWithDate({
-      startDate,
-      endDate,
-    });
-  }
+  // @Query(() => [VacationIssue], { description: '휴가 발생특정날짜 모두조회' })
+  // async fetchVacationIssueWithDate(
+  //   @Args('startDate') startDate: Date,
+  //   @Args('endDate') endDate: Date,
+  // ) {
+  //   return await this.vacationIssuesService.findVacationIssueWithDate({
+  //     startDate,
+  //     endDate,
+  //   });
+  // }
 
   @Mutation(() => VacationIssue, { description: '관리자 휴가 발생 만들기' })
   async createVacationIssue(

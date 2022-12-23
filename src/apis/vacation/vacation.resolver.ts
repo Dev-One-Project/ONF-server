@@ -21,6 +21,7 @@ export class VacationResolver {
   async fetchVacationWithDate(
     @Args('vacationStart') vacationStart: Date,
     @Args('vacationEnd') vacationEnd: Date,
+
   ) {
     return await this.vacationService.findVacationWithDate({
       vacationStart,
