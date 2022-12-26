@@ -26,7 +26,7 @@ export class FileService {
     // Upload Image to Minio
     const result: string = await new Promise((res, rej) => {
       const origin_fname = data.filename;
-      const fname = `${getTodayString}/origin/${uuid()}-${origin_fname}`;
+      const fname = `${getTodayString()}/origin/${uuid()}-${origin_fname}`;
       minioClient.putObject(
         process.env.OBJ_STORAGE_BUCKET,
         fname,
