@@ -26,17 +26,19 @@ export class NoticeBoardResolver {
   }
 
   // 일단 관리자가드가 만들어지기 전에 일반가드 씀 추후 교체
-  @UseGuards(GqlAuthAccessGuard)
+  // @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => NoticeBoard)
   async createNoticeBoard(
-    @Context() context: IContext, //
+    // @Context() context: IContext, //
+    @Args('accountId') accountId: string,
     @Args('createNoticeBoardInput')
     createNoticeBoardInput: CreateNoticeBoardInput, //
   ) {
-    const user = context.req.user.email;
+    // const user = context.req.user.email;
 
     return await this.noticeBoardService.create({
-      user,
+      // user,
+      accountId,
       createNoticeBoardInput,
     });
   }

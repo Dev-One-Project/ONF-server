@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Account } from '../accounts/entites/account.entity';
 import { NoticeBoard } from './entities/noticeBoard.entity';
 
@@ -32,14 +32,15 @@ export class NoticeBoardService {
     });
   }
 
-  async create({ user, createNoticeBoardInput }) {
-    const userId = await this.accountRepository.findOne({
-      where: { email: user },
-    });
+  async create({ accountId, createNoticeBoardInput }) {
+    // const userId = await this.accountRepository.findOne({
+    //   where: { email: user },
+    // });
 
     return await this.noticeBoardRepository.save({
       ...createNoticeBoardInput,
-      account: { id: userId.id },
+      //  account: { id: userId.id },
+      account: { id: accountId },
     });
   }
 
