@@ -19,6 +19,10 @@ export class NoticeBoard {
 
   @Column()
   @Field(() => String)
+  preface: string;
+
+  @Column()
+  @Field(() => String)
   title: string;
 
   @Column()

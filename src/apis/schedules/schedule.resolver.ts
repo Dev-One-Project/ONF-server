@@ -10,15 +10,30 @@ export class ScheduleResolver {
     private readonly scheduleService: ScheduleService, //
   ) {}
 
-  @Query(() => [Schedule], { description: '이번주 근무일정 조회' })
-  async fetchWeekSchedule(
-    @Args('today') today: Date, //
-    @Args('companyId') companyId: string, // 컴퍼니빼고 지점넣어야할듯 + 직무
-  ) {
-    return await this.scheduleService.weekFind({ today, companyId });
-  }
+  // @Query(() => [Schedule], { description: '이번주 근무일정 조회 - 달력형' })
+  // async fetchWeekSchedule(
+  //   @Args('today') today: Date, //
+  //   @Args({name:'organizationId', type:()=> [String]}) organizationId:string[],
+  //   @Args({name:'roleCategoryId', type:()=> [String]}) roleCategoryId:string[]
+  // ) {
+  //   return await this.scheduleService.weekFind({ today, organizationId,roleCategoryId });
+  // }
 
-  // 시작날짜+끝날짜 + 지점 조회
+  @Query(() => [Schedule], {
+    description: '선택한 기간동안의 지점 근무일정 조회 - 목록형',
+  })
+  async fetchListTypeSchedule(
+    @Args('startDate') startDate: Date, //
+    @Args('endDate') endDate: Date,
+    @Args({ name: 'organizationId', type: () => [String] })
+    organizationId: string[],
+  ) {
+    return await this.scheduleService.listFind({
+      startDate,
+      endDate,
+      organizationId,
+    });
+  }
 
   @Mutation(() => [Schedule], { description: '근무일정 생성' })
   async createSchedule(
