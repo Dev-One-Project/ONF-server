@@ -96,6 +96,19 @@ export class InvitationCodeService {
     return '전송완료';
   }
 
+  async reservation({ companyId, memberId, email, date }) {
+    const current = new Date();
+    current.setHours(current.getHours() + 9);
+
+    const time = date.getTime() - current.getTime();
+
+    setTimeout(() => {
+      this.send({ companyId, memberId, email });
+    }, time);
+
+    return '예약전송완료';
+  }
+
   async check({ memberId, invitationCode }) {
     const saveCode = await this.invitationCodeRepository.findOne({
       where: { member: { id: memberId } },
@@ -113,7 +126,6 @@ export class InvitationCodeService {
     await this.invitationCodeRepository.delete({ member: { id: memberId } });
 
     // TODO : account테이블에서 memberId 넣어줘야함 근데 어떻게?
-    // TODO : 예약전송 찾아보고 만들기
     // await this.accountRepository.update
 
     return '합류완료';

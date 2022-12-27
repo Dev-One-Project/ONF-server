@@ -322,6 +322,9 @@ type Mutation {
   """초대코드 발송"""
   sendCodeToEmail(companyId: String!, memberId: String!, email: String!): String!
 
+  """초대코드 예약전송"""
+  sendReservationCode(companyId: String!, memberId: String!, email: String!, date: DateTime!): String!
+
   """초대코드 확인"""
   checkInvitationCode(memberId: String!, invitationCode: String!): String!
 
@@ -358,7 +361,7 @@ type Mutation {
   createCompany(createCompanyInput: CreateCompanyInput!): Company!
 
   """회사 정보 수정"""
-  updateCompany(companyId: String!, updateCompanyInput: CreateCompanyInput!): Company!
+  updateCompany(companyId: String!, updateCompanyInput: UpdateCompanyInput!): Company!
 
   """회사 정보 영구 삭제 / 복구 불가능하므로 사용 주의"""
   deleteCompany(companyId: String!): Boolean!
@@ -541,6 +544,13 @@ input UpdateWorkCheckInput {
 }
 
 input CreateCompanyInput {
+  name: String
+  logoUrl: String
+  rules: String
+  membership: MEMBERSHIP_TYPE
+}
+
+input UpdateCompanyInput {
   name: String
   logoUrl: String
   rules: String
