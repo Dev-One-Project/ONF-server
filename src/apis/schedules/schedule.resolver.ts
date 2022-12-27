@@ -10,14 +10,20 @@ export class ScheduleResolver {
     private readonly scheduleService: ScheduleService, //
   ) {}
 
-  // @Query(() => [Schedule], { description: '이번주 근무일정 조회 - 달력형' })
-  // async fetchWeekSchedule(
-  //   @Args('today') today: Date, //
-  //   @Args({name:'organizationId', type:()=> [String]}) organizationId:string[],
-  //   @Args({name:'roleCategoryId', type:()=> [String]}) roleCategoryId:string[]
-  // ) {
-  //   return await this.scheduleService.weekFind({ today, organizationId,roleCategoryId });
-  // }
+  @Query(() => [Schedule], { description: '이번주 근무일정 조회 - 달력형' })
+  async fetchWeekSchedule(
+    @Args('today') today: Date, //
+    @Args({ name: 'organizationId', type: () => [String] })
+    organizationId: string[],
+    @Args({ name: 'roleCategoryId', type: () => [String] })
+    roleCategoryId: string[],
+  ) {
+    return await this.scheduleService.weekFind({
+      today,
+      organizationId,
+      roleCategoryId,
+    });
+  }
 
   @Query(() => [Schedule], {
     description: '선택한 기간동안의 지점 근무일정 조회 - 목록형',
