@@ -9,9 +9,17 @@ export class AuthService {
     private readonly accountService: AccountService,
   ) {}
 
+  getAccessToken({ user }) {
+    return this.jwtService.sign(
+      { email: user.email, sub: user.id, role: user.roles },
+      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '3w' },
+    );
+  }
+
   setRefreshToken({ user, res }) {
+    console.log(user);
     const refreshToken = this.jwtService.sign(
-      { email: user.email, sub: user.id },
+      { email: user.email, sub: user.id, role: user.roles },
       { secret: process.env.REFRESH_TOKEN_KEY, expiresIn: '4w' },
     );
     // console.log(user, res),
@@ -26,12 +34,6 @@ export class AuthService {
     // )
   }
 
-  getAccessToken({ user }) {
-    return this.jwtService.sign(
-      { email: user.email, sub: user.id },
-      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '3w' },
-    );
-  }
   async socialLogin({ res, req }) {
     let user = await this.accountService.findOne({ email: req.user.email });
 
