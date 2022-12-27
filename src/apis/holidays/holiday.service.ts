@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Repository } from 'typeorm';
+import { CompanyService } from '../companies/company.service';
 import { Holiday } from './enties/holiday.entity';
 
 @Injectable()
@@ -9,10 +10,21 @@ export class HolidayService {
   constructor(
     @InjectRepository(Holiday)
     private readonly holidayRepository: Repository<Holiday>,
+
+    private readonly companyService: CompanyService,
   ) {}
 
-  create({ createHolidayInput }) {
-    return this.holidayRepository.save({ ...createHolidayInput });
+  async create({ createHolidayInput }) {
+    const { companyId, ...holiday } = createHolidayInput;
+
+    const company = await this.companyService.findOne({
+      companyId,
+    });
+
+    return await this.holidayRepository.save({
+      ...holiday,
+      company,
+    });
   }
 
   async holiday(): Promise<void> {
@@ -45,5 +57,29 @@ export class HolidayService {
         locdate: 'ASC',
       },
     });
+  }
+
+  async findCompnayHoliday({ companyId }) {
+    return await this.holidayRepository.find({
+      where: {
+        company: {
+          id: companyId,
+        },
+      },
+    });
+  }
+
+  async updateCompnayHoliday({ holidayId, updateHolidayInput }) {
+    const myCompany = await this.holidayRepository.findOne({
+      where: {
+        id: holidayId,
+      },
+    });
+    const newCompnayHoliday = {
+      ...myCompany,
+      id: holidayId,
+      ...updateHolidayInput,
+    };
+    return await this.holidayRepository.save(newCompnayHoliday);
   }
 }
