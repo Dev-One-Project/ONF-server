@@ -21,9 +21,9 @@ export class Account {
   @Field(() => String)
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'enum', enum: Role })
   @Field(() => String, { nullable: true })
-  role: Role;
+  roles: Role[];
 
   @Column()
   password: string;

@@ -1,16 +1,14 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 // import axios from 'axios';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { json, urlencoded } from 'express';
-import { RolesGuard } from './common/auth/roles.guard';
 
 async function bootstrap() {
   const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useGlobalGuards(new RolesGuard(new Reflector()));
   app.use(graphqlUploadExpress());
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ limit: '10mb', extended: true }));

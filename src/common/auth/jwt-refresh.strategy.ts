@@ -10,13 +10,15 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
         return refreshToken;
       },
       secretOrKey: process.env.REFRESH_TOKEN_KEY,
+      passReqToCallbacK: true,
     });
   }
 
-  validate(payload) {
+  validate(req, payload) {
     return {
-      email: payload.email,
       id: payload.sub,
+      email: payload.email,
+      role: payload.roles,
     };
   }
 }
