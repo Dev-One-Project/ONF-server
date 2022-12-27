@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from '../companies/entities/company.entity';
 import { Member } from '../members/entities/member.entity';
+import { Vacation } from '../vacation/entities/vacation.entity';
 import { VacationIssue } from './entities/vacationIssue.entity';
 
 @Injectable()
@@ -16,6 +17,9 @@ export class VacationIssuesService {
 
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+
+    @InjectRepository(Vacation)
+    private readonly vacationRepository: Repository<Vacation>,
   ) {}
 
   async findAll({ companyId }) {
@@ -43,8 +47,6 @@ export class VacationIssuesService {
   }) {
     await this.findWithOrganization({ companyId, organizationId });
 
-    await this.findVacationIssueWithDate({ startDate, endDate });
-
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.company', 'company')
@@ -66,6 +68,13 @@ export class VacationIssuesService {
           .andWhere('vacationIssue.startingPoint <= :baseDate', {
             baseDate,
           })
+          .andWhere(
+            'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
+            {
+              startDate,
+              endDate,
+            },
+          )
           .orderBy('vacationIssue.startingPoint', 'DESC')
           .getMany()
           .then((res) => {
@@ -88,7 +97,7 @@ export class VacationIssuesService {
     organizationId,
   }) {
     await this.findWithOrganization({ companyId, organizationId });
-    await this.findVacationIssueWithDate({ startDate, endDate });
+
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .withDeleted()
@@ -112,6 +121,13 @@ export class VacationIssuesService {
           .andWhere('vacationIssue.startingPoint <= :baseDate', {
             baseDate,
           })
+          .andWhere(
+            'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
+            {
+              startDate,
+              endDate,
+            },
+          )
           .orderBy('vacationIssue.startingPoint', 'DESC')
           .getMany()
           .then((res) => {
@@ -134,7 +150,7 @@ export class VacationIssuesService {
     organizationId,
   }) {
     await this.findWithOrganization({ companyId, organizationId });
-    await this.findVacationIssueWithDate({ startDate, endDate });
+
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.company', 'company')
@@ -156,6 +172,13 @@ export class VacationIssuesService {
           .andWhere('vacationIssue.startingPoint <= :baseDate', {
             baseDate,
           })
+          .andWhere(
+            'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
+            {
+              startDate,
+              endDate,
+            },
+          )
           .orderBy('vacationIssue.startingPoint', 'DESC')
           .getMany()
           .then((res) => {
@@ -174,14 +197,13 @@ export class VacationIssuesService {
     organizationId,
   }) {
     await this.findWithOrganization({ companyId, organizationId });
-    await this.findVacationIssueWithDate({ startDate, endDate });
+
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .withDeleted()
       .leftJoinAndSelect('member.company', 'company')
       .where('company.id = :companyId', { companyId })
       .getMany();
-
     const memberArr = await Promise.all(members);
     const result = [];
     await Promise.all(
@@ -198,6 +220,13 @@ export class VacationIssuesService {
           .andWhere('vacationIssue.startingPoint <= :baseDate', {
             baseDate,
           })
+          .andWhere(
+            'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
+            {
+              startDate,
+              endDate,
+            },
+          )
           .orderBy('vacationIssue.startingPoint', 'DESC')
           .getMany()
           .then((res) => {
@@ -216,22 +245,21 @@ export class VacationIssuesService {
     });
   }
 
-  async findVacationIssueWithDate({ startDate, endDate }) {
-    return await this.vacationIssueRepository
-      .createQueryBuilder('vacationIssue')
-      .leftJoinAndSelect('vacationIssue.member', 'member')
-      .leftJoinAndSelect('vacationIssue.company', 'company')
-      .leftJoinAndSelect('vacationIssue.organization', 'organization')
-      .where('vacationIssue.startingPoint BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      })
-      .orderBy('vacationIssue.expirationDate', 'DESC')
-      .getMany();
-  }
+  // async findVacationIssueWithDate({ startDate, endDate }) {
+  //   return await this.vacationIssueRepository
+  //     .createQueryBuilder('vacationIssue')
+  //     .leftJoinAndSelect('vacationIssue.member', 'member')
+  //     .leftJoinAndSelect('vacationIssue.company', 'company')
+  //     .leftJoinAndSelect('vacationIssue.organization', 'organization')
+  //     .where('vacationIssue.startingPoint BETWEEN :startDate AND :endDate', {
+  //       startDate,
+  //       endDate,
+  //     })
+  //     .orderBy('vacationIssue.expirationDate', 'DESC')
+  //     .getMany();
+  // }
 
   async findWithOrganization({ companyId, organizationId }) {
-    console.log(organizationId);
     const result = await Promise.all(
       organizationId.map(async (organizationId: string) => {
         return await this.vacationIssueRepository
@@ -246,6 +274,24 @@ export class VacationIssuesService {
     );
     console.log(result);
     return result.flat();
+  }
+
+  async findUseVacation({ memberId }) {
+    const member = await this.memberRepository.findOne({
+      where: { id: memberId },
+      relations: ['company', 'organization'],
+    });
+    // 1. vacation에서 사용한 휴가를 조회한다.
+    // 2. vacationIssue에 있는 vacationAll - 1문항을 하여 remaining에 넣기
+    const result = this.vacationRepository
+      .createQueryBuilder('vacation')
+      .leftJoinAndSelect('vacation.member', 'member')
+      .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
+      .select('SUM(vacationCategory.deductionDays)', 'useVacation')
+      .where('member.id = :member', { member })
+      .getRawOne();
+
+    return result;
   }
 
   async create({ createVacationIssueInput }) {
