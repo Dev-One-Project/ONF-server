@@ -6,6 +6,9 @@ import { CreateNoticeBoardInput } from './dto/createNoticeBoardInput';
 import { UpdateNoticeBoardInput } from './dto/updateNoticeBoardInput';
 import { NoticeBoard } from './entities/noticeBoard.entity';
 import { NoticeBoardService } from './noticeBoard.service';
+import { Roles } from 'src/common/auth/roles.decorator';
+import { Role } from 'src/common/types/enum.role';
+import { RolesGuard } from 'src/common/auth/roles.guard';
 
 @Resolver()
 export class NoticeBoardResolver {
@@ -13,9 +16,14 @@ export class NoticeBoardResolver {
     private readonly noticeBoardService: NoticeBoardService, //
   ) {}
 
+  @UseGuards(GqlAuthAccessGuard)
   @Query(() => [NoticeBoard])
-  async fetchAllNoticeBoards() {
-    return await this.noticeBoardService.findAll();
+  async fetchAllNoticeBoards(
+    @Context() context: IContext, //
+  ) {
+    return await this.noticeBoardService.findAll({
+      userId: context.req.user.id,
+    });
   }
 
   @Query(() => NoticeBoard)
@@ -25,25 +33,24 @@ export class NoticeBoardResolver {
     return await this.noticeBoardService.findOne({ noticeBoardId });
   }
 
-  // 일단 관리자가드가 만들어지기 전에 일반가드 씀 추후 교체
-  // @UseGuards(GqlAuthAccessGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => NoticeBoard)
   async createNoticeBoard(
-    // @Context() context: IContext, //
-    @Args('accountId') accountId: string,
+    @Context() context: IContext,
     @Args('createNoticeBoardInput')
     createNoticeBoardInput: CreateNoticeBoardInput, //
   ) {
-    // const user = context.req.user.email;
+    const userId = context.req.user.id;
 
     return await this.noticeBoardService.create({
-      // user,
-      accountId,
+      userId,
       createNoticeBoardInput,
     });
   }
 
-  // 가드
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => NoticeBoard)
   async updateNoticeBoard(
     @Args('noticeBoardId') noticeBoardId: string, //
@@ -56,7 +63,8 @@ export class NoticeBoardResolver {
     });
   }
 
-  // 가드
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => Boolean)
   async deleteNoticeBoard(
     @Args('noticeBoardId') noticeBoardId: string, //

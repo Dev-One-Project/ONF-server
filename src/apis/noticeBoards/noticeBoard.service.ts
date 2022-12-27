@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Account } from '../accounts/entites/account.entity';
 import { NoticeBoard } from './entities/noticeBoard.entity';
+import { Company } from '../companies/entities/company.entity';
 
 @Injectable()
 export class NoticeBoardService {
@@ -12,15 +13,26 @@ export class NoticeBoardService {
 
     @InjectRepository(Account)
     private readonly accountRepository: Repository<Account>,
+
+    @InjectRepository(Company)
+    private readonly companyRepository: Repository<Company>,
   ) {}
 
-  async findAll() {
-    return await this.noticeBoardRepository.find({
+  async findAll({ userId }) {
+    const account = await this.accountRepository.findOne({
       relations: {
-        account: true,
+        company: true,
       },
-      order: { createdAt: 'DESC' },
+      where: { id: userId },
     });
+
+    return await this.noticeBoardRepository
+      .createQueryBuilder('noticeBoard')
+      .leftJoinAndSelect('noticeBoard.account', 'account')
+      .leftJoinAndSelect('noticeBoard.company', 'company')
+      .where('company.id = :id', { id: account.company.id })
+      .orderBy('noticeBoard.createdAt', 'DESC')
+      .getMany();
   }
 
   async findOne({ noticeBoardId }) {
@@ -32,15 +44,18 @@ export class NoticeBoardService {
     });
   }
 
-  async create({ accountId, createNoticeBoardInput }) {
-    // const userId = await this.accountRepository.findOne({
-    //   where: { email: user },
-    // });
+  async create({ userId, createNoticeBoardInput }) {
+    const account = await this.accountRepository.findOne({
+      where: { id: userId },
+    });
+    const company = await this.companyRepository.findOne({
+      where: { id: account.company.id },
+    });
 
     return await this.noticeBoardRepository.save({
       ...createNoticeBoardInput,
-      //  account: { id: userId.id },
-      account: { id: accountId },
+      account,
+      company,
     });
   }
 

@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Account } from 'src/apis/accounts/entites/account.entity';
+import { Company } from 'src/apis/companies/entities/company.entity';
 import {
   Column,
   CreateDateColumn,
@@ -43,4 +44,8 @@ export class NoticeBoard {
   @ManyToOne(() => Account)
   @Field(() => Account)
   account: Account;
+
+  @ManyToOne(() => Company)
+  @Field(() => Company)
+  company: Company;
 }

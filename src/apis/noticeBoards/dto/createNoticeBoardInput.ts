@@ -10,7 +10,4 @@ export class CreateNoticeBoardInput {
 
   @Field(() => String)
   contents: string;
-
-  @Field(() => String)
-  accountId: string;
 }

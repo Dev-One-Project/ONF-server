@@ -89,7 +89,7 @@ enum MEMBERSHIP_TYPE {
 type Account {
   id: String!
   email: String!
-  role: String
+  roles: String
   member: Member
   company: Company
 }
@@ -195,6 +195,7 @@ type NoticeBoard {
   createdAt: DateTime!
   updatedAt: DateTime!
   account: Account!
+  company: Company!
 }
 
 type Query {
@@ -273,7 +274,6 @@ type Query {
   """(관리자) 퇴사자와 함께 조회"""
   fetchVacationWithDelete: [Vacation!]!
   fetchAccount: Account!
-  fetchAccounts: Account!
 
   """이번주 근무일정 조회 - 달력형"""
   fetchWeekSchedule(today: DateTime!, organizationId: [String!]!, roleCategoryId: [String!]!): [Schedule!]!
@@ -287,7 +287,7 @@ type Query {
 }
 
 type Mutation {
-  createNoticeBoard(accountId: String!, createNoticeBoardInput: CreateNoticeBoardInput!): NoticeBoard!
+  createNoticeBoard(createNoticeBoardInput: CreateNoticeBoardInput!): NoticeBoard!
   updateNoticeBoard(noticeBoardId: String!, updateNoticeBoardInput: UpdateNoticeBoardInput!): NoticeBoard!
   deleteNoticeBoard(noticeBoardId: String!): Boolean!
   createRoleCategory(createRoleCategoryInput: CreateRoleCategoryInput!): RoleCategory!
@@ -442,14 +442,12 @@ input CreateNoticeBoardInput {
   preface: String!
   title: String!
   contents: String!
-  accountId: String!
 }
 
 input UpdateNoticeBoardInput {
   preface: String
   title: String
   contents: String
-  accountId: String
 }
 
 input CreateRoleCategoryInput {
