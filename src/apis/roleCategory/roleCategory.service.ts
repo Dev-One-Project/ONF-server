@@ -9,27 +9,34 @@ import { RoleCategory } from './entities/roleCategory.entity';
 export class RoleCategoryService {
   constructor(
     @InjectRepository(RoleCategory)
-    private readonly RoleCategoryRepositoy: Repository<RoleCategory>,
+    private readonly roleCategoryRepositoy: Repository<RoleCategory>,
 
     @InjectRepository(Company)
-    private readonly CompnayReposistory: Repository<Company>,
+    private readonly compnayReposistory: Repository<Company>,
   ) {}
 
   async create(createRoleCategoryInput: IRoleCategory): Promise<RoleCategory> {
     const { companyId, ...roleCategory } = createRoleCategoryInput;
-
-    const result = await this.RoleCategoryRepositoy.save({
-      ...roleCategory,
-      company: { id: companyId },
+    const company = await this.compnayReposistory.findOne({
+      where: { id: companyId },
     });
-    console.log(result);
+
+    const result = await this.roleCategoryRepositoy.save({
+      ...roleCategory,
+      company,
+    });
     return result;
   }
 
   async update({ roleCategoryId, updateRoleCategoryInput }) {
-    const updateRole: RoleCategory = await this.findOne({ roleCategoryId });
+    const updateRole: RoleCategory = await this.roleCategoryRepositoy.findOne({
+      where: { id: roleCategoryId },
+      relations: [
+        'company', //
+      ],
+    });
 
-    const result = await this.RoleCategoryRepositoy.save({
+    const result = await this.roleCategoryRepositoy.save({
       ...updateRole,
       roleCategoryId: updateRole.id,
       ...updateRoleCategoryInput,
@@ -37,14 +44,16 @@ export class RoleCategoryService {
     return result;
   }
 
-  async findAll(): Promise<RoleCategory[]> {
-    return await this.RoleCategoryRepositoy.find({
-      relations: ['company'],
-    });
+  async findAll({ companyId }): Promise<RoleCategory[]> {
+    return await this.roleCategoryRepositoy
+      .createQueryBuilder('roleCategory')
+      .leftJoinAndSelect('roleCategory.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
   }
 
   async findOne({ roleCategoryId }): Promise<RoleCategory> {
-    return await this.RoleCategoryRepositoy.findOne({
+    return await this.roleCategoryRepositoy.findOne({
       where: { id: roleCategoryId },
       relations: [
         'company', //
@@ -53,7 +62,7 @@ export class RoleCategoryService {
   }
 
   async remove({ roleCategoryId }): Promise<boolean> {
-    const result = await this.RoleCategoryRepositoy.softDelete({
+    const result = await this.roleCategoryRepositoy.softDelete({
       id: roleCategoryId,
     });
     return result.affected ? true : false;

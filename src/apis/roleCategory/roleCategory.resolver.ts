@@ -26,8 +26,10 @@ export class RoleCategoryResolver {
   }
 
   @Query(() => [RoleCategory], { description: 'Fetch RoleCategorys' })
-  fetchRoleCategorys() {
-    return this.roleCategoryService.findAll();
+  fetchRoleCategories(
+    @Args('companyId') companyId: string, //    )
+  ) {
+    return this.roleCategoryService.findAll({ companyId });
   }
 
   @Mutation(() => RoleCategory, { description: 'Update RoleCategory' })
