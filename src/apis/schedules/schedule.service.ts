@@ -23,29 +23,53 @@ export class ScheduleService {
     private readonly scheduleTemplateRepository: Repository<ScheduleTemplate>,
   ) {}
 
-  // async weekFind({ today, organizationId,roleCategoryId }) {
-  //   const week = currentWeek(today);
-  //   const startWeek = new Date(week[0]);
-  //   const end = new Date(week[1]);
-  //   const endWeek = new Date(end.setDate(end.getDate() + 1));
+  async weekFind({ today, organizationId, roleCategoryId }) {
+    const week = currentWeek(today);
+    const startWeek = new Date(week[0]);
+    const end = new Date(week[1]);
+    const endWeek = new Date(end.setDate(end.getDate() + 1));
 
-  //   const result = await this.scheduleRepository
-  //     .createQueryBuilder('Schedule')
-  //     .leftJoinAndSelect('Schedule.member', 'member')
-  //     .leftJoinAndSelect('Schedule.organization', 'organization')
-  //     .leftJoinAndSelect('Schedule.roleCategory', 'roleCategory')
-  //     .leftJoinAndSelect('Schedule.scheduleTemplate', 'scheduleTemplate')
-  //     .leftJoinAndSelect('Schedule.company', 'company')
-  //     .leftJoinAndSelect('Schedule.scheduleCategory', 'scheduleCategory')
-  //     .where('Schedule.company = :companyId', { companyId })
-  //     .andWhere(
-  //       `Schedule.date BETWEEN '${startWeek.toISOString()}' AND '${endWeek.toISOString()}'`,
-  //     )
-  //     .orderBy('Schedule.date', 'ASC')
-  //     .getMany();
+    const result = [];
 
-  //   return result;
-  // }
+    await Promise.all(
+      organizationId.map(async (organizationId) => {
+        await Promise.all(
+          roleCategoryId.map(async (roleCategoryId) => {
+            const schedule = await this.scheduleRepository
+              .createQueryBuilder('Schedule')
+              .leftJoinAndSelect('Schedule.member', 'member')
+              .leftJoinAndSelect('Schedule.organization', 'organization')
+              .leftJoinAndSelect('Schedule.roleCategory', 'roleCategory')
+              .leftJoinAndSelect(
+                'Schedule.scheduleTemplate',
+                'scheduleTemplate',
+              )
+              .leftJoinAndSelect('Schedule.company', 'company')
+              .leftJoinAndSelect(
+                'Schedule.scheduleCategory',
+                'scheduleCategory',
+              )
+              .where('Schedule.organization = :organizationId', {
+                organizationId,
+              })
+              .andWhere('Schedule.roleCategory = :roleCategoryId', {
+                roleCategoryId,
+              })
+              .andWhere(
+                `Schedule.date BETWEEN '${startWeek.toISOString()}' AND '${endWeek.toISOString()}'`,
+              )
+              .orderBy('member.name', 'ASC')
+              .addOrderBy('Schedule.date', 'ASC')
+              .getMany();
+
+            result.push(schedule);
+          }),
+        );
+      }),
+    );
+
+    return result.flat();
+  }
 
   // TODO : 오름차순 내림차순 선택할 수 있게 하자
   async listFind({ startDate, endDate, organizationId }) {
