@@ -2,6 +2,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CompanyService } from './company.service';
 import { CreateCompanyInput } from './dto/createCompany.input';
 import { Company } from './entities/company.entity';
+import { UpdateCompanyInput } from './dto/updateCompany.input';
 
 @Resolver()
 export class CompanyResolver {
@@ -26,7 +27,7 @@ export class CompanyResolver {
   @Mutation(() => Company, { description: '회사 정보 수정' })
   async updateCompany(
     @Args('companyId') companyId: string,
-    @Args('updateCompanyInput') updateCompanyInput: CreateCompanyInput,
+    @Args('updateCompanyInput') updateCompanyInput: UpdateCompanyInput,
   ) {
     return await this.companyService.updateCompanyDetail({
       companyId,
