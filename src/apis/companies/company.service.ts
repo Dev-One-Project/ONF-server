@@ -120,4 +120,12 @@ export class CompanyService {
 
     return result.affected ? true : false;
   }
+
+  async findOne({ companyId }) {
+    return await this.companyRepository.findOne({
+      where: {
+        id: companyId,
+      },
+    });
+  }
 }

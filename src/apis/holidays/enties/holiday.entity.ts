@@ -1,11 +1,12 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { Company } from 'src/apis/companies/entities/company.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @ObjectType()
 @Entity()
 export class Holiday {
   @Field(() => String)
-  @PrimaryGeneratedColumn('increment')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Field(() => String, { nullable: true })
@@ -16,11 +17,11 @@ export class Holiday {
   @Column({ type: 'varchar', length: 25, nullable: true })
   locdate: string;
 
-  @Field(() => Int, { nullable: true })
-  @Column({ type: 'float', nullable: true })
-  premuimRate: number;
-
   @Field(() => String, { nullable: true })
   @Column({ type: 'varchar', length: 25, nullable: true })
   year: string;
+
+  @Field()
+  @ManyToOne(() => Company, { nullable: true })
+  company: Company;
 }
