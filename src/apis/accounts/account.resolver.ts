@@ -16,9 +16,11 @@ export class AccountResolver {
   async createAccount(
     @Args('email') email: string,
     @Args('password') password: string,
+    @Args('name') name: string,
+    @Args('phone') phone: string,
   ) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    return this.accountService.create({ email, hashedPassword });
+    return this.accountService.create({ email, hashedPassword, name, phone });
   }
 
   @UseGuards(GqlAuthAccessGuard)

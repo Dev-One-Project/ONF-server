@@ -28,6 +28,14 @@ export class Account {
   @Column()
   password: string;
 
+  @Column({ type: 'varchar', length: 30 })
+  @Field(() => String)
+  name: string;
+
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  @Field(() => String, { nullable: true })
+  phone: string;
+
   @OneToOne(() => Member, { nullable: true })
   @JoinColumn()
   @Field(() => Member, { nullable: true })

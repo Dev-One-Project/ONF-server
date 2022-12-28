@@ -17,7 +17,7 @@ export class AuthService {
   }
 
   setRefreshToken({ user, res }) {
-    console.log(user);
+    // console.log('setRefreshTokenUser:', user);
     const refreshToken = this.jwtService.sign(
       { email: user.email, sub: user.id, role: user.roles },
       { secret: process.env.REFRESH_TOKEN_KEY, expiresIn: '4w' },
@@ -41,6 +41,8 @@ export class AuthService {
       user = await this.accountService.create({
         email: req.user.email,
         hashedPassword: req.user.password,
+        name: req.user.name,
+        phone: req.user.phone,
       });
     }
     this.setRefreshToken({ user, res });
