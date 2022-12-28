@@ -22,11 +22,11 @@ export class AccountService {
     });
   }
 
-  async create({ email, hashedPassword: password }) {
+  async create({ email, hashedPassword: password, name, phone }) {
     const user = await this.accountRepository.findOne({
       where: { email },
     });
     if (user) throw new ConflictException('이미 등록된 이메일입니다.');
-    return await this.accountRepository.save({ email, password });
+    return await this.accountRepository.save({ email, password, name, phone });
   }
 }
