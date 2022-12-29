@@ -13,9 +13,6 @@ export class GlobalConfigService {
     private readonly companyRepository: Repository<Company>,
   ) {}
 
-  private sqlInit =
-    this.globalConfigRepository.createQueryBuilder('globalConfig');
-
   async create({ createGlobalConfigInput }) {
     const { companyId, ...input } = createGlobalConfigInput;
     const company = await this.companyRepository
@@ -32,7 +29,8 @@ export class GlobalConfigService {
 
   async update({ updateGlobalConfigInput }) {
     const { companyId, ...input } = updateGlobalConfigInput;
-    const config = await this.sqlInit
+    const config = await this.globalConfigRepository
+      .createQueryBuilder('globalConfig')
       .leftJoinAndSelect('globalConfig.company', 'company')
       .where('company.id = :companyId', { companyId })
       .getOne();
@@ -46,7 +44,8 @@ export class GlobalConfigService {
   }
 
   async fetch({ companyId }) {
-    return this.sqlInit
+    return this.globalConfigRepository
+      .createQueryBuilder('globalConfig')
       .leftJoinAndSelect('globalConfig.company', 'company')
       .where('company.id = :companyId', { companyId })
       .getOne();
