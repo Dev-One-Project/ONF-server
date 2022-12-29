@@ -20,20 +20,20 @@ export class InvitationCodeResolver {
     });
   }
 
-  @Mutation(() => String, { description: '초대코드 예약전송' })
-  async sendReservationCode(
-    @Args('companyId') companyId: string, //
-    @Args('memberId') memberId: string,
-    @Args('email') email: string,
-    @Args('date') date: Date,
-  ) {
-    return await this.invitationCodeService.reservation({
-      companyId,
-      memberId,
-      email,
-      date,
-    });
-  }
+  // @Mutation(() => String, { description: '초대코드 예약전송' })
+  // async sendReservationCode(
+  //   @Args('companyId') companyId: string, //
+  //   @Args('memberId') memberId: string,
+  //   @Args('email') email: string,
+  //   @Args('date') date: Date,
+  // ) {
+  //   return await this.invitationCodeService.reservation({
+  //     companyId,
+  //     memberId,
+  //     email,
+  //     date,
+  //   });
+  // }
 
   @Mutation(() => String, { description: '초대코드 확인' })
   async checkInvitationCode(

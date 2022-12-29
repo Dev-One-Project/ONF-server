@@ -96,18 +96,20 @@ export class InvitationCodeService {
     return '전송완료';
   }
 
-  async reservation({ companyId, memberId, email, date }) {
-    const current = new Date();
-    current.setHours(current.getHours() + 9);
+  // cron + mongodb
+  // async reservation({ companyId, memberId, email, date }) {
 
-    const time = date.getTime() - current.getTime();
+  //   // const current = new Date();
+  //   // current.setHours(current.getHours() + 9);
 
-    setTimeout(() => {
-      this.send({ companyId, memberId, email });
-    }, time);
+  //   // const time = date.getTime() - current.getTime();
 
-    return '예약전송완료';
-  }
+  //   // setTimeout(() => {
+  //   //   this.send({ companyId, memberId, email });
+  //   // }, time);
+
+  //   return '예약전송완료';
+  // }
 
   async check({ memberId, invitationCode }) {
     const saveCode = await this.invitationCodeRepository.findOne({
@@ -123,7 +125,7 @@ export class InvitationCodeService {
 
     await this.memberRepository.update({ id: memberId }, { isJoin: true });
 
-    await this.invitationCodeRepository.delete({ member: { id: memberId } });
+    // await this.invitationCodeRepository.delete({ member: { id: memberId } });
 
     // TODO : account테이블에서 memberId 넣어줘야함 근데 어떻게?
     // await this.accountRepository.update
