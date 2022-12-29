@@ -79,6 +79,7 @@ export class ScheduleService {
       organizationId.map(async (organizationId) => {
         return await this.scheduleRepository
           .createQueryBuilder('Schedule')
+          .leftJoinAndSelect('Schedule.company', 'company')
           .leftJoinAndSelect('Schedule.member', 'member')
           .leftJoinAndSelect('Schedule.scheduleCategory', 'scheduleCategory')
           .leftJoinAndSelect('Schedule.organization', 'organization')
