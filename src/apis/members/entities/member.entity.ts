@@ -1,4 +1,4 @@
-import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ObjectType } from '@nestjs/graphql';
 import { Account } from 'src/apis/accounts/entites/account.entity';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
@@ -33,9 +33,9 @@ export class Member {
   // @Field(() => Boolean, { nullable: true, defaultValue: false })
   // isAdmin: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   @Field(() => String)
-  joinDate: string;
+  joinDate: Date;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })

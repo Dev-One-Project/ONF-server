@@ -39,6 +39,7 @@ export class InvitationCodeService {
         member: true,
       },
     });
+    console.log('admin:?', admin);
 
     const isCode = await this.invitationCodeRepository.findOne({
       where: { member: { id: memberId } },
@@ -87,12 +88,13 @@ export class InvitationCodeService {
       .then((send) => console.log(send))
       .catch((err) => console.log(err));
 
-    await this.invitationCodeRepository.save({
+    const result = await this.invitationCodeRepository.save({
       member: memberId,
-      compnay: companyId,
+      company: companyId,
       invitationCode: code,
     });
 
+    console.log('회사정보가 없습니다.', result);
     return '전송완료';
   }
 
