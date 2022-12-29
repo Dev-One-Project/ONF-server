@@ -30,12 +30,7 @@ export class CompanyService {
   }
 
   async createCompany({ createCompanyInput }) {
-    return await this.companyRepository
-      .createQueryBuilder('company')
-      .insert()
-      .into(Company)
-      .values(createCompanyInput)
-      .execute();
+    return await this.companyRepository.save(createCompanyInput);
   }
 
   async updateCompanyDetail({ companyId, updateCompanyInput }) {
@@ -44,12 +39,7 @@ export class CompanyService {
       ...company,
       ...updateCompanyInput,
     };
-    return await this.companyRepository
-      .createQueryBuilder('company')
-      .update(Company)
-      .set(updateData)
-      .where('id = :companyId', { companyId })
-      .execute();
+    return await this.companyRepository.save(updateData);
   }
 
   async deleteCompany({ companyId }) {
@@ -61,12 +51,7 @@ export class CompanyService {
       .getMany();
 
     members.forEach(async (member) => {
-      await this.memberRepository
-        .createQueryBuilder('member')
-        .delete()
-        .from(Member)
-        .where('id = :memberId', { memberId: member.id })
-        .execute();
+      await this.memberRepository.delete({ id: member.id });
     });
 
     //TODO: get holiday list and delete all holidays
@@ -79,12 +64,7 @@ export class CompanyService {
       .getMany();
 
     categories.forEach(async (category) => {
-      await this.roleCategoryRepository
-        .createQueryBuilder('category')
-        .delete()
-        .from(RoleCategory)
-        .where('id = :categoryId', { categoryId: category.id })
-        .execute();
+      await this.roleCategoryRepository.delete({ id: category.id });
     });
 
     //get organization list and delete all organizations
@@ -95,12 +75,7 @@ export class CompanyService {
       .getMany();
 
     organizations.forEach(async (organization) => {
-      await this.organizationRepository
-        .createQueryBuilder('organization')
-        .delete()
-        .from(Organization)
-        .where('id = :organizationId', { organizationId: organization.id })
-        .execute();
+      await this.organizationRepository.delete({ id: organization.id });
     });
 
     //delete globalConfig
@@ -111,12 +86,7 @@ export class CompanyService {
     //TODO: get schedule category list and delete all schedule categories
 
     //TODO: delete company
-    const result = await this.companyRepository
-      .createQueryBuilder('company')
-      .delete()
-      .from(Company)
-      .where('id = :companyId', { companyId })
-      .execute();
+    const result = await this.companyRepository.delete({ id: companyId });
 
     //TODO: get account and delete account
     // => use accountService.hardDelete({ accountId })
