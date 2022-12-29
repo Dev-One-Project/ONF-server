@@ -34,18 +34,18 @@ export class AuthService {
     // )
   }
 
-  async socialLogin({ res, req }) {
-    let user = await this.accountService.findOne({ email: req.user.email });
+  // async socialLogin({ res, req }) {
+  //   let user = await this.accountService.findOne({ email: req.user.email });
 
-    if (!user) {
-      user = await this.accountService.create({
-        email: req.user.email,
-        hashedPassword: req.user.password,
-        name: req.user.name,
-        phone: req.user.phone,
-      });
-    }
-    this.setRefreshToken({ user, res });
-    res.redirect('http://localhost:5000/frontend/social-login.html');
-  }
+  //   if (!user) {
+  //     user = await this.accountService.create({
+  //       email: req.user.email,
+  //       hashedPassword: req.user.password,
+  //       name: req.user.name,
+  //       phone: req.user.phone,
+  //     });
+  //   }
+  //   this.setRefreshToken({ user, res });
+  //   res.redirect('http://localhost:5000/frontend/social-login.html');
+  // }
 }
