@@ -21,16 +21,17 @@ export class CompanyService {
     @InjectRepository(GlobalConfig)
     private readonly globalConfigRepository: Repository<GlobalConfig>,
   ) {}
-  private sqlInit = this.companyRepository.createQueryBuilder('company');
 
   async getCompanyDetail({ companyId }) {
-    return await this.sqlInit
+    return await this.companyRepository
+      .createQueryBuilder('company')
       .where('company.id = :companyId', { companyId })
       .getOne();
   }
 
   async createCompany({ createCompanyInput }) {
-    return await this.sqlInit
+    return await this.companyRepository
+      .createQueryBuilder('company')
       .insert()
       .into(Company)
       .values(createCompanyInput)
@@ -43,7 +44,8 @@ export class CompanyService {
       ...company,
       ...updateCompanyInput,
     };
-    return await this.sqlInit
+    return await this.companyRepository
+      .createQueryBuilder('company')
       .update(Company)
       .set(updateData)
       .where('id = :companyId', { companyId })
@@ -109,7 +111,8 @@ export class CompanyService {
     //TODO: get schedule category list and delete all schedule categories
 
     //TODO: delete company
-    const result = await this.sqlInit
+    const result = await this.companyRepository
+      .createQueryBuilder('company')
       .delete()
       .from(Company)
       .where('id = :companyId', { companyId })
