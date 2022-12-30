@@ -25,7 +25,11 @@ export class CompanyResolver {
     });
   }
 
-  @Mutation(() => Company, { description: '회사 신규 가입' })
+  @Mutation(() => Company, {
+    description: '회사 신규 가입',
+    deprecationReason:
+      '회원가입 시 자동으로 회사가 생성됩니다. 테스트용으로 수동생성시에만 사용하여 주세요',
+  })
   async createCompany(
     @Args('createCompanyInput') createCompanyInput: CreateCompanyInput,
   ) {
