@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Company } from '../companies/entities/company.entity';
@@ -20,7 +24,7 @@ export class AccountService {
     private readonly companyRepository: Repository<Company>,
 
     @InjectRepository(InvitationCode)
-    private readonly invitationRepository: Repository<InvitationCode>,
+    private readonly invitationCodeRepository: Repository<InvitationCode>,
 
     private readonly invitaionCodeSerivce: InvitationCodeService,
 
@@ -107,7 +111,6 @@ export class AccountService {
     hashedPassword: password,
     name,
     phone,
-    memberId,
     invitationCode,
   }) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -117,38 +120,31 @@ export class AccountService {
       const user = await this.accountRepository.findOne({ where: { email } });
       if (user) throw new ConflictException('이미 등록된 이메일입니다.');
       console.log(user);
-      const code = await this.invitationRepository.findOne({
-        where: { member: { id: memberId } },
+
+      const code = await this.invitationCodeRepository.findOne({
+        where: { invitationCode },
         relations: {
           member: true,
+          company: true,
         },
       });
 
-      if (code.invitationCode !== invitationCode)
-        throw new ConflictException('초대코드가 일치하지 않습니다.');
+      if (!code) throw new NotFoundException('초대코드가 일치하지 않습니다.');
+
       const isJoin = this.memberRepository.create({
         ...code.member,
         isJoin: true,
       });
 
-      await queryRunner.manager.save(Member, isJoin);
-
-      const member: Member = await this.memberRepository.findOne({
-        where: {
-          id: memberId,
-        },
-        relations: {
-          company: true,
-        },
-      });
+      const member = await queryRunner.manager.save(Member, isJoin);
 
       const createEmployee: Account = this.accountRepository.create({
         email,
         password,
         name,
         phone,
-        member: { id: memberId },
-        company: { id: member.company.id },
+        member,
+        company: code.company,
       });
 
       const result = await queryRunner.manager.save(Account, createEmployee);
@@ -158,6 +154,7 @@ export class AccountService {
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
+      await this.invitationCodeRepository.delete({ invitationCode });
     }
   }
 }

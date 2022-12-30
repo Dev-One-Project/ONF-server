@@ -19,6 +19,8 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
       id: payload.sub,
       email: payload.email,
       role: payload.roles,
+      company: payload.company,
+      member: payload.member,
     };
   }
 }

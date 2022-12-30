@@ -26,7 +26,11 @@ export class AuthResolver {
     const isAuth = await bcrypt.compare(password, user.password);
     if (!isAuth) throw new UnprocessableEntityException('암호가 틀렸습니다.');
 
-    this.authService.setRefreshToken({ user, res: context.res });
+    this.authService.setRefreshToken({
+      user,
+      res: context.res,
+      req: context.req,
+    });
 
     return this.authService.getAccessToken({ user });
   }
