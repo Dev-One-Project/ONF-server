@@ -1,17 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AccountService } from '../accounts/account.service';
-import { Account } from '../accounts/entites/account.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService, //
-
-    @InjectRepository(Account)
-    private readonly accountRepository: Repository<Account>,
   ) {}
 
   getAccessToken({ user }) {
@@ -23,7 +16,7 @@ export class AuthService {
         company: user.company.id,
         member: user.member.id,
       },
-      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '3w' },
+      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '5m' },
     );
   }
 
@@ -38,6 +31,7 @@ export class AuthService {
       },
       { secret: process.env.REFRESH_TOKEN_KEY, expiresIn: '4w' },
     );
+
     // Development server
     // res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; path=/;`);
 

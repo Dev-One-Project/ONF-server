@@ -43,6 +43,11 @@ export class AuthResolver {
     const user = await this.accountService.findOne({
       email: context.req.user.email,
     });
+    this.authService.setRefreshToken({
+      user,
+      res: context.res,
+      req: context.req,
+    });
     return this.authService.getAccessToken({ user });
   }
 }
