@@ -15,8 +15,13 @@ export class RoleCategoryService {
     private readonly companyReposistory: Repository<Company>,
   ) {}
 
-  async create(createRoleCategoryInput: IRoleCategory): Promise<RoleCategory> {
-    const { companyId, ...roleCategory } = createRoleCategoryInput;
+  async create({
+    createRoleCategoryInput,
+    companyId,
+  }: {
+    createRoleCategoryInput: IRoleCategory;
+    companyId: string;
+  }): Promise<RoleCategory> {
     const company = await this.companyReposistory.findOne({
       where: { id: companyId },
     });
