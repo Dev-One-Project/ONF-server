@@ -23,7 +23,6 @@ export class AccountResolver {
     createCompanyInput?: CreateCompanyInput,
     @Args('invitationCode', { nullable: true })
     invitationCode?: string,
-    @Args('memberId', { nullable: true }) memberId?: string,
   ) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const admin: Account = await this.accountService.createAdmin({
@@ -39,7 +38,7 @@ export class AccountResolver {
       hashedPassword,
       name,
       phone,
-      memberId,
+
       invitationCode,
     });
 
