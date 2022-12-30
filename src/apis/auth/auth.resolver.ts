@@ -37,9 +37,12 @@ export class AuthResolver {
 
   @UseGuards(GqlAuthRefreshGuard)
   @Mutation(() => String)
-  restoreAccessToken(
+  async restoreAccessToken(
     @Context() context: IContext, //
   ) {
-    return this.authService.getAccessToken({ user: context.req.user });
+    const user = await this.accountService.findOne({
+      email: context.req.user.email,
+    });
+    return this.authService.getAccessToken({ user });
   }
 }
