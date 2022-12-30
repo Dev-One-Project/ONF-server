@@ -22,7 +22,4 @@ export class CreateGlobalConfigInput {
 
   @Field(() => Boolean, { nullable: false, defaultValue: false })
   isCheckOutEnabled: boolean;
-
-  @Field(() => String, { nullable: false })
-  companyId: string;
 }

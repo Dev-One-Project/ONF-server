@@ -1,10 +1,11 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GlobalConfigService } from './globalConfig.service';
 import { GlobalConfig } from './entities/globalConfig.entity';
 import { CreateGlobalConfigInput } from './dto/createGlobalConfig.input';
 import { UpdateGlobalConfigInput } from './dto/updateGlobalConfig.input';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthAccessGuard } from 'src/common/auth/gql-auth.guard';
+import { IContext } from 'src/common/types/context';
 
 @Resolver()
 export class GlobalConfigResolver {
@@ -12,8 +13,10 @@ export class GlobalConfigResolver {
 
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => GlobalConfig)
-  async fetchGlobalConfig(@Args('companyId') companyId: string) {
-    return await this.globalConfigService.fetch({ companyId });
+  async fetchGlobalConfig(@Context() context: IContext) {
+    return await this.globalConfigService.fetch({
+      companyId: context.req.user.company,
+    });
   }
 
   @UseGuards(GqlAuthAccessGuard)
@@ -21,8 +24,12 @@ export class GlobalConfigResolver {
   async createGlobalConfig(
     @Args('createGlobalConfigInput')
     createGlobalConfigInput: CreateGlobalConfigInput,
+    @Context() context: IContext,
   ) {
-    return await this.globalConfigService.create({ createGlobalConfigInput });
+    return await this.globalConfigService.create({
+      createGlobalConfigInput,
+      companyId: context.req.user.company,
+    });
   }
 
   @UseGuards(GqlAuthAccessGuard)
@@ -30,7 +37,11 @@ export class GlobalConfigResolver {
   async updateGlobalConfig(
     @Args('updateGlobalConfigInput')
     updateGlobalConfigInput: UpdateGlobalConfigInput,
+    @Context() context: IContext,
   ) {
-    return await this.globalConfigService.update({ updateGlobalConfigInput });
+    return await this.globalConfigService.update({
+      updateGlobalConfigInput,
+      companyId: context.req.user.company,
+    });
   }
 }

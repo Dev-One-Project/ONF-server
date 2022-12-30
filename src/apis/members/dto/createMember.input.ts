@@ -1,4 +1,4 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class CreateMemberInput {
@@ -19,9 +19,6 @@ export class CreateMemberInput {
 
   @Field(() => String, { nullable: true })
   memo: string;
-
-  @Field(() => String)
-  companyId: string;
 
   @Field(() => String, { nullable: true })
   organizationId: string;

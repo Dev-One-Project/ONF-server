@@ -13,22 +13,20 @@ export class GlobalConfigService {
     private readonly companyRepository: Repository<Company>,
   ) {}
 
-  async create({ createGlobalConfigInput }) {
-    const { companyId, ...input } = createGlobalConfigInput;
+  async create({ createGlobalConfigInput, companyId }) {
     const company = await this.companyRepository
       .createQueryBuilder('company')
       .where('company.id = :companyId', { companyId })
       .getOne();
 
     const config = this.globalConfigRepository.create({
-      ...input,
+      ...createGlobalConfigInput,
       company,
     });
     return this.globalConfigRepository.save(config);
   }
 
-  async update({ updateGlobalConfigInput }) {
-    const { companyId, ...input } = updateGlobalConfigInput;
+  async update({ updateGlobalConfigInput, companyId }) {
     const config = await this.globalConfigRepository
       .createQueryBuilder('globalConfig')
       .leftJoinAndSelect('globalConfig.company', 'company')
@@ -37,7 +35,7 @@ export class GlobalConfigService {
 
     const updateData = {
       ...config,
-      ...input,
+      ...updateGlobalConfigInput,
     };
 
     return this.globalConfigRepository.save(updateData);

@@ -27,10 +27,9 @@ export class MemberService {
     });
   }
 
-  async create({ createMemberInput }) {
+  async create({ createMemberInput, companyId }) {
     console.log(createMemberInput);
-    const { companyId, organizationId, roleCategoryId, ...rest } =
-      createMemberInput;
+    const { organizationId, roleCategoryId, ...rest } = createMemberInput;
 
     return await this.memberRepository.save({
       ...rest,

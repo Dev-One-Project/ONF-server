@@ -24,10 +24,8 @@ export class VacationService {
   ) {}
 
   async findAll({ companyId }) {
-    await this.companyRepository.findOne({
-      where: { id: companyId },
-    });
     return this.vacationRepository.find({
+      where: { company: companyId },
       relations: ['member', 'company', 'vacationCategory'],
     });
   }
@@ -39,7 +37,7 @@ export class VacationService {
     });
   }
 
-  async findVacationWithDate({ vacationStart, vacationEnd }) {
+  async findVacationWithDate({ vacationStart, vacationEnd, companyId }) {
     return await this.vacationRepository
       .createQueryBuilder('vacation')
       .leftJoinAndSelect('vacation.member', 'member')
@@ -49,6 +47,7 @@ export class VacationService {
         vacationStart,
         vacationEnd,
       })
+      .andWhere('company.id = :companyId', { companyId })
       .orderBy('vacation.vacationStart', 'DESC')
       .getMany();
     //   //받아온 start 와 end의 날짜 안에있는 값들을 찾는다.

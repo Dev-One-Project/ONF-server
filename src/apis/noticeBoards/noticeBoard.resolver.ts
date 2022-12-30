@@ -22,7 +22,7 @@ export class NoticeBoardResolver {
     @Context() context: IContext, //
   ) {
     return await this.noticeBoardService.findAll({
-      userId: context.req.user.id,
+      companyId: context.req.user.company,
     });
   }
 

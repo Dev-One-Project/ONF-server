@@ -14,15 +14,13 @@ export class HolidayService {
     private readonly companyService: CompanyService,
   ) {}
 
-  async create({ createHolidayInput }) {
-    const { companyId, ...holiday } = createHolidayInput;
-
+  async create({ createHolidayInput, companyId }) {
     const company = await this.companyService.findOne({
       companyId,
     });
 
     return await this.holidayRepository.save({
-      ...holiday,
+      ...createHolidayInput,
       company,
     });
   }
@@ -74,10 +72,12 @@ export class HolidayService {
       where: {
         id: holidayId,
       },
+      relations: {
+        company: true,
+      },
     });
     const newCompnayHoliday = {
       ...myCompany,
-      id: holidayId,
       ...updateHolidayInput,
     };
     return await this.holidayRepository.save(newCompnayHoliday);

@@ -10,7 +10,4 @@ export class CreateRoleCategoryInput {
 
   @Field(() => String, { nullable: false })
   colorCode: string;
-
-  @Field(() => String, { nullable: false })
-  companyId: string;
 }

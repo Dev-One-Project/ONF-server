@@ -19,7 +19,4 @@ export class CreateOrganizationInput {
 
   @Field(() => String, { nullable: false })
   color: string;
-
-  @Field(() => String, { nullable: false })
-  companyId: string;
 }
