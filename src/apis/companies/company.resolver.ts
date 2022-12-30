@@ -1,20 +1,28 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CompanyService } from './company.service';
 import { CreateCompanyInput } from './dto/createCompany.input';
 import { Company } from './entities/company.entity';
 import { UpdateCompanyInput } from './dto/updateCompany.input';
+import { IContext } from 'src/common/types/context';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthAccessGuard } from 'src/common/auth/gql-auth.guard';
+import { Roles } from 'src/common/auth/roles.decorator';
+import { Role } from 'src/common/types/enum.role';
+import { RolesGuard } from 'src/common/auth/roles.guard';
 
 @Resolver()
 export class CompanyResolver {
   constructor(private readonly companyService: CompanyService) {}
 
-  //TODO: 로그인 구현 이후 로그인된 정보로 조회 하도록 수정 해야함
+  @UseGuards(GqlAuthAccessGuard)
   @Query(() => Company, {
     description: '회사 정보 조회',
     deprecationReason: 'Initializing Status / Need Update',
   })
-  async fetchCompanyDetail(@Args('companyId') companyId: string) {
-    return await this.companyService.getCompanyDetail({ companyId });
+  async fetchCompanyDetail(@Context() context: IContext) {
+    return await this.companyService.getCompanyDetail({
+      companyId: context.req.user.company,
+    });
   }
 
   @Mutation(() => Company, { description: '회사 신규 가입' })
@@ -24,21 +32,27 @@ export class CompanyResolver {
     return await this.companyService.createCompany({ createCompanyInput });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => Company, { description: '회사 정보 수정' })
   async updateCompany(
-    @Args('companyId') companyId: string,
+    @Context() context: IContext,
     @Args('updateCompanyInput') updateCompanyInput: UpdateCompanyInput,
   ) {
     return await this.companyService.updateCompanyDetail({
-      companyId,
+      companyId: context.req.user.company,
       updateCompanyInput,
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => Boolean, {
     description: '회사 정보 영구 삭제 / 복구 불가능하므로 사용 주의',
   })
-  async deleteCompany(@Args('companyId') companyId: string) {
-    return await this.companyService.deleteCompany({ companyId });
+  async deleteCompany(@Context() context: IContext) {
+    return await this.companyService.deleteCompany({
+      companyId: context.req.user.company,
+    });
   }
 }

@@ -18,19 +18,12 @@ export class NoticeBoardService {
     private readonly companyRepository: Repository<Company>,
   ) {}
 
-  async findAll({ userId }) {
-    const account = await this.accountRepository.findOne({
-      relations: {
-        company: true,
-      },
-      where: { id: userId },
-    });
-
+  async findAll({ companyId }) {
     return await this.noticeBoardRepository
       .createQueryBuilder('noticeBoard')
       .leftJoinAndSelect('noticeBoard.account', 'account')
       .leftJoinAndSelect('noticeBoard.company', 'company')
-      .where('company.id = :id', { id: account.company.id })
+      .where('company.id = :id', { id: companyId })
       .orderBy('noticeBoard.createdAt', 'DESC')
       .getMany();
   }

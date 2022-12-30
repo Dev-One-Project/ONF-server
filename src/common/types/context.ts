@@ -3,6 +3,8 @@ export interface IUser {
     email: string;
     id: string;
     role: string;
+    company: string;
+    member: string;
   };
 }
 

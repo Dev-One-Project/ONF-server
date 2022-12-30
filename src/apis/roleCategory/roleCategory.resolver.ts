@@ -1,8 +1,14 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateRoleCategoryInput } from './dto/createRoleCategory.input';
 import { UpdateRoleCategoryInput } from './dto/updateRoleCategory.input';
 import { RoleCategory } from './entities/roleCategory.entity';
 import { RoleCategoryService } from './roleCategory.service';
+import { IContext } from 'src/common/types/context';
+import { Roles } from 'src/common/auth/roles.decorator';
+import { Role } from 'src/common/types/enum.role';
+import { GqlAuthAccessGuard } from 'src/common/auth/gql-auth.guard';
+import { RolesGuard } from 'src/common/auth/roles.guard';
 
 @Resolver()
 export class RoleCategoryResolver {
@@ -10,12 +16,18 @@ export class RoleCategoryResolver {
     private readonly roleCategoryService: RoleCategoryService, //
   ) {}
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => RoleCategory)
   createRoleCategory(
     @Args('createRoleCategoryInput')
     createRoleCategoryInput: CreateRoleCategoryInput,
+    @Context() context: IContext,
   ) {
-    return this.roleCategoryService.create(createRoleCategoryInput);
+    return this.roleCategoryService.create({
+      createRoleCategoryInput,
+      companyId: context.req.user.company,
+    });
   }
 
   @Query(() => RoleCategory, { description: 'Fetch RoleCategory' })
@@ -25,13 +37,17 @@ export class RoleCategoryResolver {
     return this.roleCategoryService.findOne({ roleCategoryId });
   }
 
+  @Roles(Role.ADMIN, Role.USER)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Query(() => [RoleCategory], { description: 'Fetch RoleCategorys' })
-  fetchRoleCategories(
-    @Args('companyId') companyId: string, //    )
-  ) {
-    return this.roleCategoryService.findAll({ companyId });
+  fetchRoleCategories(@Context() context: IContext) {
+    return this.roleCategoryService.findAll({
+      companyId: context.req.user.company,
+    });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => RoleCategory, { description: 'Update RoleCategory' })
   updateRoleCategory(
     @Args('roleCategoryId') roleCategoryId: string,

@@ -31,9 +31,9 @@ export class OrganizationService {
       .getOne();
   }
 
-  async create({ createOrganizationInput }) {
+  async create({ createOrganizationInput, companyId }) {
     const company = await this.companyService.getCompanyDetail({
-      companyId: createOrganizationInput.companyId,
+      companyId,
     });
     const organization = this.organizationRepository.create({
       ...createOrganizationInput,
@@ -42,10 +42,10 @@ export class OrganizationService {
     return await this.organizationRepository.save(organization);
   }
 
-  async update({ organizationId, updateOrganizationInput }) {
+  async update({ organizationId, companyId, updateOrganizationInput }) {
     const organization = this.getOrganizationDetail({ organizationId });
     const company = await this.companyService.getCompanyDetail({
-      companyId: updateOrganizationInput.companyId,
+      companyId,
     });
     const updateData = {
       ...organization,
