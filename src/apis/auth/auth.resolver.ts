@@ -40,11 +40,12 @@ export class AuthResolver {
   async restoreAccessToken(
     @Context() context: IContext, //
   ) {
-    const user = await this.accountService.findOne({
-      email: context.req.user.email,
+    const user = await this.accountService.findDetail({
+      userId: context.req.user.id,
     });
+
     this.authService.setRefreshToken({
-      user,
+      user: context.req.user,
       res: context.res,
       req: context.req,
     });

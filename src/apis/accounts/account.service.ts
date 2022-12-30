@@ -7,7 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Company } from '../companies/entities/company.entity';
 import { InvitationCode } from '../invitationCode/entities/invitationCode.entity';
-import { InvitationCodeService } from '../invitationCode/invitationCode.service';
 import { Member } from '../members/entities/member.entity';
 import { Account } from './entites/account.entity';
 
@@ -26,8 +25,6 @@ export class AccountService {
     @InjectRepository(InvitationCode)
     private readonly invitationCodeRepository: Repository<InvitationCode>,
 
-    private readonly invitaionCodeSerivce: InvitationCodeService,
-
     private readonly dataSource: DataSource,
   ) {}
 
@@ -41,6 +38,15 @@ export class AccountService {
         company: true,
       },
     });
+  }
+
+  async findDetail({ userId }) {
+    return await this.accountRepository
+      .createQueryBuilder('account')
+      .leftJoinAndSelect('account.member', 'member')
+      .leftJoinAndSelect('account.company', 'company')
+      .where('account.id = :userId', { userId })
+      .getOne();
   }
 
   async createAdmin({
