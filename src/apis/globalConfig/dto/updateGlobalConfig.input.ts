@@ -1,9 +1,7 @@
-import { InputType, OmitType } from '@nestjs/graphql';
+import { InputType, PartialType } from '@nestjs/graphql';
 import { CreateGlobalConfigInput } from './createGlobalConfig.input';
 
 @InputType()
-export class UpdateGlobalConfigInput extends OmitType(
+export class UpdateGlobalConfigInput extends PartialType(
   CreateGlobalConfigInput,
-  ['companyId'],
-  InputType,
 ) {}
