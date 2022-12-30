@@ -21,13 +21,14 @@ export class AuthService {
   }
 
   setRefreshToken({ user, res, req }) {
+    console.log(user);
     const refreshToken = this.jwtService.sign(
       {
         email: user.email,
         sub: user.id,
         role: user.roles,
-        company: user.company.id,
-        member: user.member.id,
+        company: user.company,
+        member: user.member,
       },
       { secret: process.env.REFRESH_TOKEN_KEY, expiresIn: '4w' },
     );

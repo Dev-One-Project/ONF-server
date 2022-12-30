@@ -6,19 +6,25 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     super({
       jwtFromRequest: (req) => {
         const cookie = req.headers.cookie;
-        const refreshToken = cookie.replace('refreshToken=', '');
+        const splitCookie = cookie.split(' ');
+        let target = 0;
+        for (let i = 0; i < splitCookie.length; i++) {
+          if (splitCookie[i].includes('refreshToken=')) target = i;
+        }
+        const refreshToken = splitCookie[target].replace('refreshToken=', '');
+        console.log(refreshToken);
         return refreshToken;
       },
       secretOrKey: process.env.REFRESH_TOKEN_KEY,
-      passReqToCallbacK: true,
+      ignoreExpiration: false,
     });
   }
 
-  validate(req, payload) {
+  validate(payload) {
     return {
       id: payload.sub,
       email: payload.email,
-      role: payload.roles,
+      role: payload.role,
       company: payload.company,
       member: payload.member,
     };

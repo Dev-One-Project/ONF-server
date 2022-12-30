@@ -11,7 +11,6 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'myGuard') {
   }
 
   validate(req, payload) {
-    // console.log('payload:', payload.role);
     return {
       id: payload.sub,
       email: payload.email,
