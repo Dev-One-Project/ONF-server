@@ -12,17 +12,12 @@ export class RoleCategoryService {
     private readonly roleCategoryRepositoy: Repository<RoleCategory>,
 
     @InjectRepository(Company)
-    private readonly compnayReposistory: Repository<Company>,
+    private readonly companyReposistory: Repository<Company>,
   ) {}
 
-  async create({
-    createRoleCategoryInput,
-    companyId,
-  }: {
-    createRoleCategoryInput: IRoleCategory;
-    companyId: string;
-  }): Promise<RoleCategory> {
-    const company = await this.compnayReposistory.findOne({
+  async create(createRoleCategoryInput: IRoleCategory): Promise<RoleCategory> {
+    const { companyId, ...roleCategory } = createRoleCategoryInput;
+    const company = await this.companyReposistory.findOne({
       where: { id: companyId },
     });
 

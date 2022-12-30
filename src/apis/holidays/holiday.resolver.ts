@@ -45,7 +45,7 @@ export class HolidayResolver {
     description: 'Fetch Holiday such as companyAnniversary',
   })
   fetchHoliday(@Context() context: IContext) {
-    return this.holidayService.findCompnayHoliday({
+    return this.holidayService.findCompanyHoliday({
       companyId: context.req.user.company,
     });
   }
@@ -64,7 +64,7 @@ export class HolidayResolver {
     @Args('holidayId') holidayId: string, //
     @Args('updateHolidayInput') updateHolidayInput: UpdateHolidayInput,
   ) {
-    return this.holidayService.updateCompnayHoliday({
+    return this.holidayService.updateCompanyHoliday({
       holidayId,
       updateHolidayInput,
     });

@@ -57,7 +57,7 @@ export class HolidayService {
     });
   }
 
-  async findCompnayHoliday({ companyId }) {
+  async findCompanyHoliday({ companyId }) {
     return await this.holidayRepository.find({
       where: {
         company: {
@@ -67,7 +67,7 @@ export class HolidayService {
     });
   }
 
-  async updateCompnayHoliday({ holidayId, updateHolidayInput }) {
+  async updateCompanyHoliday({ holidayId, updateHolidayInput }) {
     const myCompany = await this.holidayRepository.findOne({
       where: {
         id: holidayId,
@@ -76,10 +76,10 @@ export class HolidayService {
         company: true,
       },
     });
-    const newCompnayHoliday = {
+    const newCompanyHoliday = {
       ...myCompany,
       ...updateHolidayInput,
     };
-    return await this.holidayRepository.save(newCompnayHoliday);
+    return await this.holidayRepository.save(newCompanyHoliday);
   }
 }
