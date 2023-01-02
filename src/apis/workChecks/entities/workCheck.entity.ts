@@ -57,10 +57,6 @@ export class WorkCheck {
   @Field(() => Date, { nullable: true })
   updatedAt: Date;
 
-  @DeleteDateColumn({ nullable: true })
-  @Field(() => Date, { nullable: true })
-  deletedAt: Date;
-
   @ManyToOne(() => Member)
   @Field(() => Member)
   member: Member;

@@ -8,14 +8,11 @@ export class CreateMemberInput {
   @Field(() => String, { nullable: true })
   phone: string;
 
-  @Field(() => Boolean, { nullable: true, defaultValue: false })
-  isAdmin: boolean;
+  @Field(() => Date)
+  joinDate: Date;
 
-  @Field(() => String)
-  joinDate: string;
-
-  @Field(() => String, { nullable: true })
-  exitDate: string;
+  @Field(() => Date, { nullable: true })
+  exitDate: Date;
 
   @Field(() => String, { nullable: true })
   memo: string;

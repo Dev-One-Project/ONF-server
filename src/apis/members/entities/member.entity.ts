@@ -33,13 +33,13 @@ export class Member {
   // @Field(() => Boolean, { nullable: true, defaultValue: false })
   // isAdmin: boolean;
 
-  @Column({ nullable: true })
-  @Field(() => String)
+  @Column()
+  @Field(() => Date)
   joinDate: Date;
 
   @Column({ nullable: true })
-  @Field(() => String, { nullable: true })
-  exitDate: string;
+  @Field(() => Date, { nullable: true })
+  exitDate: Date;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
