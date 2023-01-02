@@ -8,7 +8,7 @@ export class CreateMemberInput {
   @Field(() => String, { nullable: true })
   phone: string;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   joinDate: Date;
 
   @Field(() => Date, { nullable: true })

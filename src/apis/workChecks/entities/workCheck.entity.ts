@@ -7,7 +7,6 @@ import { Schedule } from 'src/apis/schedules/entities/schedule.entity';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,

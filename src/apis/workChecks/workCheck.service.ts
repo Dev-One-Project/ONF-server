@@ -253,41 +253,65 @@ export class WorkCheckService {
   //   });
   // }
 
-  async update({ workCheckId, updateWorkCheckInput }) {
+  async updateOne({ workCheckId, updateWorkCheckInput }) {
     const findWorkCheck = await this.workCheckRepository.findOne({
       where: { id: workCheckId },
       relations: ['member', 'organization', 'schedule', 'roleCategory'],
     });
 
-    const originArr = Object.entries(findWorkCheck);
-    const updateKey = Object.keys(updateWorkCheckInput);
+    // const originArr = Object.entries(findWorkCheck);
+    // const updateKey = Object.keys(updateWorkCheckInput);
 
-    const updateObj = {};
+    // const updateObj = {};
 
-    await Promise.all(
-      updateKey.map((a) => {
-        return originArr.filter((x) => {
-          if (x[0] === a) {
-            return (updateObj[a] = updateWorkCheckInput[a]);
-          }
-        });
-      }),
-    );
+    // await Promise.all(
+    //   updateKey.map((a) => {
+    //     return originArr.filter((x) => {
+    //       if (x[0] === a) {
+    //         return (updateObj[a] = updateWorkCheckInput[a]);
+    //       }
+    //     });
+    //   }),
+    // );
 
-    const { workingTime, quittingTime, breakStartTime, breakEndTime } =
-      updateWorkCheckInput;
+    // const { workingTime, quittingTime, breakStartTime, breakEndTime } =
+    //   updateWorkCheckInput;
 
-    workingTime?.setHours(workingTime.getHours() - 9);
-    quittingTime?.setHours(quittingTime.getHours() - 9);
-    breakStartTime?.setHours(breakStartTime.getHours() - 9);
-    breakEndTime?.setHours(breakEndTime.getHours() - 9);
+    // workingTime?.setHours(workingTime.getHours() - 9);
+    // quittingTime?.setHours(quittingTime.getHours() - 9);
+    // breakStartTime?.setHours(breakStartTime.getHours() - 9);
+    // breakEndTime?.setHours(breakEndTime.getHours() - 9);
+
+    // return await this.workCheckRepository.save({
+    //   ...findWorkCheck,
+    //   id: workCheckId,
+    //   ...updateObj,
+    //   organization: updateWorkCheckInput?.organizationId,
+    //   roleCategory: updateWorkCheckInput?.roleCategoryId,
+    // });
+
+    const updateObj = Object.assign({}, findWorkCheck, updateWorkCheckInput);
+
+    // console.log(updateObj);
+
+    const { workingTime, quittingTime } = updateWorkCheckInput;
+
+    if (workingTime) {
+      workingTime.setHours(workingTime.getHours() - 9);
+    }
+
+    if (quittingTime) {
+      quittingTime.setHours(quittingTime.getHours() - 9);
+    }
+
+    const { organizationId, roleCategoryId, ...rest } = updateObj;
 
     return await this.workCheckRepository.save({
       ...findWorkCheck,
       id: workCheckId,
-      ...updateObj,
-      organization: updateWorkCheckInput?.organizationId,
-      roleCategory: updateWorkCheckInput?.roleCategoryId,
+      organization: organizationId,
+      roleCategory: roleCategoryId,
+      ...rest,
     });
   }
 

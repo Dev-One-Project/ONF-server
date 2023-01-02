@@ -153,7 +153,7 @@ export class WorkCheckResolver {
     @Args('workCheckId') workCheckId: string, //
     @Args('updateWorkCheckInput') updateWorkCheckInput: UpdateWorkCheckInput,
   ) {
-    const result = await this.workCheckService.update({
+    const result = await this.workCheckService.updateOne({
       workCheckId,
       updateWorkCheckInput,
     });
