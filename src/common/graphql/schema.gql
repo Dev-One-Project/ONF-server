@@ -90,6 +90,8 @@ type Account {
   id: String!
   email: String!
   roles: String
+  name: String!
+  phone: String
   member: Member
   company: Company
 }
@@ -176,8 +178,8 @@ type Holiday {
   id: String!
   dateName: String
   locdate: String
-  premuimRate: Int
   year: String
+  company: Company!
 }
 
 type File {
@@ -206,7 +208,7 @@ type Query {
   fetchRoleCategory(roleCategoryId: String!): RoleCategory!
 
   """Fetch RoleCategorys"""
-  fetchRoleCategorys: [RoleCategory!]!
+  fetchRoleCategories: [RoleCategory!]!
 
   """근무일정 템플릿 전체 조회"""
   fetchAllScheduleTemplates: [ScheduleTemplate!]!
@@ -242,19 +244,19 @@ type Query {
   fetchDateMemberWorkChecks(companyId: String!, organizationId: [String!], startDate: DateTime!, endDate: DateTime!): [WorkCheck!]!
 
   """회사 정보 조회"""
-  fetchCompanyDetail(companyId: String!): Company! @deprecated(reason: "Initializing Status / Need Update")
+  fetchCompanyDetail: Company! @deprecated(reason: "Initializing Status / Need Update")
 
   """조직 리스트 조회"""
-  fetchOrganizations(companyId: String!): [Organization!]!
+  fetchOrganizations: [Organization!]!
 
   """조직 상세 조회"""
   fetchOrganizationDetail(organizationId: String!): Organization!
 
   """comanyId에 해당하는 멤버 전체 조회"""
-  fetchMembers(companyId: String!): [Member!]!
+  fetchMembers: [Member!]!
 
-  """memberId(사원ID)로 개별 조회"""
-  fetchMember(memberId: String!): Member!
+  """memberId(사원ID)로 개별 조회, memberId 입력시 입력한 member 조회, 아니면 로그인한 유저 정보 조회"""
+  fetchMember(memberId: String): Member!
 
   """휴가유형 전체 찾기"""
   fetchVacationCategorys(organizationid: String!): [VacationCategory!]!
@@ -263,7 +265,7 @@ type Query {
   fetchVacationCategory(vacationCategoryId: String!): VacationCategory!
 
   """(관리자) 휴가 전체 조회"""
-  fetchVacations(companyId: String!): [Vacation!]!
+  fetchVacations: [Vacation!]!
 
   """(관리자) 기간 내 휴가 조회"""
   fetchVacationWithDate(vacationStart: DateTime!, vacationEnd: DateTime!): [Vacation!]!
@@ -281,9 +283,12 @@ type Query {
   """선택한 기간동안의 지점 근무일정 조회 - 목록형"""
   fetchListTypeSchedule(startDate: DateTime!, endDate: DateTime!, organizationId: [String!]!): [Schedule!]!
 
+  """Fetch Holiday such as companyAnniversary"""
+  fetchHoliday: [Holiday!]!
+
   """Fetch Holidays in ASC order"""
   fetchHolidays: [Holiday!]!
-  fetchGlobalConfig(companyId: String!): GlobalConfig!
+  fetchGlobalConfig: GlobalConfig!
 }
 
 type Mutation {
@@ -320,10 +325,7 @@ type Mutation {
   deleteScheduleCategory(scheduleCategoryId: String!): Boolean!
 
   """초대코드 발송"""
-  sendCodeToEmail(companyId: String!, memberId: String!, email: String!): String!
-
-  """초대코드 예약전송"""
-  sendReservationCode(companyId: String!, memberId: String!, email: String!, date: DateTime!): String!
+  sendCodeToEmail(email: String!, memberId: String!): String!
 
   """초대코드 확인"""
   checkInvitationCode(memberId: String!, invitationCode: String!): String!
@@ -358,13 +360,13 @@ type Mutation {
   deleteWorkCheck(workCheckId: String!): Boolean!
 
   """회사 신규 가입"""
-  createCompany(createCompanyInput: CreateCompanyInput!): Company!
+  createCompany(createCompanyInput: CreateCompanyInput!): Company! @deprecated(reason: "회원가입 시 자동으로 회사가 생성됩니다. 테스트용으로 수동생성시에만 사용하여 주세요")
 
   """회사 정보 수정"""
-  updateCompany(companyId: String!, updateCompanyInput: UpdateCompanyInput!): Company!
+  updateCompany(updateCompanyInput: UpdateCompanyInput!): Company!
 
   """회사 정보 영구 삭제 / 복구 불가능하므로 사용 주의"""
-  deleteCompany(companyId: String!): Boolean!
+  deleteCompany: Boolean!
 
   """조직 신규 생성"""
   createOrganization(createOrganizationInput: CreateOrganizationInput!): Organization!
@@ -407,7 +409,7 @@ type Mutation {
 
   """(관리자) 휴가 완전 삭제"""
   deleteVacation(vacationId: String!): Boolean!
-  createAccount(email: String!, password: String!): Account!
+  createAccount(email: String!, password: String!, name: String!, phone: String, createCompanyInput: CreateCompanyInput, invitationCode: String): Account!
 
   """근무일정 생성"""
   createSchedule(dates: [DateTime!]!, createScheduleInput: CreateScheduleInput!): [Schedule!]!
@@ -431,7 +433,8 @@ type Mutation {
   Create holidays such as "설날"
   """
   createHolidays: String!
-  createGlobalConfig(createGlobalConfigInput: CreateGlobalConfigInput!): GlobalConfig!
+  updateHoliday(holidayId: String!, updateHolidayInput: UpdateHolidayInput!): Holiday!
+  createGlobalConfig(createGlobalConfigInput: CreateGlobalConfigInput): GlobalConfig!
   updateGlobalConfig(updateGlobalConfigInput: UpdateGlobalConfigInput!): GlobalConfig!
 
   """Upload a single file / Max file size apporximatly 10M"""
@@ -457,14 +460,12 @@ input CreateRoleCategoryInput {
   duty: String!
   memo: String!
   colorCode: String!
-  companyId: String!
 }
 
 input UpdateRoleCategoryInput {
   duty: String
   memo: String
   colorCode: String
-  companyId: String
 }
 
 input CreateScheduleTemplateInput {
@@ -548,6 +549,7 @@ input CreateCompanyInput {
   logoUrl: String
   rules: String
   membership: MEMBERSHIP_TYPE
+  memberCount: Int
 }
 
 input UpdateCompanyInput {
@@ -555,6 +557,7 @@ input UpdateCompanyInput {
   logoUrl: String
   rules: String
   membership: MEMBERSHIP_TYPE
+  memberCount: Int
 }
 
 input CreateOrganizationInput {
@@ -564,7 +567,6 @@ input CreateOrganizationInput {
   lng: String
   description: String
   color: String!
-  companyId: String!
 }
 
 input UpdateOrganizationInput {
@@ -574,7 +576,6 @@ input UpdateOrganizationInput {
   lng: String
   description: String
   color: String
-  companyId: String
 }
 
 input CreateMemberInput {
@@ -584,7 +585,6 @@ input CreateMemberInput {
   joinDate: String!
   exitDate: String
   memo: String
-  companyId: String!
   organizationId: String
   roleCategoryId: String
 }
@@ -596,7 +596,6 @@ input UpdateMemberInput {
   joinDate: String
   exitDate: String
   memo: String
-  companyId: String
   organizationId: String
   roleCategoryId: String
 }
@@ -650,7 +649,11 @@ input UpdateScheduleInput {
 input CreateHolidayInput {
   dateName: String
   locdate: String
-  premuimRate: Int
+}
+
+input UpdateHolidayInput {
+  dateName: String
+  locdate: String
 }
 
 input CreateGlobalConfigInput {
@@ -661,7 +664,6 @@ input CreateGlobalConfigInput {
   isScheduleEnabled: Boolean = false
   isCheckInEnabled: Boolean = false
   isCheckOutEnabled: Boolean = false
-  companyId: String!
 }
 
 input UpdateGlobalConfigInput {

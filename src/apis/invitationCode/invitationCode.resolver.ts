@@ -1,4 +1,10 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { GqlAuthAccessGuard } from 'src/common/auth/gql-auth.guard';
+import { Roles } from 'src/common/auth/roles.decorator';
+import { RolesGuard } from 'src/common/auth/roles.guard';
+import { IContext } from 'src/common/types/context';
+import { Role } from 'src/common/types/enum.role';
 import { InvitationCodeService } from './invitationCode.service';
 
 @Resolver()
@@ -7,14 +13,16 @@ export class InvitationCodeResolver {
     private readonly invitationCodeService: InvitationCodeService, //
   ) {}
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => String, { description: '초대코드 발송' })
   async sendCodeToEmail(
-    @Args('companyId') companyId: string, //
-    @Args('memberId') memberId: string,
     @Args('email') email: string,
+    @Args('memberId') memberId: string,
+    @Context() context: IContext,
   ) {
     return await this.invitationCodeService.send({
-      companyId,
+      companyId: context.req.user.company,
       memberId,
       email,
     });

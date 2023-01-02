@@ -7,6 +7,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -73,6 +75,7 @@ export class Company {
   @OneToMany(() => RoleCategory, (roleCategory) => roleCategory.company)
   roleCategorys: RoleCategory[];
 
-  @OneToOne(() => Account, (account) => account.company)
+  @ManyToOne(() => Account, (account) => account.company)
+  @JoinColumn()
   account: Account;
 }

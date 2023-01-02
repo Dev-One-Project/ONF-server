@@ -6,6 +6,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -21,9 +22,9 @@ export class Account {
   @Field(() => String)
   email: string;
 
-  @Column({ type: 'enum', enum: Role })
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
   @Field(() => String, { nullable: true })
-  roles: Role[];
+  roles: Role;
 
   @Column()
   password: string;
@@ -41,8 +42,10 @@ export class Account {
   @Field(() => Member, { nullable: true })
   member: Member;
 
-  @OneToOne(() => Company, { nullable: true })
-  @JoinColumn()
+  @Column()
+  companyId: string;
+
+  @OneToMany(() => Company, (company) => company.account)
   @Field(() => Company, { nullable: true })
   company: Company;
 }

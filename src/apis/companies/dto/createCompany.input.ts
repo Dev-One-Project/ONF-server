@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { MEMBERSHIP_TYPE } from '../entities/company.entity';
 
 @InputType()
@@ -14,4 +14,7 @@ export class CreateCompanyInput {
 
   @Field(() => MEMBERSHIP_TYPE, { nullable: true })
   membership: MEMBERSHIP_TYPE;
+
+  @Field(() => Int, { nullable: true })
+  memberCount: number;
 }
