@@ -91,7 +91,7 @@ export const getDatesStartToEnd = (month) => {
   const endDate = new Date(`${arr[0]}-${arr[1]}-${end}`);
 
   while (startDate <= endDate) {
-    result.push(startDate.toISOString().split('T')[0]);
+    result.push(new Date(startDate.toISOString().split('T')[0]));
     startDate.setDate(startDate.getDate() + 1);
   }
   return result;

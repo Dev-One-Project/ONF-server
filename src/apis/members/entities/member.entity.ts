@@ -34,12 +34,12 @@ export class Member {
   // isAdmin: boolean;
 
   @Column({ nullable: true })
-  @Field(() => String)
+  @Field(() => Date, { nullable: true })
   joinDate: Date;
 
   @Column({ nullable: true })
-  @Field(() => String, { nullable: true })
-  exitDate: string;
+  @Field(() => Date, { nullable: true })
+  exitDate: Date;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })

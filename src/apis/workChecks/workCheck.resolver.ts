@@ -12,34 +12,52 @@ export class WorkCheckResolver {
   ) {}
 
   @Query(() => [WorkCheck], {
-    description: '해당 회사에 속하는 member들의 출퇴근 기록 조회',
+    description: 'member개인(나)의 출퇴근 기록 조회 - 직원모드',
   })
-  async fetchCompanyWorkChecks(
-    @Args('companyId') companyId: string, //
-  ) {
-    return await this.workCheckService.findCompanyWorkCheck({ companyId });
-  }
-
-  @Query(() => [WorkCheck], { description: 'member개인의 출퇴근 기록 조회' })
   async fetchMemberWorkChecks(
     @Args('memberId') memberId: string, //
+    @Args('startDate') startDate: Date,
+    @Args('endDate') endDate: Date,
   ) {
-    return await this.workCheckService.findMemberWorkCheck({ memberId });
+    const result = await this.workCheckService.findMemberWorkCheck({
+      memberId,
+      startDate,
+      endDate,
+    });
+
+    result.map((time) => {
+      plusNineHour(time.workingTime), plusNineHour(time.quittingTime);
+    });
+
+    return result;
   }
 
-  @Query(() => [[WorkCheck]], {
-    description: '회사 지점에 속한 멤버들의 출퇴근 기록을 월별로 조회',
+  @Query(() => [[[WorkCheck]]], {
+    description:
+      '회사 지점에 속한 멤버들의 출퇴근 기록을 월별로 조회 - 달력형 - 관리자',
   })
   async fetchMonthWorkChecks(
     @Args('comapnyId') companyId: string, //
-    // @Args('organizationId', { nullable: true }) organizationId: string,
+    @Args({ name: 'organizationId', type: () => [String] })
+    organizationId: string[],
     @Args('month') month: string,
   ) {
-    return await this.workCheckService.findMonth({ companyId, month });
+    const result = await this.workCheckService.findMonth({
+      companyId,
+      organizationId,
+      month,
+    });
+
+    // result.map((time) => {
+    //   plusNineHour(time.workingTime), plusNineHour(time.quittingTime);
+    // });
+
+    return result;
   }
 
   @Query(() => [WorkCheck], {
-    description: '지정된 기간동안의 회사+지점에 속한 멤버들의 출퇴근 기록 조회',
+    description:
+      '지정된 기간동안의 회사+지점에 속한 멤버들의 출퇴근 기록 조회 - 목록형 - 관리자',
   })
   async fetchDateMemberWorkChecks(
     @Args('companyId') companyId: string, //
@@ -79,7 +97,7 @@ export class WorkCheckResolver {
     });
   }
 
-  @Mutation(() => WorkCheck, { description: '출근기록 자동 생성' })
+  @Mutation(() => WorkCheck, { description: '출근하기' })
   async createStartWorkCheck(
     @Args('memberId') memberId: string, // guard 넣게 되면 빼야 될듯???
   ) {
@@ -90,12 +108,13 @@ export class WorkCheckResolver {
     return result;
   }
 
-  @Mutation(() => WorkCheck, { description: '퇴근기록 자동 생성' })
+  @Mutation(() => WorkCheck, { description: '퇴근하기' })
   async createEndWorkCheck(
     @Args('workCheckId') workCheckId: string, //
   ) {
     const result = await this.workCheckService.createEndWork({ workCheckId });
 
+    plusNineHour(result.workingTime);
     plusNineHour(result.quittingTime);
 
     return result;
@@ -130,11 +149,11 @@ export class WorkCheckResolver {
   // }
 
   @Mutation(() => WorkCheck, { description: '출퇴근기록 수정' })
-  async updateWorkCheck(
+  async updateOneWorkCheck(
     @Args('workCheckId') workCheckId: string, //
     @Args('updateWorkCheckInput') updateWorkCheckInput: UpdateWorkCheckInput,
   ) {
-    const result = await this.workCheckService.update({
+    const result = await this.workCheckService.updateOne({
       workCheckId,
       updateWorkCheckInput,
     });
