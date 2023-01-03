@@ -25,6 +25,7 @@ export class CompanyService {
   async getCompanyDetail({ companyId }) {
     return await this.companyRepository
       .createQueryBuilder('company')
+      .leftJoinAndSelect('company.globalConfig', 'globalConfig')
       .where('company.id = :companyId', { companyId })
       .getOne();
   }
@@ -79,7 +80,11 @@ export class CompanyService {
     });
 
     //delete globalConfig
-    this.globalConfigRepository.createQueryBuilder('globalConfig').delete();
+    this.globalConfigRepository
+      .createQueryBuilder('globalConfig')
+      .leftJoinAndSelect('globalConfig.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .delete();
 
     //TODO: get vacation category list and delete all vacation categories
     //TODO: get workinfo list and delete all workinfos
