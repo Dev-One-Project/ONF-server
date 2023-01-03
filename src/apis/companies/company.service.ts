@@ -34,7 +34,7 @@ export class CompanyService {
   }
 
   async updateCompanyDetail({ companyId, updateCompanyInput }) {
-    const company = this.getCompanyDetail({ companyId });
+    const company = await this.getCompanyDetail({ companyId });
     const updateData = {
       ...company,
       ...updateCompanyInput,
