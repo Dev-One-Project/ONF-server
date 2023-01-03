@@ -7,7 +7,6 @@ import { Schedule } from 'src/apis/schedules/entities/schedule.entity';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -56,10 +55,6 @@ export class WorkCheck {
   @UpdateDateColumn({ nullable: true })
   @Field(() => Date, { nullable: true })
   updatedAt: Date;
-
-  @DeleteDateColumn({ nullable: true })
-  @Field(() => Date, { nullable: true })
-  deletedAt: Date;
 
   @ManyToOne(() => Member)
   @Field(() => Member)

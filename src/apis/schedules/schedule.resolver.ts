@@ -26,7 +26,7 @@ export class ScheduleResolver {
   }
 
   @Query(() => [Schedule], {
-    description: '선택한 기간동안의 지점 근무일정 조회 - 목록형',
+    description: '선택한 기간동안의 근무일정 조회 - 목록형',
   })
   async fetchListTypeSchedule(
     @Args('startDate') startDate: Date, //
