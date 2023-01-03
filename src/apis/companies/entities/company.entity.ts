@@ -70,8 +70,10 @@ export class Company {
   deletedAt: Date;
 
   @OneToOne(() => GlobalConfig)
+  @JoinColumn()
   @Field(() => GlobalConfig, { nullable: true })
   globalConfig: GlobalConfig;
+
   @OneToMany(() => RoleCategory, (roleCategory) => roleCategory.company)
   roleCategorys: RoleCategory[];
 
