@@ -9,6 +9,7 @@ import { Account } from '../accounts/entites/account.entity';
 import { CompanyService } from '../companies/company.service';
 import { Company } from '../companies/entities/company.entity';
 import { GlobalConfig } from '../globalConfig/entities/globalConfig.entity';
+import { GlobalConfigService } from '../globalConfig/globalConfig.service';
 import { InvitationCode } from '../invitationCode/entities/invitationCode.entity';
 import { InvitationCodeService } from '../invitationCode/invitationCode.service';
 import { Member } from '../members/entities/member.entity';
@@ -40,6 +41,7 @@ import { AuthService } from './auth.service';
     AccountService,
     CompanyService,
     InvitationCodeService,
+    GlobalConfigService,
   ],
   controllers: [
     AuthController, //

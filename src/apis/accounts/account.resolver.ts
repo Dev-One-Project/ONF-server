@@ -18,34 +18,29 @@ export class AccountResolver {
     @Args('email') email: string,
     @Args('password') password: string,
     @Args('name') name: string,
-    @Args('phone') phone: string,
+    @Args('phone', { nullable: true }) phone: string,
     @Args('createCompanyInput', { nullable: true })
     createCompanyInput?: CreateCompanyInput,
     @Args('invitationCode', { nullable: true })
     invitationCode?: string,
   ) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const admin: Account = await this.accountService.createAdmin({
-      email,
-      hashedPassword,
-      name,
-      phone,
-      createCompanyInput,
-    });
-
-    const employee: Account = await this.accountService.createEmployee({
-      email,
-      hashedPassword,
-      name,
-      phone,
-
-      invitationCode,
-    });
-
-    if (employee) {
-      return employee;
+    if (!invitationCode) {
+      return await this.accountService.createAdmin({
+        email,
+        hashedPassword,
+        name,
+        phone,
+        createCompanyInput,
+      });
     } else {
-      return admin;
+      return await this.accountService.createEmployee({
+        email,
+        hashedPassword: password,
+        name,
+        phone,
+        invitationCode,
+      });
     }
   }
 

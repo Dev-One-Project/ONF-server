@@ -545,6 +545,7 @@ input CreateCompanyInput {
   logoUrl: String
   rules: String
   membership: MEMBERSHIP_TYPE
+  memberCount: Int
 }
 
 input UpdateCompanyInput {
@@ -552,6 +553,7 @@ input UpdateCompanyInput {
   logoUrl: String
   rules: String
   membership: MEMBERSHIP_TYPE
+  memberCount: Int
 }
 
 input CreateOrganizationInput {

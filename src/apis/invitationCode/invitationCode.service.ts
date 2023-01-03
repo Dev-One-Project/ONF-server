@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as nodemailer from 'nodemailer';
 import { checkEmail, getEmailTemplate } from 'src/common/libraries/utils';
+import { Role } from 'src/common/types/enum.role';
 import { Repository } from 'typeorm';
 import { Account } from '../accounts/entites/account.entity';
 import { Company } from '../companies/entities/company.entity';
@@ -34,13 +35,12 @@ export class InvitationCodeService {
     });
 
     const admin = await this.accountRepository.findOne({
-      where: { company: { id: companyId } },
+      where: { roles: Role.ADMIN },
       relations: {
         member: true,
       },
     });
-    console.log('admin:?', admin);
-
+    // console.log('admin인가요?', admin);
     const isCode = await this.invitationCodeRepository.findOne({
       where: { member: { id: memberId } },
     });

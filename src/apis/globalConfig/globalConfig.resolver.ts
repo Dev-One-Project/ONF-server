@@ -22,7 +22,7 @@ export class GlobalConfigResolver {
   @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => GlobalConfig)
   async createGlobalConfig(
-    @Args('createGlobalConfigInput')
+    @Args('createGlobalConfigInput', { nullable: true })
     createGlobalConfigInput: CreateGlobalConfigInput,
     @Context() context: IContext,
   ) {

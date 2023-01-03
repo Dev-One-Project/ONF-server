@@ -4,6 +4,7 @@ import { JwtAccessStrategy } from 'src/common/auth/jwt-access.strategy';
 import { CompanyService } from '../companies/company.service';
 import { Company } from '../companies/entities/company.entity';
 import { GlobalConfig } from '../globalConfig/entities/globalConfig.entity';
+import { GlobalConfigService } from '../globalConfig/globalConfig.service';
 import { InvitationCode } from '../invitationCode/entities/invitationCode.entity';
 import { InvitationCodeService } from '../invitationCode/invitationCode.service';
 import { Member } from '../members/entities/member.entity';
@@ -33,6 +34,7 @@ import { Account } from './entites/account.entity';
     CompanyService,
     RoleCategoryService,
     InvitationCodeService,
+    GlobalConfigService,
   ],
 })
 export class AccountModule {}

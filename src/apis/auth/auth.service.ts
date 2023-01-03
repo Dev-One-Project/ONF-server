@@ -13,10 +13,10 @@ export class AuthService {
         email: user.email,
         sub: user.id,
         role: user.roles,
-        company: user.company.id,
+        company: user.companyId,
         member: user.member.id,
       },
-      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '5m' },
+      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '4w' },
     );
   }
 
@@ -27,8 +27,8 @@ export class AuthService {
         email: user.email,
         sub: user.id,
         role: user.roles,
-        company: user.company,
-        member: user.member,
+        company: user.companyId,
+        member: user.member.id,
       },
       { secret: process.env.REFRESH_TOKEN_KEY, expiresIn: '4w' },
     );

@@ -4,8 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Role } from 'src/common/types/enum.role';
 import { DataSource, Repository } from 'typeorm';
 import { Company } from '../companies/entities/company.entity';
+import { GlobalConfig } from '../globalConfig/entities/globalConfig.entity';
 import { InvitationCode } from '../invitationCode/entities/invitationCode.entity';
 import { Member } from '../members/entities/member.entity';
 import { Account } from './entites/account.entity';
@@ -24,6 +26,9 @@ export class AccountService {
 
     @InjectRepository(InvitationCode)
     private readonly invitationCodeRepository: Repository<InvitationCode>,
+
+    @InjectRepository(GlobalConfig)
+    private readonly globalConfigRepository: Repository<GlobalConfig>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -72,13 +77,26 @@ export class AccountService {
         rules: createCompanyInput.rules,
         membership: createCompanyInput.membership,
       });
-
+      // console.log('1번테스트', companyData);
       const company: Company = await queryRunner.manager.save(
         Company,
         companyData,
       );
-
+      // console.log('2번테스트', company);
       const joinDate: Date = company.createdAt;
+
+      const globalData: GlobalConfig = this.globalConfigRepository.create({
+        allowedCheckInBefore: 10,
+        allowedCheckInAfter: 12,
+        isWorkLogEnabled: false,
+        isVacationEnabled: false,
+        isScheduleEnabled: false,
+        isCheckInEnabled: false,
+        isCheckOutEnabled: false,
+        company: { id: company.id },
+      });
+
+      await queryRunner.manager.save(GlobalConfig, globalData);
 
       const memberData = this.memberRepository.create({
         name: '최고관리자',
@@ -87,26 +105,40 @@ export class AccountService {
         company: { id: company.id },
         joinDate: joinDate,
       });
-
+      // console.log('3번테스트', memberData);
       const member: Member = await queryRunner.manager.save(Member, memberData);
+      // console.log('4번테스트', member);
 
       const adminAccount: Account = this.accountRepository.create({
         email,
         name,
         password,
         phone,
-        company,
+        companyId: company.id,
         member,
+        roles: Role.ADMIN,
       });
+      // console.log('5번테스트', adminAccount);
 
       const result: Account = await queryRunner.manager.save(
         Account,
         adminAccount,
       );
+
+      const { account } = company;
+
+      await queryRunner.manager.save(Company, {
+        ...company,
+        account: { id: result.id },
+      });
+      // console.log('6번테스트', result);
+
       await queryRunner.commitTransaction();
+
       return result;
-    } catch (err) {
+    } catch (error) {
       await queryRunner.rollbackTransaction();
+      return error;
     } finally {
       await queryRunner.release();
     }
@@ -125,7 +157,6 @@ export class AccountService {
     try {
       const user = await this.accountRepository.findOne({ where: { email } });
       if (user) throw new ConflictException('이미 등록된 이메일입니다.');
-      console.log(user);
 
       const code = await this.invitationCodeRepository.findOne({
         where: { invitationCode },
@@ -135,6 +166,8 @@ export class AccountService {
         },
       });
 
+      // console.log('여기도 같이 돌아가나요?', code);
+
       if (!code) throw new NotFoundException('초대코드가 일치하지 않습니다.');
 
       const isJoin = this.memberRepository.create({
@@ -143,21 +176,23 @@ export class AccountService {
       });
 
       const member = await queryRunner.manager.save(Member, isJoin);
-
+      // console.log('회사ID', code.company.id);
       const createEmployee: Account = this.accountRepository.create({
         email,
         password,
         name,
         phone,
         member,
-        company: code.company,
+        companyId: code.company.id,
       });
 
+      // console.log('직원이 생성되나요?', createEmployee);
       const result = await queryRunner.manager.save(Account, createEmployee);
       await queryRunner.commitTransaction();
       return result;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      return error;
     } finally {
       await queryRunner.release();
       await this.invitationCodeRepository.delete({ invitationCode });
