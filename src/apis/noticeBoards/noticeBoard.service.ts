@@ -41,14 +41,11 @@ export class NoticeBoardService {
     const account = await this.accountRepository.findOne({
       where: { id: userId },
     });
-    const company = await this.companyRepository.findOne({
-      where: { id: account.company.id },
-    });
 
     return await this.noticeBoardRepository.save({
       ...createNoticeBoardInput,
       account,
-      company,
+      company: account.companyId,
     });
   }
 
