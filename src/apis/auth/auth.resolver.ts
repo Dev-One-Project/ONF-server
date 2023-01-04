@@ -46,7 +46,7 @@ export class AuthResolver {
     });
 
     this.authService.setRefreshToken({
-      user: context.req.user,
+      user,
       res: context.res,
       req: context.req,
     });
