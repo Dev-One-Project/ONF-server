@@ -4,7 +4,10 @@ import { AccountService } from '../accounts/account.service';
 import { AuthService } from './auth.service';
 import * as bcrypt from 'bcrypt';
 import { IContext } from 'src/common/types/context';
-import { GqlAuthRefreshGuard } from 'src/common/auth/gql-auth.guard';
+import {
+  GqlAuthAccessGuard,
+  GqlAuthRefreshGuard,
+} from 'src/common/auth/gql-auth.guard';
 
 @Resolver()
 export class AuthResolver {
@@ -51,5 +54,13 @@ export class AuthResolver {
       req: context.req,
     });
     return this.authService.getAccessToken({ user });
+  }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Mutation(() => String, { description: 'Remove refreshtoken in headers' })
+  async logout(
+    @Context() context: IContext, //
+  ) {
+    return this.authService.logOut({ res: context.res, req: context.req });
   }
 }
