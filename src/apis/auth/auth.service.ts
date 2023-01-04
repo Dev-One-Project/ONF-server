@@ -8,6 +8,7 @@ export class AuthService {
   ) {}
 
   getAccessToken({ user }) {
+    console.log('user from getAccessToken : ', user);
     return this.jwtService.sign(
       {
         email: user.email,
@@ -21,7 +22,7 @@ export class AuthService {
   }
 
   setRefreshToken({ user, res, req }) {
-    console.log(user);
+    console.log('user from setRefreshToken : ', user);
     const refreshToken = this.jwtService.sign(
       {
         email: user.email,

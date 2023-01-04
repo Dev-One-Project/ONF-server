@@ -40,6 +40,7 @@ export class AuthResolver {
   async restoreAccessToken(
     @Context() context: IContext, //
   ) {
+    console.log('context.req.user from resolver : ', context.req.user);
     const user = await this.accountService.findDetail({
       userId: context.req.user.id,
     });

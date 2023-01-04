@@ -49,7 +49,7 @@ export class AccountService {
     return await this.accountRepository
       .createQueryBuilder('account')
       .leftJoinAndSelect('account.member', 'member')
-      .leftJoinAndSelect('account.company', 'company')
+      // .leftJoinAndSelect('account.company', 'company')
       .where('account.id = :userId', { userId })
       .getOne();
   }
