@@ -53,9 +53,13 @@ export class AuthService {
     );
     let cookie = '';
     if (refreshToken) {
-      cookie = `refreshToken=${refreshToken}; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=${
-        3600 * 24 * 14
-      };`;
+      if (req.headers.origin.includes('localhost')) {
+        cookie = `refreshToken=${refreshToken}; path=/;`;
+      } else {
+        cookie = `refreshToken=${refreshToken}; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=${
+          3600 * 24 * 14
+        };`;
+      }
       res.setHeader('Set-Cookie', cookie);
     }
   }
