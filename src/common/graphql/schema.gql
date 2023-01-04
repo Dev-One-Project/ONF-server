@@ -219,16 +219,16 @@ type Query {
   fetchVacationIssue(vacationIssueId: String!): VacationIssue!
 
   """관리자 EndDate가 기준일자인 휴가발생 조회하기"""
-  fetchVacationIssueBaseDate(baseDate: DateTime!, companyId: String!, organizationId: [String!]!, startDate: DateTime, endDate: DateTime): [[VacationIssue!]!]!
+  fetchVacationIssueBaseDate(baseDate: DateTime!, organizationId: [String!]!, startDate: DateTime, endDate: DateTime): [[VacationIssue!]!]!
 
   """관지라 EndDate가 기준일자이고, 퇴사자랑 같이 조회"""
-  fetchVacationIssueWithBaseDateDelete(baseDate: DateTime!, companyId: String!, organizationId: [String!]!, startDate: DateTime, endDate: DateTime): [[VacationIssue!]!]!
+  fetchVacationIssueWithBaseDateDelete(baseDate: DateTime!, organizationId: [String!]!, startDate: DateTime, endDate: DateTime): [[VacationIssue!]!]!
 
   """관리자 기준일자 기준으로 앞에 발생된 휴가 목록 조회"""
-  fetchVacationIssueDetailDate(baseDate: DateTime!, companyId: String!, organizationId: [String!]!, startDate: DateTime, endDate: DateTime): [[VacationIssue!]!]!
+  fetchVacationIssueDetailDate(baseDate: DateTime!, organizationId: [String!]!, startDate: DateTime, endDate: DateTime): [[VacationIssue!]!]!
 
   """관리자 기준일자 기준으로 앞에 발생된 휴가 퇴사자랑 같이 조회"""
-  fetchVacationIssueDetailDateDelete(baseDate: DateTime!, companyId: String!, startDate: DateTime, endDate: DateTime, organizationId: [String!]!): [[VacationIssue!]!]!
+  fetchVacationIssueDetailDateDelete(baseDate: DateTime!, startDate: DateTime, endDate: DateTime, organizationId: [String!]!): [[VacationIssue!]!]!
 
   """member개인(나)의 출퇴근 기록 조회 - 직원모드"""
   fetchMemberWorkChecks(startDate: DateTime!, endDate: DateTime!): [WorkCheck!]!
@@ -273,10 +273,10 @@ type Query {
   fetchVacationWithDelete: [Vacation!]!
   fetchAccount: Account!
 
-  """이번주 근무일정 조회 - 달력형"""
+  """이번주 근무일정 조회 - 달력형 - 관리자"""
   fetchWeekSchedule(today: DateTime!, organizationId: [String!]!, roleCategoryId: [String!]!): [Schedule!]!
 
-  """선택한 기간동안의 근무일정 조회 - 목록형"""
+  """선택한 기간동안의 근무일정 조회 - 목록형 - 관리자"""
   fetchListTypeSchedule(startDate: DateTime!, endDate: DateTime!, organizationId: [String!]!): [Schedule!]!
 
   """Fetch Holiday such as companyAnniversary"""

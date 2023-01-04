@@ -151,10 +151,16 @@ export class ScheduleService {
       ],
     });
 
+    const { scheduleCategoryId, organizationId, roleCategoryId, ...rest } =
+      updateScheduleInput;
+
     return await this.scheduleRepository.save({
       ...origin,
       id: scheduleId,
-      ...updateScheduleInput,
+      ...rest,
+      scheduleCategory: scheduleCategoryId,
+      organization: organizationId,
+      roleCategory: roleCategoryId,
     });
   }
 
@@ -173,10 +179,16 @@ export class ScheduleService {
           ],
         });
 
+        const { scheduleCategoryId, organizationId, roleCategoryId, ...rest } =
+          updateScheduleInput;
+
         return await this.scheduleRepository.save({
           ...origin,
-          id: schedule,
-          ...updateScheduleInput,
+          id: scheduleId,
+          ...rest,
+          scheduleCategory: scheduleCategoryId,
+          organization: organizationId,
+          roleCategory: roleCategoryId,
         });
       }),
     );

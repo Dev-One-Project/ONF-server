@@ -5,7 +5,7 @@ import { Member } from '../members/entities/member.entity';
 import { WorkCheck } from './entities/workCheck.entity';
 import { getDatesStartToEnd, getToday } from 'src/common/libraries/utils';
 import { minusNineHour } from 'src/common/libraries/utils';
-import { Schedule } from '../schedules/entities/schedule.entity';
+import { Schedule } from 'src/apis/schedules/entities/schedule.entity';
 
 @Injectable()
 export class WorkCheckService {
