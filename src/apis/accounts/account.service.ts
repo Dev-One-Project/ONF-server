@@ -70,12 +70,9 @@ export class AccountService {
       });
 
       if (user) throw new ConflictException('이미 등록된 이메일입니다.');
-
+      const companyInput: Company = { ...createCompanyInput };
       const companyData: Company = this.companyRepository.create({
-        name: createCompanyInput.name,
-        logoUrl: createCompanyInput.logoUrl,
-        rules: createCompanyInput.rules,
-        membership: createCompanyInput.membership,
+        ...companyInput,
       });
       // console.log('1번테스트', companyData);
       const company: Company = await queryRunner.manager.save(
@@ -96,7 +93,16 @@ export class AccountService {
         company: { id: company.id },
       });
 
-      await queryRunner.manager.save(GlobalConfig, globalData);
+      const globalConfig = await queryRunner.manager.save(
+        GlobalConfig,
+        globalData,
+      );
+
+      await queryRunner.manager.update(
+        Company,
+        { id: globalConfig.company.id },
+        { globalConfig: { id: globalConfig.id } },
+      );
 
       const memberData = this.memberRepository.create({
         name: '최고관리자',
