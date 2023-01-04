@@ -53,17 +53,11 @@ export class AuthService {
     );
     let cookie = '';
     if (refreshToken) {
-      if (req.headers.origin.includes('localhost')) {
-        cookie = `refreshToken=${refreshToken}; path=/; domain=.brian-hong.tech; SameSite=Lax; httpOnly; Max-Age=${
-          3600 * 24 * 30
-        };`;
-      } else {
-        cookie = `refreshToken=${refreshToken}; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=${
-          3600 * 24 * 30
-        };`;
-      }
-      res.setHeader('Set-Cookie', cookie);
+      cookie = `refreshToken=${refreshToken}; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=${
+        3600 * 24 * 30
+      };`;
     }
+    res.setHeader('Set-Cookie', cookie);
   }
   // TODO : 확인필
   // async socialLogin({ res, req }) {
