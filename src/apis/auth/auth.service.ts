@@ -54,7 +54,7 @@ export class AuthService {
     let cookie = '';
     if (refreshToken) {
       if (req.headers.origin.includes('localhost')) {
-        cookie = `refreshToken=${refreshToken}; path=/;`;
+        cookie = `refreshToken=${refreshToken}; path=/; Max-Age=${3600 * 24 * 14};`;
       } else {
         cookie = `refreshToken=${refreshToken}; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=${
           3600 * 24 * 14
