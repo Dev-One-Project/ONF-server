@@ -141,6 +141,14 @@ export class ScheduleService {
   async updateOne({ scheduleId, updateScheduleInput }) {
     const origin = await this.scheduleRepository.findOne({
       where: { id: scheduleId },
+      relations: [
+        'member',
+        'company',
+        'organization',
+        'roleCategory',
+        'scheduleTemplate',
+        'scheduleCategory',
+      ],
     });
 
     return await this.scheduleRepository.save({
@@ -155,6 +163,14 @@ export class ScheduleService {
       scheduleId.map(async (schedule) => {
         const origin = await this.scheduleRepository.findOne({
           where: { id: schedule },
+          relations: [
+            'member',
+            'company',
+            'organization',
+            'roleCategory',
+            'scheduleTemplate',
+            'scheduleCategory',
+          ],
         });
 
         return await this.scheduleRepository.save({
