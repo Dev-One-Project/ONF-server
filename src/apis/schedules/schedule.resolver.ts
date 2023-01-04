@@ -73,11 +73,11 @@ export class ScheduleResolver {
   @Mutation(() => [Schedule], {
     description: 'scheduleId로 찾은 근무일정 다수 수정',
   })
-  async updateAllSchedule(
+  async updateManySchedule(
     @Args({ name: 'scheduleId', type: () => [String] }) scheduleId: string[], //
     @Args('updateScheduleInput') updateScheduleInput: UpdateScheduleInput,
   ) {
-    return await this.scheduleService.updateAll({
+    return await this.scheduleService.updateMany({
       scheduleId,
       updateScheduleInput,
     });

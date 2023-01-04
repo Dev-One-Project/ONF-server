@@ -164,11 +164,11 @@ export class ScheduleService {
     });
   }
 
-  async updateAll({ scheduleId, updateScheduleInput }) {
+  async updateMany({ scheduleId, updateScheduleInput }) {
     const result = await Promise.all(
-      scheduleId.map(async (schedule) => {
+      scheduleId.map(async (scheduleId) => {
         const origin = await this.scheduleRepository.findOne({
-          where: { id: schedule },
+          where: { id: scheduleId },
           relations: [
             'member',
             'company',
