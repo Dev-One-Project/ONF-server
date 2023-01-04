@@ -54,10 +54,12 @@ export class AuthService {
     let cookie = '';
     if (refreshToken) {
       if (req.headers.origin.includes('localhost')) {
-        cookie = `refreshToken=${refreshToken}; path=/; Max-Age=${3600 * 24 * 14};`;
+        cookie = `refreshToken=${refreshToken}; path=/; domain=localhost; SameSite=Lax; httpOnly; Max-Age=${
+          3600 * 24 * 30
+        };`;
       } else {
         cookie = `refreshToken=${refreshToken}; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=${
-          3600 * 24 * 14
+          3600 * 24 * 30
         };`;
       }
       res.setHeader('Set-Cookie', cookie);
