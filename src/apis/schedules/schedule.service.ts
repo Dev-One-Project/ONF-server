@@ -141,26 +141,54 @@ export class ScheduleService {
   async updateOne({ scheduleId, updateScheduleInput }) {
     const origin = await this.scheduleRepository.findOne({
       where: { id: scheduleId },
+      relations: [
+        'member',
+        'company',
+        'organization',
+        'roleCategory',
+        'scheduleTemplate',
+        'scheduleCategory',
+      ],
     });
+
+    const { scheduleCategoryId, organizationId, roleCategoryId, ...rest } =
+      updateScheduleInput;
 
     return await this.scheduleRepository.save({
       ...origin,
       id: scheduleId,
-      ...updateScheduleInput,
+      ...rest,
+      scheduleCategory: scheduleCategoryId,
+      organization: organizationId,
+      roleCategory: roleCategoryId,
     });
   }
 
-  async updateAll({ scheduleId, updateScheduleInput }) {
+  async updateMany({ scheduleId, updateScheduleInput }) {
     const result = await Promise.all(
-      scheduleId.map(async (schedule) => {
+      scheduleId.map(async (scheduleId) => {
         const origin = await this.scheduleRepository.findOne({
-          where: { id: schedule },
+          where: { id: scheduleId },
+          relations: [
+            'member',
+            'company',
+            'organization',
+            'roleCategory',
+            'scheduleTemplate',
+            'scheduleCategory',
+          ],
         });
+
+        const { scheduleCategoryId, organizationId, roleCategoryId, ...rest } =
+          updateScheduleInput;
 
         return await this.scheduleRepository.save({
           ...origin,
-          id: schedule,
-          ...updateScheduleInput,
+          id: scheduleId,
+          ...rest,
+          scheduleCategory: scheduleCategoryId,
+          organization: organizationId,
+          roleCategory: roleCategoryId,
         });
       }),
     );
