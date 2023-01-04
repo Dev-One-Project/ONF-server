@@ -70,7 +70,6 @@ export class WorkCheckService {
     return result.flat();
   }
 
-  // 멤버 별로 주르륵
   async findMonth({ companyId, organizationId, month }) {
     const monthStartToEnd = getDatesStartToEnd(month);
 
@@ -121,15 +120,11 @@ export class WorkCheckService {
   }
 
   async createAdmin({ companyId, createWorkCheckInput }) {
-    const { workingTime, quittingTime, breakStartTime, breakEndTime } =
-      createWorkCheckInput;
+    const { workingTime, quittingTime } = createWorkCheckInput;
 
     minusNineHour(workingTime);
     minusNineHour(quittingTime);
-    minusNineHour(breakStartTime);
-    minusNineHour(breakEndTime);
 
-    // 회사ID는 어떻게 넣을까(가드로 해결)
     return await this.workCheckRepository.save({
       ...createWorkCheckInput,
       comapny: companyId,
@@ -158,8 +153,10 @@ export class WorkCheckService {
     });
 
     const startToday = new Date();
+    startToday.setHours(9, 0, 0, 0);
     const copyDate = new Date();
     const endToday = new Date(copyDate.setDate(copyDate.getDate() + 1));
+    endToday.setHours(9, 0, 0, 0);
 
     const schedule = await this.scheduleRepository
       .createQueryBuilder('Schedule')
@@ -172,13 +169,12 @@ export class WorkCheckService {
     const duplicateWorkCheck = await this.workCheckRepository
       .createQueryBuilder('WorkCheck')
       .where('WorkCheck.member = :memberId', { memberId })
-      .andWhere(
-        `WorkCheck.workDay BETWEEN '${startToday.toISOString()}' AND '${endToday.toISOString()}'`,
-      )
+      .andWhere('WorkCheck.workDay BETWEEN :start AND :end', {
+        start: startToday,
+        end: endToday,
+      })
       .andWhere('WorkCheck.quittingTime IS NULL')
       .getOne();
-
-    console.log(duplicateWorkCheck);
 
     if (duplicateWorkCheck) {
       throw new UnprocessableEntityException('이미 출근하셨습니다.');
@@ -203,8 +199,10 @@ export class WorkCheckService {
     });
 
     const startToday = new Date();
+    startToday.setHours(9, 0, 0, 0);
     const copyDate = new Date();
     const endToday = new Date(copyDate.setDate(copyDate.getDate() + 1));
+    endToday.setHours(9, 0, 0, 0);
 
     const checkWorkCheck = await this.workCheckRepository
       .createQueryBuilder('WorkCheck')
@@ -226,32 +224,6 @@ export class WorkCheckService {
       quittingTime: new Date(),
     });
   }
-
-  // async createStartBreak({ workCheckId }) {
-  //   const origin = await this.workCheckRepository.findOne({
-  //     where: { id: workCheckId },
-  //   });
-
-  //   // TODO : 츨근 후 근무중인 상태만 누를수있게하기
-
-  //   return await this.workCheckRepository.save({
-  //     ...origin,
-  //     id: workCheckId,
-  //     breakStartTime: new Date(),
-  //   });
-  // }
-
-  // async createEndBreak({ workCheckId }) {
-  //   const origin = await this.workCheckRepository.findOne({
-  //     where: { id: workCheckId },
-  //   });
-
-  //   return await this.workCheckRepository.save({
-  //     ...origin,
-  //     id: workCheckId,
-  //     breakEndTime: new Date(),
-  //   });
-  // }
 
   async updateOne({ workCheckId, updateWorkCheckInput }) {
     const findWorkCheck = await this.workCheckRepository.findOne({
@@ -289,12 +261,11 @@ export class WorkCheckService {
     //   organization: updateWorkCheckInput?.organizationId,
     //   roleCategory: updateWorkCheckInput?.roleCategoryId,
     // });
+    const { workingTime, quittingTime, isWorking } = updateWorkCheckInput;
 
-    const updateObj = Object.assign({}, findWorkCheck, updateWorkCheckInput);
-
-    // console.log(updateObj);
-
-    const { workingTime, quittingTime } = updateWorkCheckInput;
+    if (isWorking) {
+      findWorkCheck.quittingTime = null;
+    }
 
     if (workingTime) {
       workingTime.setHours(workingTime.getHours() - 9);
@@ -304,22 +275,80 @@ export class WorkCheckService {
       quittingTime.setHours(quittingTime.getHours() - 9);
     }
 
+    const updateObj = Object.assign({}, findWorkCheck, updateWorkCheckInput);
+
+    console.log(updateObj);
+
     const { organizationId, roleCategoryId, ...rest } = updateObj;
 
     return await this.workCheckRepository.save({
       ...findWorkCheck,
       id: workCheckId,
+      ...rest,
       organization: organizationId,
       roleCategory: roleCategoryId,
-      ...rest,
     });
   }
 
-  async delete({ workCheckId }) {
+  async updateMany({ workCheckId, updateWorkCheckInput }) {
+    const result = await Promise.all(
+      workCheckId.map(async (workCheckId) => {
+        const origin = await this.workCheckRepository.findOne({
+          where: { id: workCheckId },
+          relations: {
+            schedule: true,
+          },
+        });
+
+        const updateObj = Object.assign({}, origin, updateWorkCheckInput);
+
+        const { workingTime, quittingTime } = updateWorkCheckInput;
+
+        if (workingTime) {
+          workingTime.setHours(workingTime.getHours() - 9);
+        }
+
+        if (quittingTime) {
+          quittingTime.setHours(quittingTime.getHours() - 9);
+        }
+
+        const { organizationId, roleCategoryId, ...rest } = updateObj;
+
+        if (origin.schedule === null) {
+          return await this.workCheckRepository.save({
+            ...origin,
+            id: workCheckId,
+            ...rest,
+          });
+        } else {
+          return await this.workCheckRepository.save({
+            ...origin,
+            id: workCheckId,
+            ...rest,
+            organization: organizationId,
+            roleCategory: roleCategoryId,
+          });
+        }
+      }),
+    );
+    return result;
+  }
+
+  async deleteOne({ workCheckId }) {
     const result = await this.workCheckRepository.delete({
       id: workCheckId,
     });
 
     return result.affected ? true : false;
+  }
+
+  async deleteMany({ workCheckId }) {
+    let result = true;
+    for await (const id of workCheckId) {
+      const deletes = await this.workCheckRepository.delete({ id });
+
+      if (!deletes.affected) result = false;
+    }
+    return result;
   }
 }

@@ -65,14 +65,14 @@ export class WorkCheck {
   company: Company;
 
   @ManyToOne(() => Organization)
-  @Field(() => Organization)
+  @Field(() => Organization, { nullable: true })
   organization: Organization;
 
   @ManyToOne(() => Schedule)
-  @Field(() => Schedule)
+  @Field(() => Schedule, { nullable: true })
   schedule: Schedule;
 
   @ManyToOne(() => RoleCategory)
-  @Field(() => RoleCategory)
+  @Field(() => RoleCategory, { nullable: true })
   roleCategory: RoleCategory;
 }

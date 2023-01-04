@@ -10,7 +10,17 @@ export class ScheduleResolver {
     private readonly scheduleService: ScheduleService, //
   ) {}
 
-  @Query(() => [Schedule], { description: '이번주 근무일정 조회 - 달력형' })
+  // 직원용 조회 - 멤버(주)
+  // @Query(()=>[Schedule])
+  // async fetchMemberSchedule(
+  //   @Args({name:'memberId', type: () => [String]}) memberId : string[] , //
+  // ) {
+  //   return
+  // }
+
+  @Query(() => [Schedule], {
+    description: '이번주 근무일정 조회 - 달력형 - 관리자',
+  })
   async fetchWeekSchedule(
     @Args('today') today: Date, //
     @Args({ name: 'organizationId', type: () => [String] })
@@ -26,7 +36,7 @@ export class ScheduleResolver {
   }
 
   @Query(() => [Schedule], {
-    description: '선택한 기간동안의 근무일정 조회 - 목록형',
+    description: '선택한 기간동안의 근무일정 조회 - 목록형 - 관리자',
   })
   async fetchListTypeSchedule(
     @Args('startDate') startDate: Date, //

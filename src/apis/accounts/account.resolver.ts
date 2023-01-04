@@ -36,7 +36,7 @@ export class AccountResolver {
     } else {
       return await this.accountService.createEmployee({
         email,
-        hashedPassword: password,
+        hashedPassword,
         name,
         phone,
         invitationCode,
