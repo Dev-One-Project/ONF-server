@@ -100,10 +100,13 @@ export class ScheduleTemplateService {
       where: { id: scheduleTemplateId },
     });
 
+    const { scheduleCategoryId, ...rest } = updateScheduleTemplateInput;
+
     return await this.scheduleTemplateRepository.save({
       ...origin,
       id: scheduleTemplateId,
-      ...updateScheduleTemplateInput,
+      ...rest,
+      scheduleCategory: scheduleCategoryId,
     });
   }
 

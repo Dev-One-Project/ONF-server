@@ -1,4 +1,10 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { GqlAuthAccessGuard } from 'src/common/auth/gql-auth.guard';
+import { Roles } from 'src/common/auth/roles.decorator';
+import { RolesGuard } from 'src/common/auth/roles.guard';
+import { IContext } from 'src/common/types/context';
+import { Role } from 'src/common/types/enum.role';
 import { CreateScheduleCategoryInput } from './dto/createScheduleCategory.input';
 import { UpdateScheduleCategoryInput } from './dto/updateScheduleCategory.input';
 import { ScheduleCategory } from './entities/scheduleCategory.entity';
@@ -10,22 +16,35 @@ export class ScheduleCategoryResolver {
     private readonly scheduleCategoryService: ScheduleCategoryService, //
   ) {}
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Query(() => [ScheduleCategory], { description: '근무일정 유형 전체 조회' })
-  async fetchAllScheduleCategories() {
-    // @Args('companyId') companyId: string, // 가드 추가되면 뺄거임
-    return await this.scheduleCategoryService.findAll();
+  async fetchAllScheduleCategories(
+    @Context() context: IContext, //
+  ) {
+    const companyId = context.req.user.company;
+
+    return await this.scheduleCategoryService.findAll({ companyId });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => ScheduleCategory, { description: '근무일정 유형 생성' })
   async createScheduleCategory(
+    @Context() context: IContext, //
     @Args('createScheduleCategoryInput')
-    createScheduleCategoryInput: CreateScheduleCategoryInput, //
+    createScheduleCategoryInput: CreateScheduleCategoryInput,
   ) {
+    const companyId = context.req.user.company;
+
     return await this.scheduleCategoryService.create({
+      companyId,
       createScheduleCategoryInput,
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => ScheduleCategory, { description: '근무일정 유형 수정' })
   async updateScheduleCategory(
     @Args('scheduleCategoryId') scheduleCategoryId: string, //
@@ -38,6 +57,8 @@ export class ScheduleCategoryResolver {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => Boolean, { description: '근무일정 유형 삭제' })
   async deleteScheduleCategory(
     @Args('scheduleCategoryId') scheduleCategoryId: string, //
