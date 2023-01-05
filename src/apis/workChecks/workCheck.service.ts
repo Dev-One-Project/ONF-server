@@ -46,6 +46,8 @@ export class WorkCheckService {
   }) {
     endDate.setDate(endDate.getDate() + 1);
 
+    // 이거 만약 근무일정이 있는데 지난날짜에 결근이 있으면 업데이트 해줘야할듯
+
     const result = await Promise.all(
       organizationId.map(async (organizationId: string) => {
         return await this.workCheckRepository
