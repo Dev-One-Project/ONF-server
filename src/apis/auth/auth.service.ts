@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AccountService } from '../accounts/account.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService, //
-    private readonly accountService: AccountService,
   ) {}
 
   getAccessToken({ user }) {
-    console.log('user from getAccessToken : ', user);
     return this.jwtService.sign(
       {
         email: user.email,
@@ -65,9 +62,14 @@ export class AuthService {
   }
 
   async logOut({ req, res }) {
+    const refreshToken = req.headers.cookie;
     if (process.env.DEPLOY_ENV === 'LOCAL') {
       // 개발환경용
-      res.setHeader('Set-Cookie', `refreshToken=; path=/;`);
+      let cookie = '';
+      if (refreshToken) {
+        cookie = `refreshToken=; path=/; SameSite=None; Secure; httpOnly; Max-Age=0`;
+        res.setHeader('Set-Cookie', cookie);
+      }
     } else {
       const originList = process.env.ORIGIN_LIST.split(',');
       const origin = req.headers.origin;
@@ -83,10 +85,11 @@ export class AuthService {
         'Access-Control-Allow-Headers',
         'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, Origin, Accept, Access-Control-Request-Method, Access-Control-Request-Headers',
       );
-      res.setHeader(
-        'Set-Cookie',
-        `refreshToken=; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=0;`,
-      );
+      let cookie = '';
+      if (refreshToken) {
+        cookie = `refreshToken=; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=0`;
+        res.setHeader('Set-Cookie', cookie);
+      }
     }
     return '로그아웃에 성공하였습니다.';
   }
