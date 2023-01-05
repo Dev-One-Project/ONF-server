@@ -11,11 +11,11 @@ export class ScheduleCategory {
 
   @Column()
   @Field(() => String)
-  scheduleCategoryName: string;
+  name: string;
 
   @Column()
   @Field(() => String)
-  colorCode: string;
+  color: string;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
@@ -29,7 +29,7 @@ export class ScheduleCategory {
   @Field(() => Boolean, { nullable: true, defaultValue: false })
   isNotHolidayWork: boolean;
 
-  // @ManyToOne(() => Company)
-  // @Field(() => Company)
-  // company: Company;
+  @ManyToOne(() => Company)
+  @Field(() => Company)
+  company: Company;
 }
