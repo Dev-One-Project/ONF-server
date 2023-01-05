@@ -42,6 +42,8 @@ export class MemberResolver {
     else return await this.memberService.findOne({ memberId });
   }
 
+  // TODO : 지점별로 멤버들 조회, 직무 별로 멤버들 조회, 지점+직무로 멤버 조회
+
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => Member, { description: '멤버 정보 입력' })

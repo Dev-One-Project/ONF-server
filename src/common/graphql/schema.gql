@@ -273,9 +273,6 @@ type Query {
   fetchVacationWithDelete: [Vacation!]!
   fetchAccount: Account!
 
-  """이번주 근무일정 조회 - 달력형 - 관리자"""
-  fetchWeekSchedule(today: DateTime!, organizationId: [String!]!, roleCategoryId: [String!]!): [Schedule!]!
-
   """선택한 기간동안의 근무일정 조회 - 목록형 - 관리자"""
   fetchListTypeSchedule(startDate: DateTime!, endDate: DateTime!, organizationId: [String!]!): [Schedule!]!
 
@@ -420,13 +417,13 @@ type Mutation {
   updateOneSchedule(scheduleId: String!, updateScheduleInput: UpdateScheduleInput!): Schedule!
 
   """scheduleId로 찾은 근무일정 다수 수정"""
-  updateAllSchedule(scheduleId: [String!]!, updateScheduleInput: UpdateScheduleInput!): [Schedule!]!
+  updateManySchedule(scheduleId: [String!]!, updateScheduleInput: UpdateScheduleInput!): [Schedule!]!
 
   """근무일정 단일 삭제"""
   deleteOneSchedule(scheduleId: String!): Boolean!
 
   """근무일정 다수 삭제"""
-  deleteManySchedule(scheduleId: [String!]!): String!
+  deleteManySchedule(scheduleId: [String!]!): Boolean!
 
   """Create Holiday such as company founding anniversary"""
   createHoliday(createHolidayInput: CreateHolidayInput!): Holiday!
