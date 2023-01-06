@@ -54,6 +54,29 @@ export class VacationIssuesService {
       .getMany();
 
     const memberArr = await Promise.all(members);
+
+    const answer = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const Use = await this.vacationRepository
+          .createQueryBuilder('vacation')
+          .leftJoinAndSelect('vacation.member', 'member')
+          .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
+          .leftJoinAndSelect('vacation.company', 'company')
+          .where('member.id = :member', { member: member.id })
+          .andWhere('vacation.vacationStartDate <= :baseDate', { baseDate })
+          .select('SUM(vacationCategory.deductionDays)', 'useVacation')
+          .addSelect('member.id', 'member')
+          .getRawMany();
+        console.log(Use);
+        for (let i = 0; i < Use.flat().length; i++) {
+          if (Use.flat()[i].member !== null || Use.flat()[i].length > 0) {
+            answer.push(Use.flat()[i]);
+          }
+        }
+      }),
+    );
+
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
@@ -86,6 +109,13 @@ export class VacationIssuesService {
         if (temp.length > 0) result.push(temp);
       }),
     );
+    for (let i = 0; i < answer.flat().length; i++) {
+      if (result.flat()[i].member.id === answer.flat()[i].member) {
+        result.flat()[i].useVacation = answer.flat()[i].useVacation;
+        result.flat()[i].remaining =
+          result.flat()[i].vacationAll - result.flat()[i].useVacation;
+      }
+    }
     return result;
   }
 
@@ -106,6 +136,29 @@ export class VacationIssuesService {
       .getMany();
 
     const memberArr = await Promise.all(members);
+
+    const answer = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const Use = await this.vacationRepository
+          .createQueryBuilder('vacation')
+          .withDeleted()
+          .leftJoinAndSelect('vacation.member', 'member')
+          .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
+          .leftJoinAndSelect('vacation.company', 'company')
+          .where('member.id = :member', { member: member.id })
+          .andWhere('vacation.vacationStartDate <= :baseDate', { baseDate })
+          .select('SUM(vacationCategory.deductionDays)', 'useVacation')
+          .addSelect('member.id', 'member')
+          .getRawMany();
+        console.log(Use);
+        for (let i = 0; i < Use.flat().length; i++) {
+          if (Use.flat()[i].member !== null || Use.flat()[i].length > 0) {
+            answer.push(Use.flat()[i]);
+          }
+        }
+      }),
+    );
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
@@ -139,6 +192,13 @@ export class VacationIssuesService {
         if (temp.length > 0) result.push(temp);
       }),
     );
+    for (let i = 0; i < answer.flat().length; i++) {
+      if (result.flat()[i].member.id === answer.flat()[i].member) {
+        result.flat()[i].useVacation = answer.flat()[i].useVacation;
+        result.flat()[i].remaining =
+          result.flat()[i].vacationAll - result.flat()[i].useVacation;
+      }
+    }
     return result;
   }
 
@@ -158,6 +218,28 @@ export class VacationIssuesService {
       .getMany();
 
     const memberArr = await Promise.all(members);
+
+    const answer = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const Use = await this.vacationRepository
+          .createQueryBuilder('vacation')
+          .leftJoinAndSelect('vacation.member', 'member')
+          .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
+          .leftJoinAndSelect('vacation.company', 'company')
+          .where('member.id = :member', { member: member.id })
+          .select('SUM(vacationCategory.deductionDays)', 'useVacation')
+          .addSelect('member.id', 'member')
+          .getRawMany();
+
+        for (let i = 0; i < Use.flat().length; i++) {
+          if (Use.flat()[i].member !== null || Use.flat()[i].length > 0) {
+            answer.push(Use.flat()[i]);
+          }
+        }
+      }),
+    );
+
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
@@ -187,6 +269,15 @@ export class VacationIssuesService {
         if (temp.length > 0) result.push(temp);
       }),
     );
+    for (let i = 0; i < result.flat().length; i++) {
+      console.log(result.flat().length);
+      if (result.flat()[i].member.id === answer.flat()[i].member) {
+        result.flat()[i].useVacation = answer.flat()[i].useVacation;
+        result.flat()[i].remaining =
+          result.flat()[i].vacationAll - result.flat()[i].useVacation;
+      }
+    }
+    // console.log(result.flat());
     return result;
   }
   async findWithDetailDateDelete({
@@ -205,6 +296,28 @@ export class VacationIssuesService {
       .where('company.id = :companyId', { companyId })
       .getMany();
     const memberArr = await Promise.all(members);
+
+    const answer = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const Use = await this.vacationRepository
+          .createQueryBuilder('vacation')
+          .withDeleted()
+          .leftJoinAndSelect('vacation.member', 'member')
+          .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
+          .leftJoinAndSelect('vacation.company', 'company')
+          .where('member.id = :member', { member: member.id })
+          .select('SUM(vacationCategory.deductionDays)', 'useVacation')
+          .addSelect('member.id', 'member')
+          .getRawMany();
+
+        for (let i = 0; i < Use.flat().length; i++) {
+          if (Use.flat()[i].member !== null || Use.flat()[i].length > 0) {
+            answer.push(Use.flat()[i]);
+          }
+        }
+      }),
+    );
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
@@ -235,6 +348,14 @@ export class VacationIssuesService {
         if (temp.length > 0) result.push(temp);
       }),
     );
+    for (let i = 0; i < result.flat().length; i++) {
+      console.log(result.flat().length);
+      if (result.flat()[i].member.id === answer.flat()[i].member) {
+        result.flat()[i].useVacation = answer.flat()[i].useVacation;
+        result.flat()[i].remaining =
+          result.flat()[i].vacationAll - result.flat()[i].useVacation;
+      }
+    }
     return result;
   }
 
@@ -276,23 +397,16 @@ export class VacationIssuesService {
     return result.flat();
   }
 
-  async findUseVacation({ memberId }) {
-    const member = await this.memberRepository.findOne({
-      where: { id: memberId },
-      relations: ['company', 'organization'],
-    });
-    // 1. vacation에서 사용한 휴가를 조회한다.
-    // 2. vacationIssue에 있는 vacationAll - 1문항을 하여 remaining에 넣기
-    const result = this.vacationRepository
-      .createQueryBuilder('vacation')
-      .leftJoinAndSelect('vacation.member', 'member')
-      .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
-      .select('SUM(vacationCategory.deductionDays)', 'useVacation')
-      .where('member.id = :member', { member })
-      .getRawOne();
+  // async findUseVacation({ memberId }) {
+  // //   const member = await this.memberRepository.findOne({
+  // //     where: { id: memberId },
+  // //     relations: ['company', 'organization'],
+  // //   });
+  // //   // 1. vacation에서 사용한 휴가를 조회한다.
+  // //   // 2. vacationIssue에 있는 vacationAll - 1문항을 하여 remaining에 넣기
 
-    return result;
-  }
+  // //   return result;
+  // // }
 
   async create({ createVacationIssueInput }) {
     const member = await this.memberRepository.findOne({
