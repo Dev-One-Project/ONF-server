@@ -59,10 +59,22 @@ export class ScheduleCategoryResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Mutation(() => Boolean, { description: '근무일정 유형 삭제' })
-  async deleteScheduleCategory(
+  @Mutation(() => Boolean, { description: '근무일정 유형 단일 삭제' })
+  async deleteOneScheduleCategory(
     @Args('scheduleCategoryId') scheduleCategoryId: string, //
   ) {
-    return await this.scheduleCategoryService.delete({ scheduleCategoryId });
+    return await this.scheduleCategoryService.deleteOne({ scheduleCategoryId });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Mutation(() => Boolean, { description: '근무일정 유형 다수 삭제' })
+  async deleteManyScheduleCategory(
+    @Args({ name: 'scheduleCategoryId', type: () => [String] })
+    scheduleCategoryId: string[], //
+  ) {
+    return await this.scheduleCategoryService.deleteMany({
+      scheduleCategoryId,
+    });
   }
 }
