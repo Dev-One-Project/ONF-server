@@ -1,4 +1,4 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Organization } from '../organization/entities/organization.entity';
@@ -18,13 +18,19 @@ export class ScheduleTemplateService {
     private readonly roleCategoryRepository: Repository<RoleCategory>,
   ) {}
 
-  async findAll() {
+  async findAll({ companyId }) {
     return await this.scheduleTemplateRepository.find({
-      relations: ['organization', 'roleCategory', 'scheduleCategory'],
+      where: { company: { id: companyId } },
+      relations: [
+        'organization',
+        'roleCategory',
+        'scheduleCategory',
+        'company',
+      ],
     });
   }
 
-  async create({ createScheduleTemplateInput }) {
+  async create({ companyId, createScheduleTemplateInput }) {
     const {
       scheduleCategoryId,
       organizationId,
@@ -32,66 +38,83 @@ export class ScheduleTemplateService {
       ...scheduleTemplate
     } = createScheduleTemplateInput;
 
-    let manyOrganization: string | string[];
+    // let manyOrganization: string | string[];
 
-    if (organizationId) {
-      manyOrganization = await Promise.all(
-        organizationId.map(
-          async (organization: string) =>
-            new Promise(async (res, rej) => {
-              try {
-                const prev = await this.organizationRepository.findOne({
-                  where: { id: organization },
-                });
-                if (prev) {
-                  res(prev);
-                } else {
-                  throw new UnprocessableEntityException(
-                    '존재하지 않는 지점을 넣으셨습니다.',
-                  );
-                }
-              } catch (err) {
-                console.log(err.message);
-                rej(err.message);
-              }
-            }),
-        ),
-      );
-    }
+    // if (organizationId) {
+    //   manyOrganization = await Promise.all(
+    //     organizationId.map(
+    //       async (organization: string) =>
+    //         new Promise(async (res, rej) => {
+    //           try {
+    //             const prev = await this.organizationRepository.findOne({
+    //               where: { id: organization },
+    //             });
+    //             if (prev) {
+    //               res(prev);
+    //             } else {
+    //               throw new UnprocessableEntityException(
+    //                 '존재하지 않는 지점을 넣으셨습니다.',
+    //               );
+    //             }
+    //           } catch (err) {
+    //             console.log(err.message);
+    //             rej(err.message);
+    //           }
+    //         }),
+    //     ),
+    //   );
+    // }
 
-    let manyRoleCategory: string | string[];
+    // let manyRoleCategory: string | string[];
 
-    if (roleCategoryId) {
-      manyRoleCategory = await Promise.all(
-        roleCategoryId.map(
-          async (roleCategoy: string) =>
-            new Promise(async (res, rej) => {
-              try {
-                const prev = await this.roleCategoryRepository.findOne({
-                  where: { id: roleCategoy },
-                });
+    // if (roleCategoryId) {
+    //   manyRoleCategory = await Promise.all(
+    //     roleCategoryId.map(
+    //       async (roleCategoy: string) =>
+    //         new Promise(async (res, rej) => {
+    //           try {
+    //             const prev = await this.roleCategoryRepository.findOne({
+    //               where: { id: roleCategoy },
+    //             });
 
-                if (prev) {
-                  res(prev);
-                } else {
-                  throw new UnprocessableEntityException(
-                    '존재하지않는 직무를 넣었습니다.',
-                  );
-                }
-              } catch (err) {
-                console.log(err.message);
-                rej(err.message);
-              }
-            }),
-        ),
-      );
-    }
+    //             if (prev) {
+    //               res(prev);
+    //             } else {
+    //               throw new UnprocessableEntityException(
+    //                 '존재하지않는 직무를 넣었습니다.',
+    //               );
+    //             }
+    //           } catch (err) {
+    //             console.log(err.message);
+    //             rej(err.message);
+    //           }
+    //         }),
+    //     ),
+    //   );
+    // }
+
+    const manyOrganization = await Promise.all(
+      organizationId.map(async (organizationId) => {
+        return await this.organizationRepository.findOne({
+          where: { id: organizationId },
+        });
+      }),
+    );
+
+    const manyRoleCategory = await Promise.all(
+      roleCategoryId.map(async (roleCategoryId) => {
+        return await this.roleCategoryRepository.findOne({
+          where: { id: roleCategoryId },
+        });
+      }),
+    );
 
     return await this.scheduleTemplateRepository.save({
       ...scheduleTemplate,
       scheduleCategory: scheduleCategoryId,
       organization: manyOrganization,
       roleCategory: manyRoleCategory,
+      company: companyId,
     });
   }
 
@@ -100,13 +123,39 @@ export class ScheduleTemplateService {
       where: { id: scheduleTemplateId },
     });
 
-    const { scheduleCategoryId, ...rest } = updateScheduleTemplateInput;
+    const { scheduleCategoryId, organizationId, roleCategoryId, ...rest } =
+      updateScheduleTemplateInput;
+
+    let manyOrganization: string[];
+
+    if (organizationId) {
+      manyOrganization = await Promise.all(
+        organizationId.map(async (organizationId) => {
+          return await this.organizationRepository.findOne({
+            where: { id: organizationId },
+          });
+        }),
+      );
+    }
+
+    let manyRoleCategory: string[];
+    if (roleCategoryId) {
+      manyRoleCategory = await Promise.all(
+        roleCategoryId.map(async (roleCategoryId) => {
+          return await this.roleCategoryRepository.findOne({
+            where: { id: roleCategoryId },
+          });
+        }),
+      );
+    }
 
     return await this.scheduleTemplateRepository.save({
       ...origin,
       id: scheduleTemplateId,
       ...rest,
       scheduleCategory: scheduleCategoryId,
+      organization: manyOrganization,
+      roleCategory: manyRoleCategory,
     });
   }
 
@@ -119,12 +168,12 @@ export class ScheduleTemplateService {
   }
 
   async deleteMany({ scheduleTemplateId }) {
-    await Promise.all(
-      scheduleTemplateId.map(async (scheduleTemplate) => {
-        await this.scheduleTemplateRepository.delete({ id: scheduleTemplate });
-      }),
-    );
+    let result = true;
+    for await (const id of scheduleTemplateId) {
+      const deletes = await this.scheduleTemplateRepository.delete({ id });
 
-    return '삭제 완료';
+      if (!deletes.affected) result = false;
+    }
+    return result;
   }
 }

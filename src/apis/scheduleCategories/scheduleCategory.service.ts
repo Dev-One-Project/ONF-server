@@ -36,11 +36,21 @@ export class ScheduleCategoryService {
     });
   }
 
-  async delete({ scheduleCategoryId }) {
+  async deleteOne({ scheduleCategoryId }) {
     const result = await this.scheduleCategoryRepository.delete({
       id: scheduleCategoryId,
     });
 
     return result.affected ? true : false;
+  }
+
+  async deleteMany({ scheduleCategoryId }) {
+    let result = true;
+    for await (const id of scheduleCategoryId) {
+      const deletes = await this.scheduleCategoryRepository.delete({ id });
+
+      if (!deletes.affected) result = false;
+    }
+    return result;
   }
 }

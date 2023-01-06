@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Company } from 'src/apis/companies/entities/company.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
 import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
 import { ScheduleCategory } from 'src/apis/scheduleCategories/entities/scheduleCategory.entity';
@@ -37,6 +38,10 @@ export class ScheduleTemplate {
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   memo: string;
+
+  @ManyToOne(() => Company)
+  @Field(() => Company)
+  company: Company;
 
   @ManyToOne(() => ScheduleCategory, { nullable: true })
   @Field(() => ScheduleCategory, { nullable: true })
