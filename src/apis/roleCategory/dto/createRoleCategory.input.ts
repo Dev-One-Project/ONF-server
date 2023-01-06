@@ -3,7 +3,7 @@ import { Field, InputType } from '@nestjs/graphql';
 @InputType()
 export class CreateRoleCategoryInput {
   @Field(() => String, { nullable: false })
-  duty: string;
+  name: string;
 
   @Field(() => String, { nullable: false })
   memo: string;

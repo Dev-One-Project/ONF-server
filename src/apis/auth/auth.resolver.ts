@@ -61,6 +61,6 @@ export class AuthResolver {
   async logout(
     @Context() context: IContext, //
   ) {
-    return this.authService.logOut({ res: context.res, req: context.req });
+    return this.authService.logout({ res: context.res, req: context.req });
   }
 }

@@ -33,7 +33,7 @@ export class AuthService {
     );
 
     // Deployment server
-    if (process.env.DEPLOY_ENV === 'LOCAL') {
+    if (req.headers.origin.includes('localhost')) {
       // 개발환경용
       res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; path=/;`);
     } else {
@@ -51,27 +51,24 @@ export class AuthService {
         'Access-Control-Allow-Headers',
         'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, Origin, Accept, Access-Control-Request-Method, Access-Control-Request-Headers',
       );
-      let cookie = '';
-      if (refreshToken) {
-        cookie = `refreshToken=${refreshToken}; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=${
+      res.setHeader(
+        'Set-Cookie',
+        `refreshToken=${refreshToken}; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=${
           3600 * 24 * 14
-        };`;
-        res.setHeader('Set-Cookie', cookie);
-      }
+        };`,
+      );
     }
   }
 
-  async logOut({ req, res }) {
-    const refreshToken = req.headers.cookie;
-    if (process.env.DEPLOY_ENV === 'LOCAL') {
+  async logout({ req, res }) {
+    if (req.headers.origin.includes('localhost')) {
       // 개발환경용
-      let cookie = '';
-      if (refreshToken) {
-        cookie = `refreshToken=; path=/; SameSite=None; Secure; httpOnly; Max-Age=0`;
-        res.setHeader('Set-Cookie', cookie);
-      }
+      res.setHeader(
+        'Set-Cookie',
+        `refreshToken=; path=/; SameSite=None; Secure; httpOnly; Max-Age=0`,
+      );
     } else {
-      const originList = process.env.ORIGIN_LIST.split(',');
+      const originList = process.env.ALLOWED_HOSTS.split(',');
       const origin = req.headers.origin;
       if (originList.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
@@ -85,11 +82,10 @@ export class AuthService {
         'Access-Control-Allow-Headers',
         'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, Origin, Accept, Access-Control-Request-Method, Access-Control-Request-Headers',
       );
-      let cookie = '';
-      if (refreshToken) {
-        cookie = `refreshToken=; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=0`;
-        res.setHeader('Set-Cookie', cookie);
-      }
+      res.setHeader(
+        'Set-Cookie',
+        `refreshToken=; path=/; domain=.brian-hong.tech; SameSite=None; Secure; httpOnly; Max-Age=0`,
+      );
     }
     return '로그아웃에 성공하였습니다.';
   }

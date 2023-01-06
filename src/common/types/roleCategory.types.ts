@@ -1,5 +1,5 @@
 export interface IRoleCategory {
-  duty: string;
+  name: string;
   memo: string;
   colorCode: string;
 }
