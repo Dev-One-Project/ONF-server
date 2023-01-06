@@ -21,7 +21,7 @@ export class RoleCategory {
 
   @Column({ type: 'varchar', length: 30, nullable: false })
   @Field(() => String, { nullable: false })
-  duty: string;
+  name: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
   @Field(() => String, { nullable: true })

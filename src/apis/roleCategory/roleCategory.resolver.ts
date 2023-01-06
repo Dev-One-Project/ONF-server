@@ -18,7 +18,7 @@ export class RoleCategoryResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Mutation(() => RoleCategory)
+  @Mutation(() => RoleCategory, { description: 'Create RoleCategory' })
   createRoleCategory(
     @Args('createRoleCategoryInput')
     createRoleCategoryInput: CreateRoleCategoryInput,
