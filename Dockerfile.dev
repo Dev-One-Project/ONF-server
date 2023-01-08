@@ -1,5 +1,7 @@
 FROM node:16-alpine
 
+LABEL org.opencontainers.image.source=https://github.com/Dev-One-Project/ONF-server
+
 WORKDIR /ONF/
 COPY ./package.json /ONF/
 RUN yarn install --production --network-timeout 1000000
