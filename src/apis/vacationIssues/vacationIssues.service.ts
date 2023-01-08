@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from '../companies/entities/company.entity';
@@ -34,7 +34,7 @@ export class VacationIssuesService {
   async findOne({ vacationIssueId }) {
     return await this.vacationIssueRepository.findOne({
       where: { id: vacationIssueId },
-      relations: ['member'],
+      relations: ['member', 'company', 'organization'],
     });
   }
 
@@ -432,10 +432,48 @@ export class VacationIssuesService {
     return result;
   }
 
+  async updateMany({ vacationIssueId, updateVacationIssueInput }) {
+    const leave = await Promise.all(
+      vacationIssueId.map(async (vacationIssueId: string) => {
+        const findVacationIssue = await this.findOne({
+          vacationIssueId,
+        });
+        if (!vacationIssueId) {
+          throw new UnprocessableEntityException(
+            '존재하지 않은 아이디 입니다.',
+          );
+        }
+        if (!updateVacationIssueInput) {
+          throw new UnprocessableEntityException(
+            '선택사항을 모두 체크하지 않았습니다.',
+          );
+        }
+        const result = await this.vacationIssueRepository.save({
+          ...findVacationIssue,
+          id: vacationIssueId,
+          ...updateVacationIssueInput,
+        });
+
+        return result;
+      }),
+    );
+    return leave;
+  }
+
   async delete({ vacationIssueId }) {
     const result = await this.vacationIssueRepository.delete({
       id: vacationIssueId,
     });
     return result.affected ? true : false;
+  }
+
+  async deleteMany({ vacationIssueId }) {
+    let result = true;
+    for await (const id of vacationIssueId) {
+      const deletes = await this.vacationIssueRepository.delete({ id });
+
+      if (!deletes.affected) result = false;
+    }
+    return result;
   }
 }

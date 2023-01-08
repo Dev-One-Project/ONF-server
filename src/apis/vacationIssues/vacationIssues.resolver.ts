@@ -146,10 +146,35 @@ export class VacationIssuesResolver {
     });
   }
 
+  @Mutation(() => [VacationIssue], {
+    description: '관리자 휴가발생 다수 수정하기 ',
+  })
+  async UpdateManyVacationsIssue(
+    @Args({ name: 'vacationIssueId', type: () => [String] })
+    vacationIssueId: string[],
+    @Args('updateVacationIssueInput', { nullable: true })
+    updateVacationIssueInput: UpdateVacationIssueInput,
+  ) {
+    return await this.vacationIssuesService.updateMany({
+      vacationIssueId,
+      updateVacationIssueInput,
+    });
+  }
+
   @Mutation(() => Boolean, { description: '관리자 휴가 발생 삭제하기' })
   async deleteVacationIssue(
     @Args('vacationIssueId') vacationIssueId: string, //
   ) {
     return await this.vacationIssuesService.delete({ vacationIssueId });
+  }
+
+  @Mutation(() => Boolean, { description: '관리자 휴가발생 다수 삭제하기' })
+  async deleteManyVacationIssue(
+    @Args({ name: 'vacationIssueId', type: () => [String] })
+    vacationIssueId: string[],
+  ) {
+    return await this.vacationIssuesService.deleteMany({
+      vacationIssueId,
+    });
   }
 }

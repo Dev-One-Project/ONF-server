@@ -32,11 +32,11 @@ export class VacationIssue {
   vacationAll: number;
 
   @Column({ default: 0, nullable: true })
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   useVacation: number;
 
   @Column({ nullable: true })
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   remaining: number;
 
   @Column()
