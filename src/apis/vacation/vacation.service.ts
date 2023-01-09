@@ -219,6 +219,43 @@ export class VacationService {
     console.log(result);
     return result;
   }
+
+  async UpdateManyVacation({ vacationId, updateVacationInput }) {
+    const vacations = await Promise.all(
+      vacationId.map(async (vacationId: string) => {
+        const findVacation = await this.findOne({ vacationId });
+        if (!findVacation) {
+          throw new UnprocessableEntityException('존재하지 않은 휴가입니다.');
+        }
+
+        const category = await this.vacationCategoryRepository.findOne({
+          where: { id: updateVacationInput.vacationCategoryId },
+        });
+        if (!category) {
+          throw new UnprocessableEntityException('선택사항을 수정해주세요.');
+        }
+
+        if (
+          Number(findVacation.vacationCategory.deductionDays) !==
+          category.deductionDays
+        ) {
+          findVacation.member.leave +=
+            Number(findVacation.vacationCategory.deductionDays) -
+            category.deductionDays;
+        }
+        const result = await this.vacationRepository.save({
+          ...findVacation,
+          id: vacationId,
+          vacationCategory: category,
+        });
+        await this.memberRepository.save({ ...findVacation.member });
+
+        return result;
+      }),
+    );
+    return vacations;
+  }
+
   async softdelete({ vacationId }) {
     const result = await this.vacationRepository.softDelete({
       id: vacationId,
@@ -231,5 +268,15 @@ export class VacationService {
       id: vacationId,
     });
     return result.affected ? true : false;
+  }
+
+  async deleteMany({ vacationId }) {
+    let result = true;
+    for await (const id of vacationId) {
+      const deletes = await this.vacationRepository.delete({ id });
+
+      if (!deletes.affected) result = false;
+    }
+    return result;
   }
 }

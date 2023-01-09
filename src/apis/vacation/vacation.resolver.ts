@@ -87,6 +87,20 @@ export class VacationResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Mutation(() => [Vacation], { description: '(관리자) 다수의 휴가 수정하기' })
+  async updateManyVacation(
+    @Args({ name: 'vacationId', type: () => [String] }) vacationId: string[],
+    @Args('updateVacationInput', { nullable: true })
+    updateVacationInput: UpdateVacationInput,
+  ) {
+    return await this.vacationService.UpdateManyVacation({
+      vacationId,
+      updateVacationInput,
+    });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => Boolean, { description: '(관리자) 휴가 삭제 - DB에는 유지' })
   async softdeleteVacation(
     @Args('vacationId') vacationId: string, //
@@ -101,5 +115,14 @@ export class VacationResolver {
     @Args('vacationId') vacationId: string, //
   ) {
     return await this.vacationService.delete({ vacationId });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Mutation(() => Boolean, { description: '(관리자) 휴가 완전 삭제' })
+  async deleteManyVacation(
+    @Args({ name: 'vacationId', type: () => [String] }) vacationId: string[], //
+  ) {
+    return await this.vacationService.deleteMany({ vacationId });
   }
 }
