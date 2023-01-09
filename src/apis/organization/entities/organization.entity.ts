@@ -1,4 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { ScheduleTemplate } from 'src/apis/scheduleTemplates/entities/scheduleTemplate.entity';
 import {
@@ -29,6 +29,10 @@ export class Organization {
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
+  checkPoint: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
   lat: string;
 
   @Column({ nullable: true })
@@ -36,12 +40,12 @@ export class Organization {
   lng: string;
 
   @Column({ nullable: true })
+  @Field(() => Int, { nullable: true })
+  range: number;
+
+  @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   description: string;
-
-  @Column({ nullable: false })
-  @Field(() => String, { nullable: true })
-  color: string;
 
   @CreateDateColumn()
   @Field(() => Date, { nullable: true })
