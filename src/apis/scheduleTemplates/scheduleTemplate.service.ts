@@ -35,6 +35,8 @@ export class ScheduleTemplateService {
       scheduleCategoryId,
       organizationId,
       roleCategoryId,
+      startTime,
+      endTime,
       ...scheduleTemplate
     } = createScheduleTemplateInput;
 
