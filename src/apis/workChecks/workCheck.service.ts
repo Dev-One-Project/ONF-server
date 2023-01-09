@@ -47,50 +47,69 @@ export class WorkCheckService {
     organizationId,
     startDate,
     endDate,
+    isActiveMember,
   }) {
     endDate.setDate(endDate.getDate() + 1);
 
     // 이거 만약 근무일정이 있는데 지난날짜에 결근이 있으면 업데이트 해줘야할듯
 
-    const result = await Promise.all(
-      organizationId.map(async (organizationId: string) => {
-        return await this.workCheckRepository
-          .createQueryBuilder('WorkCheck')
-          .leftJoinAndSelect('WorkCheck.member', 'member')
-          .leftJoinAndSelect('WorkCheck.company', 'company')
-          .leftJoinAndSelect('WorkCheck.organization', 'organization')
-          .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
-          .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
-          .where('WorkCheck.company = :companyId', { companyId })
-          .andWhere('WorkCheck.organization = :organizationId', {
-            organizationId,
-          })
-          .andWhere(
-            `WorkCheck.workDay BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
-          )
-          .orderBy('WorkCheck.workDay', 'DESC')
-          .getMany();
-      }),
-    );
+    if (isActiveMember) {
+      const result = await Promise.all(
+        organizationId.map(async (organizationId: string) => {
+          return await this.workCheckRepository
+            .createQueryBuilder('WorkCheck')
+            .withDeleted()
+            .leftJoinAndSelect('WorkCheck.member', 'member')
+            .leftJoinAndSelect('WorkCheck.company', 'company')
+            .leftJoinAndSelect('WorkCheck.organization', 'organization')
+            .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+            .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+            .where('WorkCheck.company = :companyId', { companyId })
+            .andWhere('WorkCheck.organization = :organizationId', {
+              organizationId,
+            })
+            .andWhere(
+              `WorkCheck.workDay BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
+            )
+            .orderBy('WorkCheck.workDay', 'DESC')
+            .getMany();
+        }),
+      );
+      return result.flat();
+    } else {
+      const result2 = await Promise.all(
+        organizationId.map(async (organizationId: string) => {
+          return await this.workCheckRepository
+            .createQueryBuilder('WorkCheck')
+            .innerJoinAndSelect('WorkCheck.member', 'member')
+            .leftJoinAndSelect('WorkCheck.company', 'company')
+            .leftJoinAndSelect('WorkCheck.organization', 'organization')
+            .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+            .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+            .where('member.deletedAt IS NULL')
+            .andWhere('WorkCheck.company = :companyId', { companyId })
+            .andWhere('WorkCheck.organization = :organizationId', {
+              organizationId,
+            })
+            .andWhere(
+              `WorkCheck.workDay BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
+            )
+            .orderBy('WorkCheck.workDay', 'DESC')
+            .getMany();
+        }),
+      );
+      console.log(result2.flat());
 
-    return result.flat();
+      return result2.flat();
+    }
   }
 
   async findMonth({ companyId, organizationId, month, isActiveMember }) {
     const monthStartToEnd = getDatesStartToEnd(month);
 
-    // const memberInOrg = await this.memberRepository
-    //   .createQueryBuilder('Member')
-    //   .where('Member.isJoin = :isJoin', { isJoin: true })
-    //   .andWhere('Member.company = :companyId', { companyId })
-    //   .andWhere('Member.organization IN (:...organizationId)', {
-    //     organizationId,
-    //   })
-    //   .getMany();
-
     const result = [];
 
-    if (isActiveMember === false) {
+    if (isActiveMember) {
       const memberInOrg = await this.memberRepository
         .createQueryBuilder('Member')
         .where('Member.isJoin = :isJoin', { isJoin: true })
@@ -98,12 +117,14 @@ export class WorkCheckService {
         .andWhere('Member.organization IN (:...organizationId)', {
           organizationId,
         })
+        .withDeleted()
         .getMany();
 
       await Promise.all(
         memberInOrg.map(async (member) => {
           const workChecks = await this.workCheckRepository
             .createQueryBuilder('WorkCheck')
+            .withDeleted()
             .leftJoinAndSelect('WorkCheck.company', 'company')
             .leftJoinAndSelect('WorkCheck.member', 'member')
             .leftJoinAndSelect('WorkCheck.organization', 'organization')
@@ -139,7 +160,6 @@ export class WorkCheckService {
         .andWhere('Member.organization IN (:...organizationId)', {
           organizationId,
         })
-        .andWhere('Member.deletedAt IS NOT NULL')
         .getMany();
 
       await Promise.all(
@@ -248,6 +268,7 @@ export class WorkCheckService {
 
     const result = await this.workCheckRepository.save({
       company: memberInfo.company,
+      member: memberId,
       organization: memberInfo.organization,
       roleCategory: memberInfo.roleCategory,
       workDay: getToday(),

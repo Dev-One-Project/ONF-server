@@ -18,19 +18,19 @@ import {
 @ObjectType()
 export class Schedule {
   @PrimaryGeneratedColumn('uuid')
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   id: string;
 
   @Column({ nullable: true })
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   startWorkTime: string;
 
   @Column({ nullable: true })
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   endWorkTime: string;
 
   @Column({ nullable: true })
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   memo: string;
 
   @Column()
@@ -38,9 +38,11 @@ export class Schedule {
   date: Date;
 
   @CreateDateColumn()
+  @Field(() => Date)
   createdAt: Date;
 
   @UpdateDateColumn()
+  @Field(() => Date)
   updatedAt: Date;
 
   @ManyToOne(() => Member)

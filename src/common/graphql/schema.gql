@@ -62,7 +62,7 @@ type ScheduleTemplate {
 
 type RoleCategory {
   id: String!
-  duty: String!
+  name: String!
   memo: String
   colorCode: String!
   company: Company!
@@ -135,11 +135,13 @@ type Vacation {
 }
 
 type Schedule {
-  id: String!
-  startWorkTime: String
-  endWorkTime: String
-  memo: String
+  id: String
+  startWorkTime: String!
+  endWorkTime: String!
+  memo: String!
   date: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
   member: Member!
   company: Company!
   organization: Organization!
@@ -169,8 +171,8 @@ type VacationIssue {
   startingPoint: DateTime!
   expirationDate: DateTime!
   vacationAll: Int!
-  useVacation: Int!
-  remaining: Int!
+  useVacation: Int
+  remaining: Int
   description: String!
   member: Member!
   company: Company
@@ -241,7 +243,7 @@ type Query {
   fetchMonthWorkChecks(organizationId: [String!]!, month: String!, isActiveMember: Boolean = false): [[[WorkCheck!]!]!]!
 
   """지정된 기간동안의 회사+지점에 속한 멤버들의 출퇴근 기록 조회 - 목록형 - 관리자"""
-  fetchDateMemberWorkChecks(organizationId: [String!], startDate: DateTime!, endDate: DateTime!): [WorkCheck!]!
+  fetchDateMemberWorkChecks(organizationId: [String!], startDate: DateTime!, endDate: DateTime!, isActiveMember: Boolean = false): [WorkCheck!]!
 
   """회사 정보 조회"""
   fetchCompanyDetail: Company! @deprecated(reason: "Initializing Status / Need Update")
@@ -276,6 +278,7 @@ type Query {
   """(관리자) 퇴사자와 함께 조회"""
   fetchVacationWithDelete: [Vacation!]!
   fetchAccount: Account!
+  fetchMemberSchedule(memberId: String!, date: DateTime!): Schedule
 
   """선택한 기간동안의 근무일정 조회 - 목록형 - 관리자"""
   fetchListTypeSchedule(startDate: DateTime!, endDate: DateTime!, organizationId: [String!]!): [Schedule!]!
@@ -292,6 +295,8 @@ type Mutation {
   createNoticeBoard(createNoticeBoardInput: CreateNoticeBoardInput!): NoticeBoard!
   updateNoticeBoard(noticeBoardId: String!, updateNoticeBoardInput: UpdateNoticeBoardInput!): NoticeBoard!
   deleteNoticeBoard(noticeBoardId: String!): Boolean!
+
+  """Create RoleCategory"""
   createRoleCategory(createRoleCategoryInput: CreateRoleCategoryInput!): RoleCategory!
 
   """Update RoleCategory"""
@@ -336,8 +341,14 @@ type Mutation {
   """관리자 휴가 발생 수정하기"""
   updateVacationIssue(vacationIssueId: String!, updateVacationIssueInput: UpdateVacationIssueInput!): VacationIssue!
 
+  """관리자 휴가발생 다수 수정하기 """
+  UpdateManyVacationsIssue(vacationIssueId: [String!]!, updateVacationIssueInput: UpdateVacationIssueInput): [VacationIssue!]!
+
   """관리자 휴가 발생 삭제하기"""
   deleteVacationIssue(vacationIssueId: String!): Boolean!
+
+  """관리자 휴가발생 다수 삭제하기"""
+  deleteManyVacationIssue(vacationIssueId: [String!]!): Boolean!
   login(email: String!, password: String!): String!
   restoreAccessToken: String!
 
@@ -466,13 +477,13 @@ input UpdateNoticeBoardInput {
 }
 
 input CreateRoleCategoryInput {
-  duty: String!
+  name: String!
   memo: String!
   colorCode: String!
 }
 
 input UpdateRoleCategoryInput {
-  duty: String
+  name: String
   memo: String
   colorCode: String
 }

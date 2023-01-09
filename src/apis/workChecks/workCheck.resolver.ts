@@ -78,12 +78,14 @@ export class WorkCheckResolver {
     organizationId: string[],
     @Args('startDate') startDate: Date,
     @Args('endDate') endDate: Date,
+    @Args('isActiveMember', { defaultValue: false }) isActiveMember: boolean,
   ) {
     return await this.workCheckService.findDateMemberWorkCheck({
       companyId: context.req.user.company,
       organizationId,
       startDate,
       endDate,
+      isActiveMember,
     });
   }
 

@@ -26,7 +26,7 @@ export class NoticeBoard {
   @Field(() => String)
   title: string;
 
-  @Column()
+  @Column({ type: 'mediumtext' })
   @Field(() => String)
   contents: string;
 

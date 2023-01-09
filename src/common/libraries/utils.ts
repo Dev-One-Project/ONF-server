@@ -101,6 +101,27 @@ export const changeTime = (today, time) => {
   return new Date(`${year}-${month}-${date}T${front}:${back}:00.000Z`);
 };
 
-// export const timeDiff = (time1,time2) => {
+export const timeDiff = (time1, time2) => {
+  const date = new Date();
 
-// }
+  const offset = date.getTimezoneOffset();
+
+  date.setMinutes(offset);
+  date.setHours(0, 0, 0, 0);
+
+  date.setHours(Number(time1.split(':')[0]) + 9, time1.split(':')[1]);
+  const date1 = new Date(date);
+  date.setHours(Number(time2.split(':')[0]) + 9, time2.split(':')[1]);
+  const date2 = new Date(date);
+
+  let diffMilliseconds = Math.abs(Number(date1) - Number(date2));
+
+  if (date2 < date1) {
+    diffMilliseconds += 86400000;
+  }
+
+  const diffMinutes = Math.floor(diffMilliseconds / 1000 / 60);
+  const hours = Math.floor(diffMinutes / 60);
+
+  return hours;
+};
