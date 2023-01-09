@@ -16,7 +16,7 @@ export class AuthService {
         company: user.companyId,
         member: user.member.id,
       },
-      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '5m' },
+      { secret: process.env.ACCESS_TOKEN_KEY, expiresIn: '1d' },
     );
   }
 

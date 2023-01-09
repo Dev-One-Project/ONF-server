@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { timeDiff } from 'src/common/libraries/utils';
 import { Repository } from 'typeorm';
 import { Organization } from '../organization/entities/organization.entity';
 import { RoleCategory } from '../roleCategory/entities/roleCategory.entity';
@@ -111,13 +112,28 @@ export class ScheduleTemplateService {
       }),
     );
 
-    return await this.scheduleTemplateRepository.save({
-      ...scheduleTemplate,
-      scheduleCategory: scheduleCategoryId,
-      organization: manyOrganization,
-      roleCategory: manyRoleCategory,
-      company: companyId,
-    });
+    if (timeDiff(startTime, endTime) >= 9) {
+      return await this.scheduleTemplateRepository.save({
+        ...scheduleTemplate,
+        startTime,
+        endTime,
+        breakTime: '60분',
+        scheduleCategory: scheduleCategoryId,
+        organization: manyOrganization,
+        roleCategory: manyRoleCategory,
+        company: companyId,
+      });
+    } else {
+      return await this.scheduleTemplateRepository.save({
+        ...scheduleTemplate,
+        startTime,
+        endTime,
+        scheduleCategory: scheduleCategoryId,
+        organization: manyOrganization,
+        roleCategory: manyRoleCategory,
+        company: companyId,
+      });
+    }
   }
 
   async update({ scheduleTemplateId, updateScheduleTemplateInput }) {

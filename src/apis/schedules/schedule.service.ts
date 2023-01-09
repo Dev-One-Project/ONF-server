@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotImplementedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Member } from '../members/entities/member.entity';
@@ -21,6 +25,25 @@ export class ScheduleService {
     @InjectRepository(ScheduleTemplate)
     private readonly scheduleTemplateRepository: Repository<ScheduleTemplate>,
   ) {}
+
+  async findMemberSchedule({ memberId, date }) {
+    const endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 1);
+
+    const result = await this.scheduleRepository
+      .createQueryBuilder('Schedule')
+      .where('Schedule.member = :memberId', { memberId })
+      .andWhere(
+        `Schedule.date BETWEEN '${date.toISOString()}' AND '${endDate.toISOString()}'`,
+      )
+      .getOne();
+
+    if (!result) {
+      return null;
+    }
+
+    return result;
+  }
 
   // TODO : 오름차순 내림차순 선택할 수 있게 하자
   async listFind({ startDate, endDate, organizationId }) {

@@ -15,6 +15,16 @@ export class ScheduleResolver {
     private readonly scheduleService: ScheduleService, //
   ) {}
 
+  @Query(() => Schedule, { nullable: true })
+  async fetchMemberSchedule(
+    @Args('memberId') memberId: string, //
+    @Args('date') date: Date,
+  ) {
+    return await this.scheduleService.findMemberSchedule({ memberId, date });
+  }
+
+  // 출퇴근기록용 근무일정 조회 하나 만들기
+
   // 직원용 조회 - 멤버(월)
   // @Query(()=>[Schedule])
   // async fetchMemberSchedule(
