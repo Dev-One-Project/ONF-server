@@ -18,30 +18,6 @@ export class VacationResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Query(() => [Vacation], { description: '(관리자) 휴가 전체 조회' })
-  async fetchVacations(@Context() context: IContext) {
-    return await this.vacationService.findAll({
-      companyId: context.req.user.company,
-    });
-  }
-
-  @Roles(Role.ADMIN)
-  @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Query(() => [Vacation], { description: '(관리자) 기간 내 휴가 조회' })
-  async fetchVacationWithDate(
-    @Args('vacationStart') vacationStart: Date,
-    @Args('vacationEnd') vacationEnd: Date,
-    @Context() context: IContext,
-  ) {
-    return await this.vacationService.findVacationWithDate({
-      vacationStart,
-      vacationEnd,
-      companyId: context.req.user.company,
-    });
-  }
-
-  @Roles(Role.ADMIN)
-  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Query(() => Vacation, { description: '(관리자) 휴가 ID를 통한 휴가 조회' })
   async fetchVacation(
     @Args('vacationId') vacationId: string, //
@@ -51,9 +27,40 @@ export class VacationResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Query(() => [Vacation], { description: '(관리자) 퇴사자와 함께 조회' })
-  async fetchVacationWithDelete() {
-    return await this.vacationService.findVacationWithDelete();
+  @Query(() => [[Vacation]], { description: '(관리자) 활성직원 조회' })
+  async fetchVacationWithDate(
+    @Args('StartDate', { nullable: true }) StartDate: Date,
+    @Args('EndDate', { nullable: true }) EndDate: Date,
+    @Args({ name: 'organizationId', type: () => [String] })
+    organizationId: string[],
+    @Context() ctx: IContext,
+  ) {
+    return await this.vacationService.findVacationWithData({
+      StartDate,
+      EndDate,
+      organizationId,
+      companyId: ctx.req.user.company,
+    });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Query(() => [[Vacation]], {
+    description: '(관리자) 비활성화 된 직원 함께 조회',
+  })
+  async fetchVacationWithDelete(
+    @Args('StartDate', { nullable: true }) StartDate: Date,
+    @Args('EndDate', { nullable: true }) EndDate: Date,
+    @Args({ name: 'organizationId', type: () => [String] })
+    organizationId: string[],
+    @Context() ctx: IContext,
+  ) {
+    return await this.vacationService.findVacationWithDataDelete({
+      StartDate,
+      EndDate,
+      organizationId,
+      companyId: ctx.req.user.company,
+    });
   }
 
   @Roles(Role.ADMIN)

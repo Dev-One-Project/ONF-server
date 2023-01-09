@@ -23,13 +23,6 @@ export class VacationService {
     private readonly companyRepository: Repository<Company>,
   ) {}
 
-  async findAll({ companyId }) {
-    return this.vacationRepository.find({
-      where: { company: companyId },
-      relations: ['member', 'company', 'vacationCategory'],
-    });
-  }
-
   async findOne({ vacationId }) {
     return this.vacationRepository.findOne({
       where: { id: vacationId },
@@ -37,56 +30,108 @@ export class VacationService {
     });
   }
 
-  async findVacationWithDate({ vacationStart, vacationEnd, companyId }) {
-    return await this.vacationRepository
-      .createQueryBuilder('vacation')
-      .leftJoinAndSelect('vacation.member', 'member')
-      .leftJoinAndSelect('vacation.company', 'company')
-      .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
-      .where('vacation.createdAt BETWEEN :vacationStart AND :vacationEnd', {
-        vacationStart,
-        vacationEnd,
-      })
-      .andWhere('company.id = :companyId', { companyId })
-      .orderBy('vacation.vacationStart', 'DESC')
+  async findVacationWithData({
+    StartDate,
+    EndDate,
+    companyId,
+    organizationId,
+  }) {
+    await this.findWithOrganization({ companyId, organizationId });
+
+    const members = await this.memberRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.company', 'company')
+      .where('company.id = :companyId', { companyId })
       .getMany();
-    //   //받아온 start 와 end의 날짜 안에있는 값들을 찾는다.
-    //   const result = [];
-    //   const answer = [];
-    //   const curDate = new Date(vacationStart);
-    //   while (curDate <= new Date(vacationEnd)) {
-    //     result.push(curDate.toISOString().split('T')[0]);
-    //     curDate.setDate(curDate.getDate() + 1);
-    //   }
-    //   for (let i = 0; i < result.length; i++) {
-    //     const period = new Date(result[i]);
-    //     answer.push(period);
-    //   }
-    //   // DB안에있는 start와 end를 찾는다.
-    //   const WithDate = await this.vacationRepository.find({
-    //     where: { vacationStart: vacationStart },
-    //   });
-    //   console.log(vacationStart, '========', vacationEnd);
-    //   console.log(answer);
-    //   console.log(WithDate);
-    //   // DB안에있는 start 와 end가  answer 있다면 반환
-    //   if (answer.includes(WithDate)) {
-    //     return await this.findAll();
-    //   }
+
+    const memberArr = await Promise.all(members);
+
+    const result = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const temp = await this.vacationRepository
+          .createQueryBuilder('vacation')
+          .leftJoinAndSelect('vacation.member', 'member')
+          .leftJoinAndSelect('vacation.company', 'company')
+          .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
+          .where('member.id = :memberId', { memberId: member.id })
+          .andWhere(
+            'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
+            { StartDate, EndDate },
+          )
+          .orderBy('vacation.vacationStartDate', 'DESC')
+          .getMany()
+          .then((res) => {
+            return res;
+          });
+        if (temp.length > 0) result.push(temp);
+      }),
+    );
+    return result;
   }
 
-  async findVacationWithDelete() {
-    return await this.vacationRepository.find({
-      relations: ['member'],
-      withDeleted: true,
-    });
+  async findWithOrganization({ companyId, organizationId }) {
+    const result = await Promise.all(
+      organizationId.map(async (organizationId: string) => {
+        return await this.vacationRepository
+          .createQueryBuilder('vacationIssue')
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('company.id = :companyId', { companyId })
+          .andWhere('organization.id = :organizationId', { organizationId })
+          .getMany();
+      }),
+    );
+    return result.flat();
+  }
+  async findVacationWithDataDelete({
+    StartDate,
+    EndDate,
+    companyId,
+    organizationId,
+  }) {
+    await this.findWithOrganization({ companyId, organizationId });
+
+    const members = await this.memberRepository
+      .createQueryBuilder('member')
+      .withDeleted()
+      .leftJoinAndSelect('member.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
+
+    const memberArr = await Promise.all(members);
+
+    const result = [];
+    await Promise.all(
+      memberArr.map(async (member) => {
+        const temp = await this.vacationRepository
+          .createQueryBuilder('vacation')
+          .withDeleted()
+          .leftJoinAndSelect('vacation.member', 'member')
+          .leftJoinAndSelect('vacation.company', 'company')
+          .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
+          .where('member.id = :memberId', { memberId: member.id })
+          .andWhere(
+            'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
+            { StartDate, EndDate },
+          )
+          .orderBy('vacation.vacationStartDate', 'DESC')
+          .getMany()
+          .then((res) => {
+            return res;
+          });
+        if (temp.length > 0) result.push(temp);
+      }),
+    );
+    return result;
   }
 
   async create({ createVacationInput }) {
     // 1. 직원 조회하기
     const member = await this.memberRepository.findOne({
       where: { id: createVacationInput.memberId },
-      relations: ['company'],
+      relations: ['company', 'organization'],
     });
     if (!member) {
       throw new UnprocessableEntityException('해당 직원을 찾을 수 없습니다.');
@@ -97,6 +142,7 @@ export class VacationService {
       where: { id: createVacationInput.vacationCategoryId },
     });
     // 2. 휴가 생성할 경우 멤버의 잔여휴가를 차감 한다.
+
     const result = createVacationInput.vacations.map(async (date: Date) => {
       member.leave -= category.deductionDays;
       const vacation = this.vacationRepository.create({
@@ -106,6 +152,7 @@ export class VacationService {
         member: member,
         company: member.company,
         vacationCategory: category,
+        organization: member.organization,
       });
 
       return await this.vacationRepository.save(vacation);

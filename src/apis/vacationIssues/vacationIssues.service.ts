@@ -393,7 +393,6 @@ export class VacationIssuesService {
           .getMany();
       }),
     );
-    console.log(result);
     return result.flat();
   }
 
@@ -411,8 +410,11 @@ export class VacationIssuesService {
   async create({ createVacationIssueInput }) {
     const member = await this.memberRepository.findOne({
       where: { id: createVacationIssueInput.memberId },
+      relations: ['company', 'organization'],
     });
+
     const result = await this.vacationIssueRepository.save({
+      ...member,
       member,
       ...createVacationIssueInput,
     });

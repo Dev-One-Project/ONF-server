@@ -1,6 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Member } from 'src/apis/members/entities/member.entity';
+import { Organization } from 'src/apis/organization/entities/organization.entity';
 import { VacationCategory } from 'src/apis/vacationCategory/entities/vacationCategory.entity';
 import {
   Column,
@@ -52,4 +53,8 @@ export class Vacation {
   @ManyToOne(() => VacationCategory, { nullable: true })
   @Field(() => VacationCategory, { nullable: true })
   vacationCategory: VacationCategory;
+
+  @ManyToOne(() => Organization, { nullable: true })
+  @Field(() => Organization, { nullable: true })
+  organization: Organization;
 }
