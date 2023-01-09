@@ -39,6 +39,10 @@ export class ScheduleTemplate {
   @Field(() => String, { nullable: true })
   memo: string;
 
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  breakTime: string;
+
   @ManyToOne(() => Company)
   @Field(() => Company)
   company: Company;

@@ -50,11 +50,13 @@ export class WorkCheckResolver {
     @Args({ name: 'organizationId', type: () => [String] })
     organizationId: string[],
     @Args('month') month: string,
+    @Args('isActiveMember', { defaultValue: false }) isActiveMember: boolean,
   ) {
     const result = await this.workCheckService.findMonth({
       companyId: context.req.user.company,
       organizationId,
       month,
+      isActiveMember,
     });
 
     result.flat(2).map((time) => {
@@ -110,6 +112,7 @@ export class WorkCheckResolver {
     });
   }
 
+  // TODO : 무일정근무일 때 출근하기랑 근무일정 배정되었을 떄 출근하기가 다름
   @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => WorkCheck, { description: '출근하기' })
   async createStartWorkCheck(

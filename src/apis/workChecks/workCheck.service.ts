@@ -3,7 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Member } from '../members/entities/member.entity';
 import { WorkCheck } from './entities/workCheck.entity';
-import { getDatesStartToEnd, getToday } from 'src/common/libraries/utils';
+import {
+  changeTime,
+  getDatesStartToEnd,
+  getToday,
+} from 'src/common/libraries/utils';
 import { minusNineHour } from 'src/common/libraries/utils';
 import { Schedule } from 'src/apis/schedules/entities/schedule.entity';
 
@@ -72,64 +76,124 @@ export class WorkCheckService {
     return result.flat();
   }
 
-  async findMonth({ companyId, organizationId, month }) {
+  async findMonth({ companyId, organizationId, month, isActiveMember }) {
     const monthStartToEnd = getDatesStartToEnd(month);
 
-    const memberInOrg = await this.memberRepository
-      .createQueryBuilder('Member')
-      .where('Member.isJoin = :isJoin', { isJoin: true })
-      .andWhere('Member.company = :companyId', { companyId })
-      .andWhere('Member.organization IN (:...organizationId)', {
-        organizationId,
-      })
-      .getMany();
+    // const memberInOrg = await this.memberRepository
+    //   .createQueryBuilder('Member')
+    //   .where('Member.isJoin = :isJoin', { isJoin: true })
+    //   .andWhere('Member.company = :companyId', { companyId })
+    //   .andWhere('Member.organization IN (:...organizationId)', {
+    //     organizationId,
+    //   })
+    //   .getMany();
 
     const result = [];
 
-    await Promise.all(
-      memberInOrg.map(async (member) => {
-        const workChecks = await this.workCheckRepository
-          .createQueryBuilder('WorkCheck')
-          .leftJoinAndSelect('WorkCheck.company', 'company')
-          .leftJoinAndSelect('WorkCheck.member', 'member')
-          .leftJoinAndSelect('WorkCheck.organization', 'organization')
-          .leftJoinAndSelect('WorkCheck.schedule', 'schuedule')
-          .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
-          .where('WorkCheck.workDay IN (:...monthStartToEnd)', {
-            monthStartToEnd,
-          })
-          .andWhere('WorkCheck.member = :memberId', { memberId: member.id })
-          .orderBy('WorkCheck.workday', 'ASC')
-          .addOrderBy('member.name', 'ASC')
-          .getMany();
+    if (isActiveMember === false) {
+      const memberInOrg = await this.memberRepository
+        .createQueryBuilder('Member')
+        .where('Member.isJoin = :isJoin', { isJoin: true })
+        .andWhere('Member.company = :companyId', { companyId })
+        .andWhere('Member.organization IN (:...organizationId)', {
+          organizationId,
+        })
+        .getMany();
 
-        const memberWorkCheck = [];
+      await Promise.all(
+        memberInOrg.map(async (member) => {
+          const workChecks = await this.workCheckRepository
+            .createQueryBuilder('WorkCheck')
+            .leftJoinAndSelect('WorkCheck.company', 'company')
+            .leftJoinAndSelect('WorkCheck.member', 'member')
+            .leftJoinAndSelect('WorkCheck.organization', 'organization')
+            .leftJoinAndSelect('WorkCheck.schedule', 'schuedule')
+            .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+            .where('WorkCheck.workDay IN (:...monthStartToEnd)', {
+              monthStartToEnd,
+            })
+            .andWhere('WorkCheck.member = :memberId', { memberId: member.id })
+            .orderBy('WorkCheck.workday', 'ASC')
+            .addOrderBy('member.name', 'ASC')
+            .getMany();
 
-        for (let i = 0; i < monthStartToEnd.length; i++) {
-          const workDay = monthStartToEnd[i];
+          const memberWorkCheck = [];
 
-          const workChecksForDay = workChecks.find(
-            (workCheck) =>
-              workCheck.workDay.toISOString() === workDay.toISOString(),
-          );
-          memberWorkCheck.push(workChecksForDay ? [workChecksForDay] : []);
-        }
-        result.push(memberWorkCheck);
-      }),
-    );
+          for (let i = 0; i < monthStartToEnd.length; i++) {
+            const workDay = monthStartToEnd[i];
+
+            const workChecksForDay = workChecks.find(
+              (workCheck) =>
+                workCheck.workDay.toISOString() === workDay.toISOString(),
+            );
+            memberWorkCheck.push(workChecksForDay ? [workChecksForDay] : []);
+          }
+          result.push(memberWorkCheck);
+        }),
+      );
+    } else {
+      const memberInOrg = await this.memberRepository
+        .createQueryBuilder('Member')
+        .where('Member.isJoin = :isJoin', { isJoin: true })
+        .andWhere('Member.company = :companyId', { companyId })
+        .andWhere('Member.organization IN (:...organizationId)', {
+          organizationId,
+        })
+        .andWhere('Member.deletedAt IS NOT NULL')
+        .getMany();
+
+      await Promise.all(
+        memberInOrg.map(async (member) => {
+          const workChecks = await this.workCheckRepository
+            .createQueryBuilder('WorkCheck')
+            .leftJoinAndSelect('WorkCheck.company', 'company')
+            .leftJoinAndSelect('WorkCheck.member', 'member')
+            .leftJoinAndSelect('WorkCheck.organization', 'organization')
+            .leftJoinAndSelect('WorkCheck.schedule', 'schuedule')
+            .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+            .where('WorkCheck.workDay IN (:...monthStartToEnd)', {
+              monthStartToEnd,
+            })
+            .andWhere('WorkCheck.member = :memberId', { memberId: member.id })
+            .orderBy('WorkCheck.workday', 'ASC')
+            .addOrderBy('member.name', 'ASC')
+            .getMany();
+
+          const memberWorkCheck = [];
+
+          for (let i = 0; i < monthStartToEnd.length; i++) {
+            const workDay = monthStartToEnd[i];
+
+            const workChecksForDay = workChecks.find(
+              (workCheck) =>
+                workCheck.workDay.toISOString() === workDay.toISOString(),
+            );
+            memberWorkCheck.push(workChecksForDay ? [workChecksForDay] : []);
+          }
+          result.push(memberWorkCheck);
+        }),
+      );
+    }
 
     return result;
   }
 
   async createAdmin({ companyId, createWorkCheckInput }) {
-    const { workingTime, quittingTime } = createWorkCheckInput;
+    const { workingTime, quittingTime, ...rest } = createWorkCheckInput;
 
-    minusNineHour(workingTime);
-    minusNineHour(quittingTime);
+    const start = workingTime
+      ? minusNineHour(changeTime(createWorkCheckInput.workDay, workingTime))
+      : undefined;
+
+    const end = quittingTime
+      ? minusNineHour(changeTime(createWorkCheckInput.workDay, quittingTime))
+      : undefined;
 
     return await this.workCheckRepository.save({
-      ...createWorkCheckInput,
-      comapny: companyId,
+      ...rest,
+      workingTime: start,
+      quittingTime: end,
+      company: companyId,
       member: createWorkCheckInput.memberId,
       schedule: createWorkCheckInput.scheduleId,
       organization: createWorkCheckInput.organizationId,
@@ -149,7 +213,7 @@ export class WorkCheckService {
   }
 
   async createStartWork({ memberId }) {
-    const member = await this.memberRepository.findOne({
+    const memberInfo = await this.memberRepository.findOne({
       where: { id: memberId },
       relations: ['company', 'roleCategory', 'organization'],
     });
@@ -183,10 +247,9 @@ export class WorkCheckService {
     }
 
     const result = await this.workCheckRepository.save({
-      member: memberId,
-      company: member.company,
-      organization: member.organization,
-      roleCategory: member.roleCategory,
+      company: memberInfo.company,
+      organization: memberInfo.organization,
+      roleCategory: memberInfo.roleCategory,
       workDay: getToday(),
       workingTime: new Date(),
       schedule,

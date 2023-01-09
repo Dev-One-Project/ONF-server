@@ -5,23 +5,20 @@ export class CreateWorkCheckInput {
   @Field(() => Date, { nullable: false })
   workDay: Date;
 
-  @Field(() => Date, { nullable: true })
-  workingTime: Date;
+  @Field(() => String)
+  workingTime: string;
 
-  @Field(() => Date, { nullable: true })
-  quittingTime: Date;
-
-  // @Field(() => Date, { nullable: true })
-  // breakStartTime: Date;
-
-  // @Field(() => Date, { nullable: true })
-  // breakEndTime: Date;
+  @Field(() => String, { nullable: true })
+  quittingTime: string;
 
   @Field(() => Boolean, { nullable: true, defaultValue: false })
   isWorking: boolean;
 
   @Field(() => String, { nullable: true })
   workCheckMemo: Date;
+
+  @Field(() => Boolean, { defaultValue: false })
+  isComfirmed: boolean;
 
   @Field(() => String, { nullable: false })
   memberId: string;

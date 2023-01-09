@@ -29,10 +29,6 @@ export class Member {
   @Field(() => String, { nullable: true })
   phone: string;
 
-  // @Column({ default: false })
-  // @Field(() => Boolean, { nullable: true, defaultValue: false })
-  // isAdmin: boolean;
-
   @Column({ nullable: true })
   @Field(() => Date, { nullable: true })
   joinDate: Date;
@@ -68,13 +64,14 @@ export class Member {
 
   // One to One 근로정보
 
-  @ManyToOne(() => RoleCategory, { nullable: true })
-  @Field(() => RoleCategory, { nullable: true })
+  @ManyToOne(() => Organization)
+  @Field(() => Organization)
+  organization: Organization;
+
+  @ManyToOne(() => RoleCategory)
+  @Field(() => RoleCategory)
   roleCategory: RoleCategory;
 
-  @ManyToOne(() => Organization, { nullable: true })
-  @Field(() => Organization, { nullable: true })
-  organization: Organization;
   @OneToOne(() => Account, (account) => account.member)
   account: Account;
 }

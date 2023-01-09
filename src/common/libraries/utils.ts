@@ -22,54 +22,6 @@ export const dayOfTheWeek = () => {
   return weekday[day.getDay()];
 };
 
-// export const totalTime = (start: Date, end: Date) => {
-//   const total = [];
-//   let workMinute: number;
-//   const startTimeHour = start.getHours();
-//   const startTimeMinutes = start.getMinutes();
-//   const endTimeHour = end.getHours();
-//   const endTimeMinutes = end.getMinutes();
-//   const startMonth = start.getMonth()
-//   const endMonth = end.getMonth()
-
-//   if (startTimeHour > endTimeHour) {
-//     if (startTimeMinutes > endTimeMinutes) {
-//       workMinute = endTimeMinutes + 60 - startTimeMinutes;
-//       total.push(endTimeHour + (24 - startTimeHour) - 1, workMinute);
-//     } else {
-//       workMinute = endTimeMinutes - startTimeMinutes;
-//       total.push(endTimeHour + (24 - startTimeHour), workMinute);
-//     }
-//   } else if(startTimeHour === endTimeHour) {
-//     if(startMonth === endMonth) {
-//       workMinute = endTimeMinutes - startTimeMinutes
-//       total.push(0, workMinute)
-//     } else if(startMonth < endMonth) {
-
-//     }
-
-//   }
-//   else {
-//     if (startTimeMinutes > endTimeMinutes) {
-//       workMinute = endTimeMinutes + 60 - startTimeMinutes;
-//       total.push(endTimeHour - startTimeHour - 1, workMinute);
-//     } else {
-//       workMinute = endTimeMinutes - startTimeMinutes;
-//       total.push(endTimeHour - startTimeHour, workMinute);
-//     }
-//   }
-
-//   // if (startTimeMinutes > endTimeMinutes) {
-//   //   workMinute = endTimeMinutes + 60 - startTimeMinutes;
-//   //   total.push(endTimeHour - startTimeHour - 1, workMinute);
-//   // } else {
-//   //   workMinute = endTimeMinutes - startTimeMinutes;
-//   //   total.push(endTimeHour - startTimeHour, workMinute);
-//   // }
-
-//   return `${total[0]}시간 ${total[1]}분`;
-// };
-
 export const minusNineHour = (time: Date): Date => {
   time?.setHours(time.getHours() - 9);
 
@@ -137,3 +89,18 @@ export const currentWeek = (today) => {
 
   return [week[0], week[week.length - 1]];
 };
+
+export const changeTime = (today, time) => {
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const date = String(today.getDate()).padStart(2, '0');
+
+  const front = time.slice(0, 2);
+  const back = time.slice(2);
+
+  return new Date(`${year}-${month}-${date}T${front}:${back}:00.000Z`);
+};
+
+// export const timeDiff = (time1,time2) => {
+
+// }

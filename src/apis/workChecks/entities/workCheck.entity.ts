@@ -24,10 +24,6 @@ export class WorkCheck {
   @Field(() => Date)
   workDay: Date;
 
-  // @Column({ type: 'datetime', nullable: false })
-  // @Field(() => Date, { nullable: true })
-  // workingTime: Date;
-
   @Column()
   @Field(() => Date, { nullable: true })
   workingTime: Date;
@@ -36,17 +32,15 @@ export class WorkCheck {
   @Field(() => Date, { nullable: true })
   quittingTime: Date;
 
-  // @Column({ nullable: true })
-  // @Field(() => Date, { nullable: true })
-  // breakStartTime: Date;
-
-  // @Column({ nullable: true })
-  // @Field(() => Date, { nullable: true })
-  // breakEndTime: Date;
-
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   workCheckMemo: string;
+
+  @Column({ default: false })
+  @Field(() => Boolean, { defaultValue: false })
+  isComfirmed: boolean;
+
+  // @Column()
 
   @CreateDateColumn()
   @Field(() => Date, { nullable: true })

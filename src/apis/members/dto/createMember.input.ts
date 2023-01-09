@@ -5,9 +5,6 @@ export class CreateMemberInput {
   @Field(() => String)
   name: string;
 
-  @Field(() => String, { nullable: true })
-  phone: string;
-
   @Field(() => Date, { nullable: true })
   joinDate: Date;
 
