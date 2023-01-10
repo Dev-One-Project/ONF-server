@@ -18,7 +18,9 @@ export class VacationCategoryService {
     private readonly roleCategoryRepository: Repository<RoleCategory>,
   ) {}
   async findAll() {
-    return await this.vacationCategoryReoisitory.find();
+    return await this.vacationCategoryReoisitory.find({
+      relations: ['organization', 'roleCategory'],
+    });
   }
 
   async findOne({ vacationCategoryId }) {
