@@ -125,3 +125,35 @@ export const timeDiff = (time1, time2) => {
 
   return hours;
 };
+
+export const timeRange = (time1, time2) => {
+  const date1 = new Date(time1);
+
+  const date2 = new Date(date1);
+
+  const offset = date2.getTimezoneOffset();
+  date2.setMinutes(offset);
+  date2.setHours(0, 0, 0, 0);
+
+  date2.setHours(Number(time2.split(':')[0]) + 9, time2.split(':')[1]);
+
+  const diffMilliseconds = Math.abs(Number(date2) - Number(date1));
+
+  let diffMinutes = Math.floor(diffMilliseconds / 60000);
+
+  const diffHours = Math.floor(diffMinutes / 60);
+
+  if (diffHours >= 1) {
+    diffMinutes -= diffHours * 60;
+  }
+
+  if (date1 < date2) {
+    return diffHours > 0
+      ? `- ${diffHours}시간 ${diffMinutes}분`
+      : `- ${diffMinutes}분`;
+  } else {
+    return diffHours > 0
+      ? `+ ${diffHours}시간 ${diffMinutes}분`
+      : `+ ${diffMinutes}분`;
+  }
+};

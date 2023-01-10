@@ -8,9 +8,10 @@ import { IContext } from 'src/common/types/context';
 import { Role } from 'src/common/types/enum.role';
 import { CreateWorkCheckInput } from './dto/createWorkCheck.input';
 import { UpdateWorkCheckInput } from './dto/updateWorkCheck.input';
+import { WorkCheckOutput } from './dto/workCheck.output';
+import { WorkCheckMemberOutput } from './dto/workCheckMember.output';
 import { WorkCheck } from './entities/workCheck.entity';
 import { WorkCheckService } from './workCheck.service';
-import { WorkCheckOutput } from './dto/workCheck.output';
 
 @Resolver()
 export class WorkCheckResolver {
@@ -19,7 +20,7 @@ export class WorkCheckResolver {
   ) {}
 
   @UseGuards(GqlAuthAccessGuard)
-  @Query(() => [WorkCheck], {
+  @Query(() => [WorkCheckOutput], {
     description: 'member개인(나)의 출퇴근 기록 조회 - 직원모드',
   })
   async fetchMemberWorkChecks(
@@ -33,16 +34,16 @@ export class WorkCheckResolver {
       endDate,
     });
 
-    result.map((time) => {
-      plusNineHour(time.workingTime), plusNineHour(time.quittingTime);
-    });
+    // result.map((time) => {
+    //   plusNineHour(time.workingTime), plusNineHour(time.quittingTime);
+    // });
 
     return result;
   }
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Query(() => [[WorkCheckOutput]], {
+  @Query(() => [[WorkCheckMemberOutput]], {
     description:
       '회사 지점에 속한 멤버들의 출퇴근 기록을 월별로 조회 - 달력형 - 관리자',
   })
@@ -69,7 +70,7 @@ export class WorkCheckResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Query(() => [WorkCheck], {
+  @Query(() => [WorkCheckOutput], {
     description:
       '지정된 기간동안의 회사+지점에 속한 멤버들의 출퇴근 기록 조회 - 목록형 - 관리자',
   })

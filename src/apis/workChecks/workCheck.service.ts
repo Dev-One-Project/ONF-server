@@ -7,6 +7,8 @@ import {
   changeTime,
   getDatesStartToEnd,
   getToday,
+  plusNineHour,
+  timeRange,
 } from 'src/common/libraries/utils';
 import { minusNineHour } from 'src/common/libraries/utils';
 import { Schedule } from 'src/apis/schedules/entities/schedule.entity';
@@ -27,7 +29,7 @@ export class WorkCheckService {
   async findMemberWorkCheck({ memberId, startDate, endDate }) {
     endDate.setDate(endDate.getDate() + 1);
 
-    return await this.workCheckRepository
+    const query = this.workCheckRepository
       .createQueryBuilder('WorkCheck')
       .leftJoinAndSelect('WorkCheck.member', 'member')
       .leftJoinAndSelect('WorkCheck.company', 'company')
@@ -38,8 +40,30 @@ export class WorkCheckService {
       .andWhere(
         `WorkCheck.workDay BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
       )
-      .orderBy('WorkCheck.createdAt', 'DESC')
-      .getMany();
+      .orderBy('WorkCheck.createdAt', 'DESC');
+
+    const workChecks = await query.getMany();
+    const result = [];
+    workChecks.map((workCheck) => {
+      result.push({
+        ...workCheck,
+        workingTimeRange: workCheck.schedule
+          ? timeRange(
+              plusNineHour(workCheck.workingTime),
+              workCheck.schedule.startWorkTime,
+            )
+          : null,
+
+        endTimeRange:
+          workCheck.schedule && workCheck.quittingTime
+            ? timeRange(
+                plusNineHour(workCheck.quittingTime),
+                workCheck.schedule.endWorkTime,
+              )
+            : null,
+      });
+    });
+    return result;
   }
 
   async findDateMemberWorkCheck({
@@ -52,9 +76,9 @@ export class WorkCheckService {
     endDate.setDate(endDate.getDate() + 1);
 
     // 이거 만약 근무일정이 있는데 지난날짜에 결근이 있으면 업데이트 해줘야할듯
-
+    const result = [];
     if (isActiveMember) {
-      const result = await Promise.all(
+      const workChecks = await Promise.all(
         organizationId.map(async (organizationId: string) => {
           return await this.workCheckRepository
             .createQueryBuilder('WorkCheck')
@@ -75,9 +99,28 @@ export class WorkCheckService {
             .getMany();
         }),
       );
-      return result.flat();
+
+      workChecks.flat().map((workCheck) => {
+        result.push({
+          ...workCheck,
+          workingTimeRange: workCheck.schedule
+            ? timeRange(
+                plusNineHour(workCheck.workingTime),
+                workCheck.schedule.startWorkTime,
+              )
+            : null,
+
+          endTimeRange:
+            workCheck.schedule && workCheck.quittingTime
+              ? timeRange(
+                  plusNineHour(workCheck.quittingTime),
+                  workCheck.schedule.endWorkTime,
+                )
+              : null,
+        });
+      });
     } else {
-      const result2 = await Promise.all(
+      const workChecks = await Promise.all(
         organizationId.map(async (organizationId: string) => {
           return await this.workCheckRepository
             .createQueryBuilder('WorkCheck')
@@ -98,10 +141,27 @@ export class WorkCheckService {
             .getMany();
         }),
       );
-      console.log(result2.flat());
+      workChecks.flat().map((workCheck) => {
+        result.push({
+          ...workCheck,
+          workingTimeRange: workCheck.schedule
+            ? timeRange(
+                plusNineHour(workCheck.workingTime),
+                workCheck.schedule.startWorkTime,
+              )
+            : null,
 
-      return result2.flat();
+          endTimeRange:
+            workCheck.schedule && workCheck.quittingTime
+              ? timeRange(
+                  plusNineHour(workCheck.quittingTime),
+                  workCheck.schedule.endWorkTime,
+                )
+              : null,
+        });
+      });
     }
+    return result.flat();
   }
 
   async findMonth({ companyId, organizationId, month, isActiveMember }) {
@@ -147,6 +207,7 @@ export class WorkCheckService {
               (workCheck) =>
                 workCheck.workDay.toISOString() === workDay.toISOString(),
             );
+
             memberWorkCheck.push(workChecksForDay ? [workChecksForDay] : []);
           }
           const temp = {
@@ -267,7 +328,6 @@ export class WorkCheckService {
         start: startToday,
         end: endToday,
       })
-      .andWhere('WorkCheck.quittingTime IS NULL')
       .getOne();
 
     if (duplicateWorkCheck) {

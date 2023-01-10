@@ -36,12 +36,6 @@ export class WorkCheck {
   @Field(() => String, { nullable: true })
   workCheckMemo: string;
 
-  @Column({ default: false })
-  @Field(() => Boolean, { defaultValue: false })
-  isComfirmed: boolean;
-
-  // @Column()
-
   @CreateDateColumn()
   @Field(() => Date, { nullable: true })
   createdAt: Date;
