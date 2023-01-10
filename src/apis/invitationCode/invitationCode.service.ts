@@ -35,7 +35,10 @@ export class InvitationCodeService {
     });
 
     const admin = await this.accountRepository.findOne({
-      where: { roles: Role.ADMIN },
+      where: {
+        roles: Role.ADMIN,
+        company: { id: companyId },
+      },
       relations: {
         member: true,
       },
