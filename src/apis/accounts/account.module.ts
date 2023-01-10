@@ -11,6 +11,7 @@ import { Member } from '../members/entities/member.entity';
 import { Organization } from '../organization/entities/organization.entity';
 import { RoleCategory } from '../roleCategory/entities/roleCategory.entity';
 import { RoleCategoryService } from '../roleCategory/roleCategory.service';
+import { WorkInfo } from '../workInfo/entites/workInfo.entity';
 import { AccountResolver } from './account.resolver';
 import { AccountService } from './account.service';
 import { Account } from './entites/account.entity';
@@ -25,6 +26,7 @@ import { Account } from './entites/account.entity';
       Organization,
       GlobalConfig,
       InvitationCode,
+      WorkInfo,
     ]),
   ],
   providers: [
