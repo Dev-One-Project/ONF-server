@@ -20,7 +20,7 @@ export class VacationCategoryResolver {
   @Query(() => [VacationCategory], {
     description: '(관리자) 휴가유형 전체 찾기',
   })
-  async fetchVacationCategorys() {
+  async fetchVacationCategories() {
     return await this.vacationCategoryService.findAll();
   }
 
@@ -68,7 +68,7 @@ export class VacationCategoryResolver {
   @Mutation(() => [VacationCategory], {
     description: '(관리자) 다수의 휴가유형 수정하기',
   })
-  async updateManyVacationCategorys(
+  async updateManyVacationCategories(
     @Args({ name: 'vacationCategoryId', type: () => [String] })
     vacationCategoryId: string[],
     @Args('updateVacationCategoryInput', { nullable: true })
@@ -94,7 +94,7 @@ export class VacationCategoryResolver {
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => Boolean, { description: '(관리자) 다수의 휴가유형 삭제하기' })
-  async deleteManyVacationCategory(
+  async deleteManyVacationCategories(
     @Args({ name: 'vacationCategoryId', type: () => [String] })
     vacationCategoryId: string[],
   ) {
