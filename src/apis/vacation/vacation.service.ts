@@ -56,7 +56,7 @@ export class VacationService {
           .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
           .where('member.id = :memberId', { memberId: member.id })
           .andWhere(
-            'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
+            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
             { startDate, endDate },
           )
           .orderBy('vacation.vacationStartDate', 'DESC')
@@ -113,7 +113,7 @@ export class VacationService {
           .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
           .where('member.id = :memberId', { memberId: member.id })
           .andWhere(
-            'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
+            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
             { startDate, endDate },
           )
           .orderBy('vacation.vacationStartDate', 'DESC')
