@@ -10,6 +10,7 @@ import { CreateWorkCheckInput } from './dto/createWorkCheck.input';
 import { UpdateWorkCheckInput } from './dto/updateWorkCheck.input';
 import { WorkCheck } from './entities/workCheck.entity';
 import { WorkCheckService } from './workCheck.service';
+import { WorkCheckOutput } from './dto/workCheck.output';
 
 @Resolver()
 export class WorkCheckResolver {
@@ -41,7 +42,7 @@ export class WorkCheckResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Query(() => [[[WorkCheck]]], {
+  @Query(() => [[WorkCheckOutput]], {
     description:
       '회사 지점에 속한 멤버들의 출퇴근 기록을 월별로 조회 - 달력형 - 관리자',
   })
@@ -59,9 +60,9 @@ export class WorkCheckResolver {
       isActiveMember,
     });
 
-    result.flat(2).map((time) => {
-      plusNineHour(time.workingTime), plusNineHour(time.quittingTime);
-    });
+    // result.flat(2).map((time) => {
+    //   plusNineHour(time.workingTime), plusNineHour(time.quittingTime);
+    // });
 
     return result;
   }

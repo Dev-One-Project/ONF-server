@@ -149,7 +149,11 @@ export class WorkCheckService {
             );
             memberWorkCheck.push(workChecksForDay ? [workChecksForDay] : []);
           }
-          result.push(memberWorkCheck);
+          const temp = {
+            member,
+            data: memberWorkCheck,
+          };
+          result.push(temp);
         }),
       );
     } else {
@@ -190,7 +194,11 @@ export class WorkCheckService {
             );
             memberWorkCheck.push(workChecksForDay ? [workChecksForDay] : []);
           }
-          result.push(memberWorkCheck);
+          const temp = {
+            member,
+            data: memberWorkCheck,
+          };
+          result.push(temp);
         }),
       );
     }
