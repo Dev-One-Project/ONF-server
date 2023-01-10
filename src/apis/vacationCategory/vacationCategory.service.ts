@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Organization } from '../organization/entities/organization.entity';
@@ -17,13 +17,8 @@ export class VacationCategoryService {
     @InjectRepository(RoleCategory)
     private readonly roleCategoryRepository: Repository<RoleCategory>,
   ) {}
-  async findAll({ organizationid }) {
-    return await this.vacationCategoryReoisitory
-      .createQueryBuilder('vacationCategory')
-      .leftJoinAndSelect('vacationCategory.organization', 'organization')
-      .leftJoinAndSelect('vacationCategory.roleCategory', 'roleCategory')
-      .where('organization.id = :organizationid', { organizationid })
-      .getMany();
+  async findAll() {
+    return await this.vacationCategoryReoisitory.find();
   }
 
   async findOne({ vacationCategoryId }) {
@@ -50,12 +45,53 @@ export class VacationCategoryService {
     const vacationCategoryOne = await this.vacationCategoryReoisitory.findOne({
       where: { id: vacationCategoryId },
     });
+    const organization = await this.organizationRepository.findOne({
+      where: { id: updateVacationCategoryInput.organizationId },
+    });
+    const roleCategory = await this.roleCategoryRepository.findOne({
+      where: { id: updateVacationCategoryInput.roleCategoryId },
+    });
+
     const result = await this.vacationCategoryReoisitory.save({
       ...vacationCategoryOne,
       id: vacationCategoryId,
+      organization,
+      roleCategory,
       ...updateVacationCategoryInput,
     });
     return result;
+  }
+
+  async updateMany({ vacationCategoryId, updateVacationCategoryInput }) {
+    const category = await Promise.all(
+      vacationCategoryId.map(async (vacationCategoryId: string) => {
+        const findCategory = await this.vacationCategoryReoisitory.findOne({
+          where: { id: vacationCategoryId },
+        });
+        if (!findCategory) {
+          throw new UnprocessableEntityException(
+            '존재하지 않은 휴가유형입니다.',
+          );
+        }
+        const organization = await this.organizationRepository.findOne({
+          where: { id: updateVacationCategoryInput.organizationId },
+        });
+        const roleCategory = await this.roleCategoryRepository.findOne({
+          where: { id: updateVacationCategoryInput.roleCategoryId },
+        });
+
+        const result = await this.vacationCategoryReoisitory.save({
+          ...findCategory,
+          id: vacationCategoryId,
+          organization,
+          roleCategory,
+          ...updateVacationCategoryInput,
+        });
+
+        return result;
+      }),
+    );
+    return category;
   }
 
   async delete({ vacationCategoryId }) {
@@ -63,5 +99,16 @@ export class VacationCategoryService {
       id: vacationCategoryId,
     });
     return result.affected ? true : false;
+  }
+
+  async deleteMany({ vacationCategoryId }) {
+    let result = true;
+
+    for await (const id of vacationCategoryId) {
+      const deletes = await this.vacationCategoryReoisitory.delete({ id });
+
+      if (!deletes.affected) result = false;
+    }
+    return result;
   }
 }
