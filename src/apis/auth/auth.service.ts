@@ -35,10 +35,14 @@ export class AuthService {
     // Deployment server
     if (req.headers.origin.includes('localhost')) {
       // 개발환경용
+      const origin = req.headers.origin;
+      res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Set-Cookie', `refreshToken=${refreshToken}; path=/;`);
     } else {
       const originList = process.env.ALLOWED_HOSTS.split(',');
+      console.log(originList);
       const origin = req.headers.origin;
+      console.log(origin);
       if (originList.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
       }
@@ -63,6 +67,8 @@ export class AuthService {
   async logout({ req, res }) {
     if (req.headers.origin.includes('localhost')) {
       // 개발환경용
+      const origin = req.headers.origin;
+      res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader(
         'Set-Cookie',
         `refreshToken=; path=/; SameSite=None; Secure; httpOnly; Max-Age=0`,

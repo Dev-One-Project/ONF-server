@@ -4,12 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PeriodRange, Standard } from 'src/common/types/enum.range';
 import { Role } from 'src/common/types/enum.role';
 import { DataSource, Repository } from 'typeorm';
 import { Company } from '../companies/entities/company.entity';
 import { GlobalConfig } from '../globalConfig/entities/globalConfig.entity';
 import { InvitationCode } from '../invitationCode/entities/invitationCode.entity';
 import { Member } from '../members/entities/member.entity';
+import { WorkInfo } from '../workInfo/entites/workInfo.entity';
 import { Account } from './entites/account.entity';
 
 @Injectable()
@@ -30,6 +32,9 @@ export class AccountService {
     @InjectRepository(GlobalConfig)
     private readonly globalConfigRepository: Repository<GlobalConfig>,
 
+    @InjectRepository(WorkInfo)
+    private readonly workInfoRepository: Repository<WorkInfo>,
+
     private readonly dataSource: DataSource,
   ) {}
 
@@ -41,6 +46,14 @@ export class AccountService {
       relations: {
         member: true,
         company: true,
+      },
+    });
+  }
+
+  findByCompanyId({ companyId }) {
+    return this.accountRepository.find({
+      where: {
+        companyId,
       },
     });
   }
@@ -81,6 +94,23 @@ export class AccountService {
       );
       // console.log('2번테스트', company);
       const joinDate: Date = company.createdAt;
+
+      const workInfoData: WorkInfo = this.workInfoRepository.create({
+        fixedStandard: Standard.WEEK,
+        fixedPeriodRange: PeriodRange.WEEK,
+        maximumStandard: Standard.WEEK,
+        maximumPeriodRange: PeriodRange.WEEK,
+        name: '일반근무',
+        fixedLabor: '월,화,수,목,금',
+        weekOffDays: '일',
+        fixedHours: '40',
+        fixedUnitPeriod: '1',
+        maximumHours: '52',
+        maximumUnitPeriod: '1',
+        companyId: company.id,
+      });
+
+      await queryRunner.manager.save(WorkInfo, workInfoData);
 
       const globalData: GlobalConfig = this.globalConfigRepository.create({
         allowedCheckInBefore: 10,

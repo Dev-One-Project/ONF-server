@@ -50,4 +50,14 @@ export class AccountResolver {
     const email = context.req.user.email;
     return await this.accountService.findOne({ email });
   }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => [Account], { description: 'Fetch Accounts by company & role' })
+  fetchAccounts(
+    @Context() context: IContext, //
+  ) {
+    return this.accountService.findByCompanyId({
+      companyId: context.req.user.company,
+    });
+  }
 }
