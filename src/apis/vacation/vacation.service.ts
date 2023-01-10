@@ -31,8 +31,8 @@ export class VacationService {
   }
 
   async findVacationWithData({
-    StartDate,
-    EndDate,
+    startDate,
+    endDate,
     companyId,
     organizationId,
   }) {
@@ -57,7 +57,7 @@ export class VacationService {
           .where('member.id = :memberId', { memberId: member.id })
           .andWhere(
             'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
-            { StartDate, EndDate },
+            { startDate, endDate },
           )
           .orderBy('vacation.vacationStartDate', 'DESC')
           .getMany()
@@ -86,8 +86,8 @@ export class VacationService {
     return result.flat();
   }
   async findVacationWithDataDelete({
-    StartDate,
-    EndDate,
+    startDate,
+    endDate,
     companyId,
     organizationId,
   }) {
@@ -114,7 +114,7 @@ export class VacationService {
           .where('member.id = :memberId', { memberId: member.id })
           .andWhere(
             'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
-            { StartDate, EndDate },
+            { startDate, endDate },
           )
           .orderBy('vacation.vacationStartDate', 'DESC')
           .getMany()

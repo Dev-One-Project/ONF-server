@@ -29,15 +29,15 @@ export class VacationResolver {
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Query(() => [[Vacation]], { description: '(관리자) 활성직원 조회' })
   async fetchVacationWithDate(
-    @Args('StartDate', { nullable: true }) StartDate: Date,
-    @Args('EndDate', { nullable: true }) EndDate: Date,
+    @Args('startDate', { nullable: true }) startDate: Date,
+    @Args('endDate', { nullable: true }) endDate: Date,
     @Args({ name: 'organizationId', type: () => [String] })
     organizationId: string[],
     @Context() ctx: IContext,
   ) {
     return await this.vacationService.findVacationWithData({
-      StartDate,
-      EndDate,
+      startDate,
+      endDate,
       organizationId,
       companyId: ctx.req.user.company,
     });
@@ -49,15 +49,15 @@ export class VacationResolver {
     description: '(관리자) 비활성화 된 직원 함께 조회',
   })
   async fetchVacationWithDelete(
-    @Args('StartDate', { nullable: true }) StartDate: Date,
-    @Args('EndDate', { nullable: true }) EndDate: Date,
+    @Args('startDate', { nullable: true }) startDate: Date,
+    @Args('endDate', { nullable: true }) endDate: Date,
     @Args({ name: 'organizationId', type: () => [String] })
     organizationId: string[],
     @Context() ctx: IContext,
   ) {
     return await this.vacationService.findVacationWithDataDelete({
-      StartDate,
-      EndDate,
+      startDate,
+      endDate,
       organizationId,
       companyId: ctx.req.user.company,
     });
