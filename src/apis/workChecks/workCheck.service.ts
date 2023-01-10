@@ -263,6 +263,7 @@ export class WorkCheckService {
         }),
       );
     }
+    console.log(result);
 
     return result;
   }

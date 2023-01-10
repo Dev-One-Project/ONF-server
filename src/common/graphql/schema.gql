@@ -136,6 +136,25 @@ type Vacation {
   organization: Organization
 }
 
+type WorkInfo {
+  id: String!
+  name: String
+  fixedLabor: [String!]
+  weekOffDays: String
+  memo: String
+  fixedStandard: String
+  fixedHours: String
+  fixedUnitPeriod: String
+  fixedPeriodRange: String
+  maximumStandard: String
+  maximumHours: String
+  maximumUnitPeriod: String
+  maximumPeriodRange: String
+  companyId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Schedule {
   id: String
   startWorkTime: String!
@@ -183,6 +202,11 @@ type WorkCheckOutput {
   organization: Organization
   schedule: Schedule
   roleCategory: RoleCategory
+}
+
+type WorkCheckMemberOutput {
+  member: Member!
+  data: [[WorkCheck!]!]!
 }
 
 type VacationIssue {
@@ -259,7 +283,7 @@ type Query {
   fetchMemberWorkChecks(startDate: DateTime!, endDate: DateTime!): [WorkCheckOutput!]!
 
   """회사 지점에 속한 멤버들의 출퇴근 기록을 월별로 조회 - 달력형 - 관리자"""
-  fetchMonthWorkChecks(organizationId: [String!]!, month: String!, isActiveMember: Boolean = false): [[[WorkCheck!]!]!]!
+  fetchMonthWorkChecks(organizationId: [String!]!, month: String!, isActiveMember: Boolean = false): [WorkCheckMemberOutput!]!
 
   """지정된 기간동안의 회사+지점에 속한 멤버들의 출퇴근 기록 조회 - 목록형 - 관리자"""
   fetchDateMemberWorkChecks(organizationId: [String!], startDate: DateTime!, endDate: DateTime!, isActiveMember: Boolean = false): [WorkCheckOutput!]!
@@ -279,10 +303,10 @@ type Query {
   """memberId(사원ID)로 개별 조회, memberId 입력시 입력한 member 조회, 아니면 로그인한 유저 정보 조회"""
   fetchMember(memberId: String): Member!
 
-  """휴가유형 전체 찾기"""
-  fetchVacationCategorys(organizationid: String!): [VacationCategory!]!
+  """(관리자) 휴가유형 전체 찾기"""
+  fetchVacationCategorys: [VacationCategory!]!
 
-  """휴가유형ID를 적어서 하나의 유형 찾기"""
+  """(관리자) 휴가유형ID를 적어서 하나의 유형 찾기"""
   fetchVacationCategory(vacationCategoryId: String!): VacationCategory!
 
   """(관리자) 휴가 ID를 통한 휴가 조회"""
@@ -294,6 +318,9 @@ type Query {
   """(관리자) 비활성화 된 직원 함께 조회"""
   fetchVacationWithDelete(StartDate: DateTime, EndDate: DateTime, organizationId: [String!]!): [[Vacation!]!]!
   fetchAccount: Account!
+
+  """Fetch Accounts by company & role"""
+  fetchAccounts: [Account!]!
   fetchMemberSchedule(memberId: String!, date: DateTime!): Schedule
 
   """선택한 기간동안의 근무일정 조회 - 목록형 - 관리자"""
@@ -425,14 +452,20 @@ type Mutation {
   """멤버 정보 완전 삭제"""
   deleteMember(memberId: String!): Boolean!
 
-  """휴가유형 만들기"""
+  """(관리자) 휴가유형 만들기"""
   createVacationCategory(createVacationCategoryInput: CreateVacationCategoryInput!): VacationCategory!
 
-  """휴가유형Id와 Input을 적어 데이터 수정하기"""
+  """(관리자) 휴가유형Id와 Input을 적어 데이터 수정하기"""
   updateVacationCategory(vacationCategoryId: String!, updateVacationCategoryInput: UpdateVacationCategoryInput!): VacationCategory!
 
-  """휴가유형ID로 데이터 완전 삭제하기"""
+  """(관리자) 다수의 휴가유형 수정하기"""
+  updateManyVacationCategorys(vacationCategoryId: [String!]!, updateVacationCategoryInput: UpdateVacationCategoryInput): [VacationCategory!]!
+
+  """(관리자) 휴가유형ID로 데이터 완전 삭제하기"""
   deleteVacationCategory(vacationCategoryId: String!): Boolean!
+
+  """(관리자) 다수의 휴가유형 삭제하기"""
+  deleteManyVacationCategory(vacationCategoryId: [String!]!): Boolean!
 
   """(관리자) 휴가관리 만들기"""
   createVacation(createVacaionInput: CreateVacationInput!): [Vacation!]!
@@ -484,6 +517,18 @@ type Mutation {
 
   """Upload multiple files / Max total size approximatly 10M"""
   uploadMultipleFiles(files: [Upload!]!): [File!]!
+
+  """근로정보 만들기"""
+  createWorkInfo(
+    """근로정보 기본정보 입력"""
+    createBasicWorkInfoInput: CreateBasicWorkInfoInput
+
+    """근로정보 소정근로규칙 입력"""
+    createFixedLaborDaysInput: CreateFixedLaborDaysInput
+
+    """근로정보 최대근로규칙 입력"""
+    createMaximumLaberInput: CreateMaximumLaberInput
+  ): WorkInfo!
 }
 
 input CreateNoticeBoardInput {
@@ -647,20 +692,23 @@ input UpdateMemberInput {
 }
 
 input CreateVacationCategoryInput {
-  name: String!
-  timeOption: String!
+  name: String
+  timeOption: String
   memo: String
-  paidTime: Int!
-  deductionDays: Float!
-  organizationId: String!
-  roleCategoryId: String!
+  paidTime: Int
+  deductionDays: Float
+  organizationId: String
+  roleCategoryId: String
 }
 
 input UpdateVacationCategoryInput {
-  vacations: String
-  description: String
-  vacationCategoryId: String
-  memberId: String!
+  name: String
+  timeOption: String
+  memo: String
+  paidTime: Int
+  deductionDays: Float
+  organizationId: String
+  roleCategoryId: String
 }
 
 input CreateVacationInput {
@@ -724,3 +772,36 @@ input UpdateGlobalConfigInput {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input CreateBasicWorkInfoInput {
+  name: String!
+  fixedLabor: [String!]
+  weekOffDays: String
+  memo: String
+}
+
+input CreateFixedLaborDaysInput {
+  fixedStandard: Standard
+  fixedHours: String
+  fixedUnitPeriod: String
+  fixedPeriodRange: PeriodRange
+}
+
+enum Standard {
+  DAY
+  WEEK
+  MONTH
+}
+
+enum PeriodRange {
+  DAY
+  WEEK
+  MONTH
+}
+
+input CreateMaximumLaberInput {
+  maximumStandard: Standard
+  maximumHours: String
+  maximumUnitPeriod: String
+  maximumPeriodRange: PeriodRange
+}

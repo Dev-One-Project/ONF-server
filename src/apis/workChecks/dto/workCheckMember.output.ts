@@ -7,6 +7,6 @@ export class WorkCheckMemberOutput {
   @Field(() => Member)
   member: Member;
 
-  @Field(() => [WorkCheck])
-  data: WorkCheck[];
+  @Field(() => [[WorkCheck]])
+  data: WorkCheck[][];
 }

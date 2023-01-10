@@ -43,7 +43,7 @@ export class WorkCheckResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Query(() => [[WorkCheckMemberOutput]], {
+  @Query(() => [WorkCheckMemberOutput], {
     description:
       '회사 지점에 속한 멤버들의 출퇴근 기록을 월별로 조회 - 달력형 - 관리자',
   })
