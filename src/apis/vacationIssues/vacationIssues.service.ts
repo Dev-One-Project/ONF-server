@@ -80,33 +80,56 @@ export class VacationIssuesService {
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
-        const temp = await this.vacationIssueRepository
-          .createQueryBuilder('vacationIssue')
-          .leftJoinAndSelect('vacationIssue.member', 'member')
-          .leftJoinAndSelect('vacationIssue.company', 'company')
-          .leftJoinAndSelect('vacationIssue.organization', 'organization')
-          .where('member.id = :membersId', {
-            membersId: member.id,
-          })
-          .andWhere('vacationIssue.startingPoint <= :baseDate', {
-            baseDate,
-          })
-          .andWhere(
-            'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
-            {
-              startDate,
-              endDate,
-            },
-          )
-          .orderBy('vacationIssue.startingPoint', 'DESC')
-          .getMany()
-          .then((res) => {
-            return res;
-          });
-        for (let i = 0; i < temp.length; i++) {
-          temp[i].expirationDate = baseDate;
+        if (!startDate && !endDate) {
+          const temp = await this.vacationIssueRepository
+            .createQueryBuilder('vacationIssue')
+            .leftJoinAndSelect('vacationIssue.member', 'member')
+            .leftJoinAndSelect('vacationIssue.company', 'company')
+            .leftJoinAndSelect('vacationIssue.organization', 'organization')
+            .where('member.id = :membersId', {
+              membersId: member.id,
+            })
+            .andWhere('vacationIssue.startingPoint <= :baseDate', {
+              baseDate,
+            })
+            .orderBy('vacationIssue.startingPoint', 'DESC')
+            .getMany()
+            .then((res) => {
+              return res;
+            });
+          for (let i = 0; i < temp.length; i++) {
+            temp[i].expirationDate = baseDate;
+          }
+          if (temp.length > 0) result.push(temp);
+        } else {
+          const temp = await this.vacationIssueRepository
+            .createQueryBuilder('vacationIssue')
+            .leftJoinAndSelect('vacationIssue.member', 'member')
+            .leftJoinAndSelect('vacationIssue.company', 'company')
+            .leftJoinAndSelect('vacationIssue.organization', 'organization')
+            .where('member.id = :membersId', {
+              membersId: member.id,
+            })
+            .andWhere('vacationIssue.startingPoint <= :baseDate', {
+              baseDate,
+            })
+            .andWhere(
+              'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
+              {
+                startDate,
+                endDate,
+              },
+            )
+            .orderBy('vacationIssue.startingPoint', 'DESC')
+            .getMany()
+            .then((res) => {
+              return res;
+            });
+          for (let i = 0; i < temp.length; i++) {
+            temp[i].expirationDate = baseDate;
+          }
+          if (temp.length > 0) result.push(temp);
         }
-        if (temp.length > 0) result.push(temp);
       }),
     );
     for (let i = 0; i < answer.flat().length; i++) {
@@ -162,34 +185,58 @@ export class VacationIssuesService {
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
-        const temp = await this.vacationIssueRepository
-          .createQueryBuilder('vacationIssue')
-          .withDeleted()
-          .leftJoinAndSelect('vacationIssue.member', 'member')
-          .leftJoinAndSelect('vacationIssue.company', 'company')
-          .leftJoinAndSelect('vacationIssue.organization', 'organization')
-          .where('member.id = :membersId', {
-            membersId: member.id,
-          })
-          .andWhere('vacationIssue.startingPoint <= :baseDate', {
-            baseDate,
-          })
-          .andWhere(
-            'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
-            {
-              startDate,
-              endDate,
-            },
-          )
-          .orderBy('vacationIssue.startingPoint', 'DESC')
-          .getMany()
-          .then((res) => {
-            return res;
-          });
-        for (let i = 0; i < temp.length; i++) {
-          temp[i].expirationDate = baseDate;
+        if (!startDate && !endDate) {
+          const temp = await this.vacationIssueRepository
+            .createQueryBuilder('vacationIssue')
+            .withDeleted()
+            .leftJoinAndSelect('vacationIssue.member', 'member')
+            .leftJoinAndSelect('vacationIssue.company', 'company')
+            .leftJoinAndSelect('vacationIssue.organization', 'organization')
+            .where('member.id = :membersId', {
+              membersId: member.id,
+            })
+            .andWhere('vacationIssue.startingPoint <= :baseDate', {
+              baseDate,
+            })
+            .orderBy('vacationIssue.startingPoint', 'DESC')
+            .getMany()
+            .then((res) => {
+              return res;
+            });
+          for (let i = 0; i < temp.length; i++) {
+            temp[i].expirationDate = baseDate;
+          }
+          if (temp.length > 0) result.push(temp);
+        } else {
+          const temp = await this.vacationIssueRepository
+            .createQueryBuilder('vacationIssue')
+            .withDeleted()
+            .leftJoinAndSelect('vacationIssue.member', 'member')
+            .leftJoinAndSelect('vacationIssue.company', 'company')
+            .leftJoinAndSelect('vacationIssue.organization', 'organization')
+            .where('member.id = :membersId', {
+              membersId: member.id,
+            })
+            .andWhere('vacationIssue.startingPoint <= :baseDate', {
+              baseDate,
+            })
+            .andWhere(
+              'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
+              {
+                startDate,
+                endDate,
+              },
+            )
+            .orderBy('vacationIssue.startingPoint', 'DESC')
+            .getMany()
+            .then((res) => {
+              return res;
+            });
+          for (let i = 0; i < temp.length; i++) {
+            temp[i].expirationDate = baseDate;
+          }
+          if (temp.length > 0) result.push(temp);
         }
-        if (temp.length > 0) result.push(temp);
       }),
     );
     for (let i = 0; i < answer.flat().length; i++) {
