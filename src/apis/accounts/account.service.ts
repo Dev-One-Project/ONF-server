@@ -50,8 +50,8 @@ export class AccountService {
     });
   }
 
-  findByCompanyId({ companyId }) {
-    return this.accountRepository.find({
+  async findByCompanyId({ companyId }) {
+    return await this.accountRepository.find({
       where: {
         companyId,
       },
@@ -92,7 +92,7 @@ export class AccountService {
         Company,
         companyData,
       );
-      // console.log('2번테스트', company);
+      console.log('2번테스트', company);
       const joinDate: Date = company.createdAt;
 
       const workInfoData: WorkInfo = this.workInfoRepository.create({
@@ -101,7 +101,7 @@ export class AccountService {
         maximumStandard: Standard.WEEK,
         maximumPeriodRange: PeriodRange.WEEK,
         name: '일반근무',
-        fixedLabor: '월,화,수,목,금',
+        fixedLabor: '월화수목금',
         weekOffDays: '일',
         fixedHours: '40',
         fixedUnitPeriod: '1',
@@ -110,7 +110,17 @@ export class AccountService {
         companyId: company.id,
       });
 
-      await queryRunner.manager.save(WorkInfo, workInfoData);
+      const workInfo: WorkInfo = await queryRunner.manager.save(
+        WorkInfo,
+        workInfoData,
+      );
+      console.log('아이디확인', workInfo);
+
+      queryRunner.manager.update(
+        WorkInfo,
+        { company },
+        { company: { id: company.id } },
+      );
 
       const globalData: GlobalConfig = this.globalConfigRepository.create({
         allowedCheckInBefore: 10,

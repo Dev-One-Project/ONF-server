@@ -1,9 +1,14 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Company } from 'src/apis/companies/entities/company.entity';
+import { Member } from 'src/apis/members/entities/member.entity';
 import { PeriodRange, Standard } from 'src/common/types/enum.range';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -26,7 +31,7 @@ export class WorkInfo {
   name: string;
 
   @Column({ nullable: true })
-  @Field(() => [String], { nullable: true })
+  @Field(() => String, { nullable: true })
   fixedLabor: string;
 
   @Column({ nullable: true })
@@ -88,4 +93,13 @@ export class WorkInfo {
   @UpdateDateColumn()
   @Field(() => Date)
   updatedAt: Date;
+
+  @OneToOne(() => Member, { nullable: true })
+  @JoinColumn()
+  @Field(() => Member, { nullable: true })
+  member: Member;
+
+  @ManyToOne(() => Company, (company) => company.workInfo, { nullable: true })
+  @Field(() => Company, { nullable: true })
+  company: Company;
 }
