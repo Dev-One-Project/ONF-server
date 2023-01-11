@@ -31,12 +31,24 @@ export class VacationIssue {
   @Field(() => Int)
   vacationAll: number;
 
-  @Column({ default: 0, nullable: true })
-  @Field(() => Int, { nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    nullable: true,
+  })
+  @Field(() => Number, { nullable: true })
   useVacation: number;
 
-  @Column({ nullable: true })
-  @Field(() => Int, { nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    nullable: true,
+  })
+  @Field(() => Number, { nullable: true })
   remaining: number;
 
   @Column()
