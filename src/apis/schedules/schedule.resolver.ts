@@ -1,8 +1,9 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlAuthAccessGuard } from 'src/common/auth/gql-auth.guard';
 import { Roles } from 'src/common/auth/roles.decorator';
 import { RolesGuard } from 'src/common/auth/roles.guard';
+import { IContext } from 'src/common/types/context';
 import { Role } from 'src/common/types/enum.role';
 import { CreateScheduleInput } from './dto/createSchedule.input';
 import { UpdateScheduleInput } from './dto/updateSchedule.input';
@@ -23,15 +24,17 @@ export class ScheduleResolver {
     return await this.scheduleService.findMemberSchedule({ memberId, date });
   }
 
-  // 출퇴근기록용 근무일정 조회 하나 만들기
-
   // 직원용 조회 - 멤버(월)
-  // @Query(()=>[Schedule])
-  // async fetchMemberSchedule(
-  //   @Args({name:'memberId', type: () => [String]}) memberId : string[] , //
-  // ) {
-  //   return
-  // }
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => [[Schedule]])
+  async fetchMonthMemberSchedule(
+    @Args({ name: 'memberId', type: () => [String] }) memberId: string[], //
+    @Context() context: IContext,
+  ) {
+    const companyId = context.req.user.company;
+
+    return await this.scheduleService.monthFind({ memberId, companyId });
+  }
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)

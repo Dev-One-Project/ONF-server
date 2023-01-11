@@ -10,20 +10,65 @@ export class MemberService {
     private readonly memberRepository: Repository<Member>, //
   ) {}
 
-  async findAll({ companyId }) {
-    return await this.memberRepository
-      .createQueryBuilder('Member')
-      .leftJoinAndSelect('Member.company', 'company')
-      .leftJoinAndSelect('Member.roleCategory', 'roleCategory')
-      .leftJoinAndSelect('Member.organization', 'organization')
-      .where('Member.company = :id', { id: companyId })
-      .getMany();
+  async findAll({ companyId, isInActiveMember }) {
+    if (isInActiveMember) {
+      return await this.memberRepository.find({
+        where: { company: { id: companyId } },
+        relations: ['company', 'roleCategory', 'organization'],
+        withDeleted: true,
+      });
+    } else {
+      return await this.memberRepository.find({
+        where: { company: { id: companyId } },
+        relations: ['company', 'roleCategory', 'organization'],
+      });
+    }
+  }
+
+  async findNumber({ companyId, isInActiveMember }) {
+    if (isInActiveMember) {
+      return await this.memberRepository
+        .createQueryBuilder('Member')
+        .where('Member.company = :companyId', { companyId })
+        .andWhere('Member.deletedAt IS NOT NULL')
+        .withDeleted()
+        .getCount();
+    } else {
+      return await this.memberRepository
+        .createQueryBuilder('Member')
+        .where('Member.company = :companyId', { companyId })
+        .getCount();
+    }
   }
 
   async findOne({ memberId }) {
     return await this.memberRepository.findOne({
       where: { id: memberId },
       relations: ['company', 'roleCategory', 'organization'],
+    });
+  }
+
+  async findOrg({ organizationId }) {
+    return await this.memberRepository.find({
+      where: { organization: { id: organizationId } },
+      relations: ['company', 'organization', 'roleCategory'],
+    });
+  }
+
+  async findRole({ roleCategoryId }) {
+    return await this.memberRepository.find({
+      where: { roleCategory: { id: roleCategoryId } },
+      relations: ['company', 'organization', 'roleCategory'],
+    });
+  }
+
+  async findOrgRole({ organizationId, roleCategoryId }) {
+    return await this.memberRepository.find({
+      where: {
+        organization: { id: organizationId },
+        roleCategory: { id: roleCategoryId },
+      },
+      relations: ['company', 'organization', 'roleCategory'],
     });
   }
 

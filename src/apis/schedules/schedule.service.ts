@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { dateGetDatesStartToEnd } from 'src/common/libraries/utils';
 import { Repository } from 'typeorm';
 import { Member } from '../members/entities/member.entity';
 import { Organization } from '../organization/entities/organization.entity';
@@ -41,7 +42,38 @@ export class ScheduleService {
     return result;
   }
 
-  // TODO : 오름차순 내림차순 선택할 수 있게 하자
+  async monthFind({ companyId, memberId }) {
+    const today = new Date();
+    today.setHours(9, 0, 0, 0);
+
+    const month = dateGetDatesStartToEnd(today);
+
+    const schedules = await this.scheduleRepository
+      .createQueryBuilder('Schedule')
+      .leftJoinAndSelect('Schedule.company', 'company')
+      .leftJoinAndSelect('Schedule.member', 'member')
+      .leftJoinAndSelect('Schedule.scheduleTemplate', 'scheduleTemplate')
+      .where('Schedule.company = :companyId', { companyId })
+      .andWhere('Schedule.member IN (:...memberId)', { memberId })
+      .andWhere('Schedule.date IN (:...month)', { month })
+      .orderBy('Schedule.date', 'ASC')
+      .getMany();
+
+    const memberSchedule = [];
+
+    for (let i = 0; i < month.length; i++) {
+      const scheduleDate = month[i];
+
+      const scheduleForDay = schedules.filter(
+        (schedule) =>
+          schedule.date.toISOString() === scheduleDate.toISOString(),
+      );
+      memberSchedule[i] = [...scheduleForDay];
+    }
+
+    return memberSchedule;
+  }
+
   async listFind({ startDate, endDate, organizationId }) {
     endDate.setDate(endDate.getDate() + 1);
 

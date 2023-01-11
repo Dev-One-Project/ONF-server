@@ -1,5 +1,5 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateMemberInput } from './dto/createMember.input';
 import { UpdateMemberInput } from './dto/updateMemberInput';
 import { Member } from './entities/member.entity';
@@ -18,11 +18,32 @@ export class MemberResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Query(() => [Member], { description: 'comanyId에 해당하는 멤버 전체 조회' })
-  async fetchMembers(@Context() context: IContext) {
+  @Query(() => [Member], {
+    description:
+      'comanyId에 해당하는 멤버 전체 조회, 비활성화버튼을 통해 비활성화 멤버 검색',
+  })
+  async fetchMembers(
+    @Context() context: IContext, //
+    @Args('isInActiveMember', { defaultValue: false })
+    isInActiveMember: boolean,
+  ) {
     return await this.memberService.findAll({
       companyId: context.req.user.company,
+      isInActiveMember,
     });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Query(() => Int)
+  async fetchNumberOfEmployees(
+    @Context() context: IContext, //
+    @Args('isInActiveMember', { defaultValue: false })
+    isInActiveMember: boolean,
+  ) {
+    const companyId = context.req.user.company;
+
+    return await this.memberService.findNumber({ companyId, isInActiveMember });
   }
 
   @Roles(Role.ADMIN, Role.USER)
@@ -42,7 +63,30 @@ export class MemberResolver {
     else return await this.memberService.findOne({ memberId });
   }
 
-  // TODO : 지점별로 멤버들 조회, 직무 별로 멤버들 조회, 지점+직무로 멤버 조회
+  @Query(() => [Member])
+  async fetchMemberInOrg(
+    @Args('organizationId') organizationId: string, //
+  ) {
+    return await this.memberService.findOrg({ organizationId });
+  }
+
+  @Query(() => [Member])
+  async fetchMemberInRole(
+    @Args('roleCategoryId') roleCategoryId: string, //
+  ) {
+    return await this.memberService.findRole({ roleCategoryId });
+  }
+
+  @Query(() => [Member])
+  async fetchMemberInRoleOrg(
+    @Args('organizationId') organizationId: string, //
+    @Args('roleCategoryId') roleCategoryId: string,
+  ) {
+    return await this.memberService.findOrgRole({
+      organizationId,
+      roleCategoryId,
+    });
+  }
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
