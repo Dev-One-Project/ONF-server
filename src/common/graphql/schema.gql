@@ -297,14 +297,18 @@ type Query {
   """조직 상세 조회"""
   fetchOrganizationDetail(organizationId: String!): Organization!
 
-  """comanyId에 해당하는 멤버 전체 조회"""
-  fetchMembers: [Member!]!
+  """comanyId에 해당하는 멤버 전체 조회, 비활성화버튼을 통해 비활성화 멤버 검색"""
+  fetchMembers(isInActiveMember: Boolean = false): [Member!]!
+  fetchNumberOfEmployees(isInActiveMember: Boolean = false): Int!
 
   """memberId(사원ID)로 개별 조회, memberId 입력시 입력한 member 조회, 아니면 로그인한 유저 정보 조회"""
   fetchMember(memberId: String): Member!
+  fetchMemberInOrg(organizationId: String!): [Member!]!
+  fetchMemberInRole(roleCategoryId: String!): [Member!]!
+  fetchMemberInRoleOrg(organizationId: String!, roleCategoryId: String!): [Member!]!
 
   """(관리자) 휴가유형 전체 찾기"""
-  fetchVacationCategorys: [VacationCategory!]!
+  fetchVacationCategories: [VacationCategory!]!
 
   """(관리자) 휴가유형ID를 적어서 하나의 유형 찾기"""
   fetchVacationCategory(vacationCategoryId: String!): VacationCategory!
@@ -313,15 +317,16 @@ type Query {
   fetchVacation(vacationId: String!): Vacation!
 
   """(관리자) 활성직원 조회"""
-  fetchVacationWithDate(StartDate: DateTime, EndDate: DateTime, organizationId: [String!]!): [[Vacation!]!]!
+  fetchVacationWithDate(startDate: DateTime, endDate: DateTime, organizationId: [String!]!): [[Vacation!]!]!
 
   """(관리자) 비활성화 된 직원 함께 조회"""
-  fetchVacationWithDelete(StartDate: DateTime, EndDate: DateTime, organizationId: [String!]!): [[Vacation!]!]!
+  fetchVacationWithDelete(startDate: DateTime, endDate: DateTime, organizationId: [String!]!): [[Vacation!]!]!
   fetchAccount: Account!
 
   """Fetch Accounts by company & role"""
   fetchAccounts: [Account!]!
   fetchMemberSchedule(memberId: String!, date: DateTime!): Schedule
+  fetchMonthMemberSchedule(memberId: [String!]!): [[Schedule!]!]!
 
   """선택한 기간동안의 근무일정 조회 - 목록형 - 관리자"""
   fetchListTypeSchedule(startDate: DateTime!, endDate: DateTime!, organizationId: [String!]!): [Schedule!]!
@@ -459,13 +464,13 @@ type Mutation {
   updateVacationCategory(vacationCategoryId: String!, updateVacationCategoryInput: UpdateVacationCategoryInput!): VacationCategory!
 
   """(관리자) 다수의 휴가유형 수정하기"""
-  updateManyVacationCategorys(vacationCategoryId: [String!]!, updateVacationCategoryInput: UpdateVacationCategoryInput): [VacationCategory!]!
+  updateManyVacationCategories(vacationCategoryId: [String!]!, updateVacationCategoryInput: UpdateVacationCategoryInput): [VacationCategory!]!
 
   """(관리자) 휴가유형ID로 데이터 완전 삭제하기"""
   deleteVacationCategory(vacationCategoryId: String!): Boolean!
 
   """(관리자) 다수의 휴가유형 삭제하기"""
-  deleteManyVacationCategory(vacationCategoryId: [String!]!): Boolean!
+  deleteManyVacationCategories(vacationCategoryId: [String!]!): Boolean!
 
   """(관리자) 휴가관리 만들기"""
   createVacation(createVacaionInput: CreateVacationInput!): [Vacation!]!

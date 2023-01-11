@@ -49,6 +49,28 @@ export const getDatesStartToEnd = (month) => {
   return result;
 };
 
+export const dateGetDatesStartToEnd = (date) => {
+  const result = [];
+  const end = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
+
+  const startDate = new Date(
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+  );
+
+  const endDate = new Date(
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}-${end}`,
+  );
+
+  while (startDate <= endDate) {
+    result.push(new Date(startDate.toISOString().split('T')[0]));
+    startDate.setDate(startDate.getDate() + 1);
+  }
+  return result;
+};
+
 export const getEmailTemplate = (company, code) => {
   return `
   <html>
