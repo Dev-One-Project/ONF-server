@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Member } from './entities/member.entity';
 
 @Injectable()
@@ -13,7 +13,10 @@ export class MemberService {
   async findAll({ companyId, isInActiveMember }) {
     if (isInActiveMember) {
       return await this.memberRepository.find({
-        where: { company: { id: companyId } },
+        where: {
+          company: { id: companyId },
+          deletedAt: Not(IsNull()),
+        },
         relations: ['company', 'roleCategory', 'organization'],
         withDeleted: true,
       });
