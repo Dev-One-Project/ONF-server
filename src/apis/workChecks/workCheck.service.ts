@@ -184,7 +184,7 @@ export class WorkCheckService {
         memberInOrg.map(async (member) => {
           const workChecks = await this.workCheckRepository
             .createQueryBuilder('WorkCheck')
-            .withDeleted()
+            // .withDeleted()
             .leftJoinAndSelect('WorkCheck.company', 'company')
             .leftJoinAndSelect('WorkCheck.member', 'member')
             .leftJoinAndSelect('WorkCheck.organization', 'organization')
@@ -200,16 +200,16 @@ export class WorkCheckService {
 
           const memberWorkCheck = [];
 
-          for (let i = 0; i < monthStartToEnd.length; i++) {
-            const workDay = monthStartToEnd[i];
-
-            const workChecksForDay = workChecks.find(
+          monthStartToEnd.forEach((workDay) => {
+            const workChecksForDay = workChecks.filter(
               (workCheck) =>
-                workCheck.workDay.toISOString() === workDay.toISOString(),
+                new Date(workCheck.workDay).getDate() ===
+                new Date(workDay).getDate(),
             );
 
-            memberWorkCheck.push(workChecksForDay ? [workChecksForDay] : []);
-          }
+            memberWorkCheck.push(workChecksForDay[0] ? [workChecksForDay] : []);
+          });
+
           const temp = {
             member,
             data: memberWorkCheck,
@@ -246,15 +246,16 @@ export class WorkCheckService {
 
           const memberWorkCheck = [];
 
-          for (let i = 0; i < monthStartToEnd.length; i++) {
-            const workDay = monthStartToEnd[i];
-
-            const workChecksForDay = workChecks.find(
+          monthStartToEnd.forEach((workDay) => {
+            const workChecksForDay = workChecks.filter(
               (workCheck) =>
-                workCheck.workDay.toISOString() === workDay.toISOString(),
+                new Date(workCheck.workDay).getDate() ===
+                new Date(workDay).getDate(),
             );
-            memberWorkCheck.push(workChecksForDay ? [workChecksForDay] : []);
-          }
+
+            memberWorkCheck.push(workChecksForDay[0] ? workChecksForDay : []);
+          });
+
           const temp = {
             member,
             data: memberWorkCheck,
@@ -263,7 +264,6 @@ export class WorkCheckService {
         }),
       );
     }
-    console.log(result);
 
     return result;
   }
