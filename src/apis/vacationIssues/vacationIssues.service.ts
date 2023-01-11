@@ -132,7 +132,7 @@ export class VacationIssuesService {
         }
       }),
     );
-    for (let i = 0; i < answer.flat().length; i++) {
+    for (let i = 0; i < result.flat().length; i++) {
       if (result.flat()[i].member.id === answer.flat()[i].member) {
         result.flat()[i].useVacation = answer.flat()[i].useVacation;
         result.flat()[i].remaining =
@@ -239,7 +239,7 @@ export class VacationIssuesService {
         }
       }),
     );
-    for (let i = 0; i < answer.flat().length; i++) {
+    for (let i = 0; i < result.flat().length; i++) {
       if (result.flat()[i].member.id === answer.flat()[i].member) {
         result.flat()[i].useVacation = answer.flat()[i].useVacation;
         result.flat()[i].remaining =
