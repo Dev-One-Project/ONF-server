@@ -3,11 +3,13 @@ import { Account } from 'src/apis/accounts/entites/account.entity';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
 import { RoleCategory } from 'src/apis/roleCategory/entities/roleCategory.entity';
+import { WorkInfo } from 'src/apis/workInfo/entites/workInfo.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -62,7 +64,10 @@ export class Member {
   @Field(() => Company)
   company: Company;
 
-  // One to One 근로정보
+  @OneToOne(() => WorkInfo, { nullable: true })
+  @JoinColumn()
+  @Field(() => WorkInfo, { nullable: true })
+  workInfo: WorkInfo;
 
   @ManyToOne(() => Organization)
   @Field(() => Organization)

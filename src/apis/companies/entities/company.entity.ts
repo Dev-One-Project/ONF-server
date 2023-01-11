@@ -14,6 +14,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { WorkInfo } from 'src/apis/workInfo/entites/workInfo.entity';
 
 export enum MEMBERSHIP_TYPE {
   FREE = 'FREE',
@@ -80,4 +81,7 @@ export class Company {
   @ManyToOne(() => Account, (account) => account.company)
   @JoinColumn()
   account: Account;
+
+  @OneToMany(() => WorkInfo, (workInfo) => workInfo.company)
+  workInfo: WorkInfo[];
 }
