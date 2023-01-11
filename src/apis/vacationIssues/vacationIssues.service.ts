@@ -457,13 +457,14 @@ export class VacationIssuesService {
   async create({ createVacationIssueInput }) {
     const member = await this.memberRepository.findOne({
       where: { id: createVacationIssueInput.memberId },
-      relations: ['company', 'organization'],
+      relations: ['organization', 'company'],
     });
 
     const result = await this.vacationIssueRepository.save({
-      ...member,
-      member,
       ...createVacationIssueInput,
+      member: member,
+      organization: member.organization,
+      company: member.company,
     });
     return result;
   }
