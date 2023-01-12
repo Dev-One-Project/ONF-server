@@ -134,9 +134,6 @@ export class VacationIssuesService {
     const result1 = [];
     const leave = [];
     for (let i = 0; i < result.flat().length; i++) {
-      console.log(answer.flat().length);
-      console.log('result =', result.flat().length);
-
       if (
         result.flat()[i].member.id &&
         answer.flat()[i] &&
@@ -189,7 +186,6 @@ export class VacationIssuesService {
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
           .addSelect('member.id', 'member')
           .getRawMany();
-        console.log(Use);
         for (let i = 0; i < Use.flat().length; i++) {
           if (Use.flat()[i].member !== null || Use.flat()[i].length > 0) {
             answer.push(Use.flat()[i]);
@@ -257,9 +253,6 @@ export class VacationIssuesService {
     const result1 = [];
     const leave = [];
     for (let i = 0; i < result.flat().length; i++) {
-      console.log(answer.flat().length);
-      console.log('result =', result.flat().length);
-
       if (
         result.flat()[i].member.id &&
         answer.flat()[i] &&
@@ -348,14 +341,13 @@ export class VacationIssuesService {
       }),
     );
     for (let i = 0; i < result.flat().length; i++) {
-      console.log(result.flat().length);
       if (result.flat()[i].member.id === answer.flat()[i].member) {
         result.flat()[i].useVacation = answer.flat()[i].useVacation;
         result.flat()[i].remaining =
           result.flat()[i].vacationAll - result.flat()[i].useVacation;
       }
     }
-    // console.log(result.flat());
+
     return result;
   }
   async findWithDetailDateDelete({
@@ -427,7 +419,6 @@ export class VacationIssuesService {
       }),
     );
     for (let i = 0; i < result.flat().length; i++) {
-      console.log(result.flat().length);
       if (result.flat()[i].member.id === answer.flat()[i].member) {
         result.flat()[i].useVacation = answer.flat()[i].useVacation;
         result.flat()[i].remaining =
