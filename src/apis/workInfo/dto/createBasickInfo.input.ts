@@ -5,8 +5,8 @@ export class CreateBasicWorkInfoInput {
   @Field(() => String)
   name: string;
 
-  @Field(() => [String], { nullable: true })
-  fixedLabor: [string];
+  @Field(() => String, { nullable: true })
+  fixedLabor: string;
 
   @Field(() => String, { nullable: true })
   weekOffDays: string;
