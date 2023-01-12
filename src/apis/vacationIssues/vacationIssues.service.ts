@@ -75,7 +75,7 @@ export class VacationIssuesService {
         }
       }),
     );
-    
+
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
@@ -134,7 +134,6 @@ export class VacationIssuesService {
     const result1 = [];
     const leave = [];
     for (let i = 0; i < result.flat().length; i++) {
-\
       if (
         result.flat()[i].member.id &&
         answer.flat()[i] &&
@@ -348,7 +347,7 @@ export class VacationIssuesService {
           result.flat()[i].vacationAll - result.flat()[i].useVacation;
       }
     }
-    
+
     return result;
   }
   async findWithDetailDateDelete({
@@ -420,7 +419,6 @@ export class VacationIssuesService {
       }),
     );
     for (let i = 0; i < result.flat().length; i++) {
-      
       if (result.flat()[i].member.id === answer.flat()[i].member) {
         result.flat()[i].useVacation = answer.flat()[i].useVacation;
         result.flat()[i].remaining =
