@@ -68,15 +68,14 @@ export class VacationIssuesService {
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
           .addSelect('member.id', 'member')
           .getRawMany();
-        console.log(Use);
         for (let i = 0; i < Use.flat().length; i++) {
-          if (Use.flat()[i].member !== null || Use.flat()[i].length > 0) {
+          if (Use.flat()[i].member !== null) {
             answer.push(Use.flat()[i]);
           }
         }
       }),
     );
-
+    console.log(answer);
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
@@ -132,14 +131,30 @@ export class VacationIssuesService {
         }
       }),
     );
+    const result1 = [];
+    const leave = [];
     for (let i = 0; i < result.flat().length; i++) {
-      if (result.flat()[i].member.id === answer.flat()[i].member) {
+      console.log(answer.flat().length);
+      console.log('result =', result.flat().length);
+
+      if (
+        result.flat()[i].member.id &&
+        answer.flat()[i] &&
+        result.flat()[i].member.id === answer.flat()[i].member
+      ) {
         result.flat()[i].useVacation = answer.flat()[i].useVacation;
         result.flat()[i].remaining =
           result.flat()[i].vacationAll - result.flat()[i].useVacation;
+        leave.push(result.flat()[i]);
+      } else if (answer.flat()[i] === undefined) {
+        leave.push(result.flat()[i]);
+      } else {
+        leave.push(result.flat()[i]);
       }
     }
-    return result;
+    result1.push(leave);
+
+    return result1;
   }
 
   async fetchVacationIssueWithBaseDateDelete({
@@ -239,14 +254,30 @@ export class VacationIssuesService {
         }
       }),
     );
+    const result1 = [];
+    const leave = [];
     for (let i = 0; i < result.flat().length; i++) {
-      if (result.flat()[i].member.id === answer.flat()[i].member) {
+      console.log(answer.flat().length);
+      console.log('result =', result.flat().length);
+
+      if (
+        result.flat()[i].member.id &&
+        answer.flat()[i] &&
+        result.flat()[i].member.id === answer.flat()[i].member
+      ) {
         result.flat()[i].useVacation = answer.flat()[i].useVacation;
         result.flat()[i].remaining =
           result.flat()[i].vacationAll - result.flat()[i].useVacation;
+        leave.push(result.flat()[i]);
+      } else if (answer.flat()[i] === undefined) {
+        leave.push(result.flat()[i]);
+      } else {
+        leave.push(result.flat()[i]);
       }
     }
-    return result;
+    result1.push(leave);
+
+    return result1;
   }
 
   async findWithDetailDate({
@@ -406,27 +437,6 @@ export class VacationIssuesService {
     return result;
   }
 
-  async findVacationIssueWithDelete() {
-    return await this.vacationIssueRepository.find({
-      relations: ['member'],
-      withDeleted: true,
-    });
-  }
-
-  // async findVacationIssueWithDate({ startDate, endDate }) {
-  //   return await this.vacationIssueRepository
-  //     .createQueryBuilder('vacationIssue')
-  //     .leftJoinAndSelect('vacationIssue.member', 'member')
-  //     .leftJoinAndSelect('vacationIssue.company', 'company')
-  //     .leftJoinAndSelect('vacationIssue.organization', 'organization')
-  //     .where('vacationIssue.startingPoint BETWEEN :startDate AND :endDate', {
-  //       startDate,
-  //       endDate,
-  //     })
-  //     .orderBy('vacationIssue.expirationDate', 'DESC')
-  //     .getMany();
-  // }
-
   async findWithOrganization({ companyId, organizationId }) {
     const result = await Promise.all(
       organizationId.map(async (organizationId: string) => {
@@ -443,18 +453,8 @@ export class VacationIssuesService {
     return result.flat();
   }
 
-  // async findUseVacation({ memberId }) {
-  // //   const member = await this.memberRepository.findOne({
-  // //     where: { id: memberId },
-  // //     relations: ['company', 'organization'],
-  // //   });
-  // //   // 1. vacation에서 사용한 휴가를 조회한다.
-  // //   // 2. vacationIssue에 있는 vacationAll - 1문항을 하여 remaining에 넣기
-
-  // //   return result;
-  // // }
-
   async create({ createVacationIssueInput }) {
+    console.log(createVacationIssueInput.memberId);
     const member = await this.memberRepository.findOne({
       where: { id: createVacationIssueInput.memberId },
       relations: ['organization', 'company'],
