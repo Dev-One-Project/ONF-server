@@ -65,8 +65,7 @@ export class ScheduleService {
       const scheduleDate = month[i];
 
       const scheduleForDay = schedules.filter(
-        (schedule) =>
-          schedule.date.toISOString() === scheduleDate.toISOString(),
+        (schedule) => schedule.date.getDate() === scheduleDate.getDate(),
       );
       memberSchedule[i] = [...scheduleForDay];
     }
