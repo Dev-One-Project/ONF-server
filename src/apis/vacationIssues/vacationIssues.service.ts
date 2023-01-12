@@ -75,7 +75,7 @@ export class VacationIssuesService {
         }
       }),
     );
-
+    console.log(answer);
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
@@ -445,6 +445,7 @@ export class VacationIssuesService {
   }
 
   async create({ createVacationIssueInput }) {
+    console.log(createVacationIssueInput.memberId);
     const member = await this.memberRepository.findOne({
       where: { id: createVacationIssueInput.memberId },
       relations: ['organization', 'company'],

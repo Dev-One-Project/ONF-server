@@ -16,7 +16,10 @@ export class ScheduleResolver {
     private readonly scheduleService: ScheduleService, //
   ) {}
 
-  @Query(() => Schedule, { nullable: true })
+  @Query(() => Schedule, {
+    nullable: true,
+    description: '멤버의 특정날짜 근무일정 조회',
+  })
   async fetchMemberSchedule(
     @Args('memberId') memberId: string, //
     @Args('date') date: Date,
@@ -24,9 +27,10 @@ export class ScheduleResolver {
     return await this.scheduleService.findMemberSchedule({ memberId, date });
   }
 
-  // 직원용 조회 - 멤버(월)
   @UseGuards(GqlAuthAccessGuard)
-  @Query(() => [[Schedule]])
+  @Query(() => [[Schedule]], {
+    description: '한달동안의 멤버들 근무일정 조회 - 직원용',
+  })
   async fetchMonthMemberSchedule(
     @Args({ name: 'memberId', type: () => [String] }) memberId: string[], //
     @Context() context: IContext,

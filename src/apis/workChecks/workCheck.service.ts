@@ -12,6 +12,7 @@ import {
 } from 'src/common/libraries/utils';
 import { minusNineHour } from 'src/common/libraries/utils';
 import { Schedule } from 'src/apis/schedules/entities/schedule.entity';
+import { Vacation } from '../vacation/entities/vacation.entity';
 
 @Injectable()
 export class WorkCheckService {
@@ -24,6 +25,9 @@ export class WorkCheckService {
 
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
+
+    @InjectRepository(Vacation)
+    private readonly vacationRepository: Repository<Vacation>,
   ) {}
 
   async findMemberWorkCheck({ memberId, startDate, endDate }) {
@@ -99,7 +103,7 @@ export class WorkCheckService {
             .getMany();
         }),
       );
-
+      // 맴버아이디 조회 => 맴버아이디에 조인된 스캐쥴확인 => 스캐쥴 끝나는 시간이랑 현재시간이랑 비교해서 현재시간이 더크면 근무시간을 = null로 세이브 또는 업데이트
       workChecks.flat().map((workCheck) => {
         result.push({
           ...workCheck,
@@ -184,7 +188,7 @@ export class WorkCheckService {
         memberInOrg.map(async (member) => {
           const workChecks = await this.workCheckRepository
             .createQueryBuilder('WorkCheck')
-            // .withDeleted()
+            .withDeleted()
             .leftJoinAndSelect('WorkCheck.company', 'company')
             .leftJoinAndSelect('WorkCheck.member', 'member')
             .leftJoinAndSelect('WorkCheck.organization', 'organization')
@@ -200,14 +204,13 @@ export class WorkCheckService {
 
           const memberWorkCheck = [];
 
-          monthStartToEnd.forEach((workDay) => {
+          monthStartToEnd.forEach((workDay, i) => {
             const workChecksForDay = workChecks.filter(
-              (workCheck) =>
-                new Date(workCheck.workDay).getDate() ===
-                new Date(workDay).getDate(),
+              (workCheck) => workCheck.workDay.getDate() === workDay.getDate(),
             );
 
-            memberWorkCheck.push(workChecksForDay[0] ? [workChecksForDay] : []);
+            // memberWorkCheck.push(workChecksForDay[0] ? [workChecksForDay] : []);
+            memberWorkCheck[i] = [...workChecksForDay];
           });
 
           const temp = {
@@ -246,14 +249,13 @@ export class WorkCheckService {
 
           const memberWorkCheck = [];
 
-          monthStartToEnd.forEach((workDay) => {
+          monthStartToEnd.forEach((workDay, i) => {
             const workChecksForDay = workChecks.filter(
-              (workCheck) =>
-                new Date(workCheck.workDay).getDate() ===
-                new Date(workDay).getDate(),
+              (workCheck) => workCheck.workDay.getDate() === workDay.getDate(),
             );
 
-            memberWorkCheck.push(workChecksForDay[0] ? workChecksForDay : []);
+            // memberWorkCheck.push(workChecksForDay[0] ? workChecksForDay : []);
+            memberWorkCheck[i] = [...workChecksForDay];
           });
 
           const temp = {
@@ -264,6 +266,105 @@ export class WorkCheckService {
         }),
       );
     }
+
+    return result;
+  }
+
+  async fetchMain({ companyId }) {
+    const today = new Date();
+    today.setHours(9, 0, 0, 0);
+    const copyDate = new Date();
+    const nextDay = new Date(copyDate.setDate(copyDate.getDate() + 1));
+    nextDay.setHours(9, 0, 0, 0);
+
+    const totalMember = await this.memberRepository
+      .createQueryBuilder('Member')
+      .where('Member.company = :companyId', { companyId })
+      .getCount();
+
+    const working = await this.workCheckRepository
+      .createQueryBuilder('WorkCheck')
+      .leftJoinAndSelect('WorkCheck.member', 'member')
+      .where('WorkCheck.company = :companyId', { companyId })
+      .andWhere('WorkCheck.workDay BETWEEN :start AND :end', {
+        start: today,
+        end: nextDay,
+      })
+      .andWhere('WorkCheck.workingTime IS NOT NULL')
+      .getCount();
+
+    const members = await this.memberRepository
+      .createQueryBuilder('Member')
+      .where('Member.company = :companyId', { companyId })
+      .getMany();
+
+    const tardyCount = await Promise.all(
+      members.map(async (member) => {
+        const schedule = await this.scheduleRepository
+          .createQueryBuilder('Schedule')
+          .leftJoinAndSelect('Schedule.member', 'member')
+          .where('Schedule.member = :memberId', { memberId: member.id })
+          .andWhere('Schedule.date BETWEEN :start AND :end', {
+            start: today,
+            end: nextDay,
+          })
+          .getOne();
+
+        const createScheduleStart = (scheduleStartTime, today) =>
+          new Date(
+            `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(
+              2,
+              '0',
+            )}-${String(today.getDate()).padStart(
+              2,
+              '0',
+            )}T${scheduleStartTime}:00.000Z`,
+          );
+
+        if (schedule) {
+          const tardy = await this.workCheckRepository
+            .createQueryBuilder('WorkCheck')
+            .leftJoinAndSelect('WorkCheck.member', 'member')
+            .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+            .where('WorkCheck.company = :companyId', { companyId })
+            .where('WorkCheck.member = :memberId', { memberId: member.id })
+            .andWhere('WorkCheck.schedule IS NOT NULL')
+            .andWhere('WorkCheck.workDay BETWEEN :start AND :end', {
+              start: today,
+              end: nextDay,
+            })
+            .andWhere('WorkCheck.workingTime > :scheduleStart', {
+              scheduleStart: createScheduleStart(
+                schedule.startWorkTime,
+                today,
+              ).toISOString(),
+            })
+            .getCount();
+
+          return tardy;
+        }
+      }),
+    );
+
+    const vacation = await this.vacationRepository
+      .createQueryBuilder('Vacation')
+      .where('Vacation.company = :companyId', { companyId })
+      .andWhere('Vacation.vacationStartDate BETWEEN :start AND :end', {
+        start: today,
+        end: nextDay,
+      })
+      .getCount();
+
+    const result = [];
+
+    const query = {
+      working,
+      tardy: tardyCount[0],
+      notWorking: totalMember - working - vacation,
+      vacation,
+    };
+
+    result.push(query);
 
     return result;
   }
