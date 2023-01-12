@@ -96,6 +96,31 @@ export class WorkInfoService {
     return result[0];
   }
 
+  async updateWorkInfo({
+    memberId,
+    updateBasicWorkInfoInput,
+    updateFixedLaborDaysInput,
+    updateMaximumLaberInput,
+  }) {
+    await this.workInfoRepository
+      .createQueryBuilder('WorkInfo')
+      .innerJoinAndSelect('WorkInfo.member', 'member')
+      .update(WorkInfo)
+      .set({
+        ...updateBasicWorkInfoInput,
+        ...updateFixedLaborDaysInput,
+        ...updateMaximumLaberInput,
+      })
+      .where('member.id = :id', { id: memberId })
+      .execute();
+
+    const result = await this.workInfoRepository.find({
+      where: { member: { id: memberId } },
+      relations: { member: true },
+    });
+    return result[0];
+  }
+
   async findWorkInfo({ companyId }) {
     const company = await this.companyRepository.find({
       where: { id: companyId },
@@ -104,5 +129,21 @@ export class WorkInfoService {
       },
     });
     return company[0].workInfo;
+  }
+
+  async deleteCompanyWorkInfo({ workInfoId }) {
+    const members = await this.memberRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.workInfo', 'workInfo')
+      .where('workInfo.id = :workInfoId', { workInfoId })
+      .getMany();
+
+    console.log(members);
+
+    members.forEach(async (member) => {
+      await this.memberRepository.delete({ id: member.id });
+    });
+
+    return await this.workInfoRepository.delete({ id: workInfoId });
   }
 }
