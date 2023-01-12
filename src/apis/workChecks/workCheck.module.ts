@@ -6,6 +6,7 @@ import { Schedule } from 'src/apis/schedules/entities/schedule.entity';
 import { WorkCheck } from './entities/workCheck.entity';
 import { WorkCheckResolver } from './workCheck.resolver';
 import { WorkCheckService } from './workCheck.service';
+import { Vacation } from '../vacation/entities/vacation.entity';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { WorkCheckService } from './workCheck.service';
       Member,
       Organization,
       Schedule,
+      Vacation,
     ]),
   ],
   providers: [

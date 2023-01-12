@@ -35,7 +35,7 @@ export class MemberResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Query(() => Int)
+  @Query(() => Int, { description: '회사내의 직원 수 카운트' })
   async fetchNumberOfEmployees(
     @Context() context: IContext, //
     @Args('isInActiveMember', { defaultValue: false })
@@ -63,21 +63,21 @@ export class MemberResolver {
     else return await this.memberService.findOne({ memberId });
   }
 
-  @Query(() => [Member])
+  @Query(() => [Member], { description: '회사 내의 지점별 직원 조회' })
   async fetchMemberInOrg(
     @Args('organizationId') organizationId: string, //
   ) {
     return await this.memberService.findOrg({ organizationId });
   }
 
-  @Query(() => [Member])
+  @Query(() => [Member], { description: '회사 내의 직무별 직원 조회' })
   async fetchMemberInRole(
     @Args('roleCategoryId') roleCategoryId: string, //
   ) {
     return await this.memberService.findRole({ roleCategoryId });
   }
 
-  @Query(() => [Member])
+  @Query(() => [Member], { description: '회사 내의 지점+직무 직원 조회' })
   async fetchMemberInRoleOrg(
     @Args('organizationId') organizationId: string, //
     @Args('roleCategoryId') roleCategoryId: string,

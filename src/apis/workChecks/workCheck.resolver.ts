@@ -7,6 +7,7 @@ import { plusNineHour } from 'src/common/libraries/utils';
 import { IContext } from 'src/common/types/context';
 import { Role } from 'src/common/types/enum.role';
 import { CreateWorkCheckInput } from './dto/createWorkCheck.input';
+import { mainPageWorkCheckOutput } from './dto/mainPageWorkCheck.output';
 import { UpdateWorkCheckInput } from './dto/updateWorkCheck.input';
 import { WorkCheckOutput } from './dto/workCheck.output';
 import { WorkCheckMemberOutput } from './dto/workCheckMember.output';
@@ -89,6 +90,19 @@ export class WorkCheckResolver {
       endDate,
       isActiveMember,
     });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Query(() => [mainPageWorkCheckOutput], {
+    description: '출근,지각,미출근,휴가 조회(카운트)',
+  })
+  async fetchMainPageWorkCheck(
+    @Context() context: IContext, //
+  ) {
+    const companyId = context.req.user.company;
+
+    return await this.workCheckService.fetchMain({ companyId });
   }
 
   @Roles(Role.ADMIN)
