@@ -502,7 +502,7 @@ type Mutation {
   deleteManyVacationCategories(vacationCategoryId: [String!]!): Boolean!
 
   """(관리자) 휴가관리 만들기"""
-  createVacation(createVacaionInput: CreateVacationInput!): [Vacation!]!
+  createVacation(createVacationInput: CreateVacationInput!): [Vacation!]!
 
   """(관리자) 휴가 수정하기"""
   updateVacation(vacationId: String!, updateVacationInput: UpdateVacationInput!): Vacation!
@@ -566,6 +566,12 @@ type Mutation {
 
   """맴버에게 근로정보 부여"""
   insertWorkInfo(email: String!, name: String!): WorkInfo!
+
+  """맴버 근로정보 수정"""
+  updateWorkInfo(email: String, memberId: String!, updateBasicWorkInfoInput: UpdateBasicWorkInfoInput, updateFixedLaborDaysInput: UpdateFixedLaborDaysInput, updateMaximumLaberInput: UpdateMaximumLaberInput): WorkInfo!
+
+  """회사 근로정보 삭제(완전삭제)"""
+  deleteCompanyWorkInfo(workInfoId: String!): WorkInfo!
 }
 
 input CreateNoticeBoardInput {
@@ -812,7 +818,7 @@ scalar Upload
 
 input CreateBasicWorkInfoInput {
   name: String!
-  fixedLabor: [String!]
+  fixedLabor: String
   weekOffDays: String
   memo: String
 }
@@ -837,6 +843,27 @@ enum PeriodRange {
 }
 
 input CreateMaximumLaberInput {
+  maximumStandard: Standard
+  maximumHours: String
+  maximumUnitPeriod: String
+  maximumPeriodRange: PeriodRange
+}
+
+input UpdateBasicWorkInfoInput {
+  name: String
+  fixedLabor: String
+  weekOffDays: String
+  memo: String
+}
+
+input UpdateFixedLaborDaysInput {
+  fixedStandard: Standard
+  fixedHours: String
+  fixedUnitPeriod: String
+  fixedPeriodRange: PeriodRange
+}
+
+input UpdateMaximumLaberInput {
   maximumStandard: Standard
   maximumHours: String
   maximumUnitPeriod: String
