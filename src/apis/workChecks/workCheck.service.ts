@@ -31,6 +31,22 @@ export class WorkCheckService {
     private readonly vacationRepository: Repository<Vacation>,
   ) {}
 
+  async checkStatus({ memberId }) {
+    const result = await this.workCheckRepository
+      .createQueryBuilder('WorkCheck')
+      .leftJoinAndSelect('WorkCheck.member', 'member')
+      .where('member.id = :memberId', { memberId })
+      .andWhere('WorkCheck.workingTime IS NOT NULL')
+      .andWhere('WorkCheck.quittingTime IS NULL')
+      .andWhere('DATEDIFF(WorkCheck.workDay, :today) = 0', {
+        today: new Date(),
+      })
+      .getOne();
+    console.log(result);
+    if (!result) return false;
+    else return true;
+  }
+
   async findMemberWorkCheck({ memberId, startDate, endDate }) {
     endDate.setDate(endDate.getDate() + 1);
 
