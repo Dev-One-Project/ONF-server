@@ -51,6 +51,10 @@ export class Member {
   @Field(() => Float, { nullable: true })
   leave: number;
 
+  @Column({ default: false })
+  @Field(() => Boolean, { defaultValue: false })
+  isAttendence: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

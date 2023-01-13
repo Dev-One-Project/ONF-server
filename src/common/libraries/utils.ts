@@ -179,3 +179,14 @@ export const timeRange = (time1, time2) => {
       : `+ ${diffMinutes}분`;
   }
 };
+
+export const timeArr = (start, end) => {
+  const result = [];
+  start = new Date(start);
+  end = new Date(end);
+  while (start <= end) {
+    result.push(new Date(start.toISOString().split('T')[0]));
+    start.setDate(start.getDate() + 1);
+  }
+  return result;
+};
