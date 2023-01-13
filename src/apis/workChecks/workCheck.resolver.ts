@@ -92,6 +92,16 @@ export class WorkCheckResolver {
     });
   }
 
+  @UseGuards(GqlAuthAccessGuard)
+  @Query(() => Boolean, { description: '현재 출퇴근 여부 확인' })
+  async checkWorkStatus(
+    @Context() context: IContext, //
+  ) {
+    return await this.workCheckService.checkStatus({
+      memberId: context.req.user.member,
+    });
+  }
+
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Query(() => [mainPageWorkCheckOutput], {
