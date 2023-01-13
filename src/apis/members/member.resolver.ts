@@ -23,7 +23,7 @@ export class MemberResolver {
       'comanyId에 해당하는 멤버 전체 조회, 비활성화버튼을 통해 비활성화 멤버 검색',
   })
   async fetchMembers(
-    @Context() context: IContext, //
+    @Context() context: IContext, //x
     @Args('isInActiveMember', { defaultValue: false })
     isInActiveMember: boolean,
   ) {

@@ -11,6 +11,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -51,6 +52,10 @@ export class Member {
   @Field(() => Float, { nullable: true })
   leave: number;
 
+  @Column()
+  @Field(() => String)
+  appliedFrom: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -64,8 +69,7 @@ export class Member {
   @Field(() => Company)
   company: Company;
 
-  @OneToOne(() => WorkInfo, { nullable: true })
-  @JoinColumn()
+  @ManyToOne(() => WorkInfo, (workInfo) => workInfo.members)
   @Field(() => WorkInfo, { nullable: true })
   workInfo: WorkInfo;
 

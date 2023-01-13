@@ -5,6 +5,7 @@ import { Roles } from 'src/common/auth/roles.decorator';
 import { RolesGuard } from 'src/common/auth/roles.guard';
 import { IContext } from 'src/common/types/context';
 import { Role } from 'src/common/types/enum.role';
+import { Member } from '../members/entities/member.entity';
 import { CreateBasicWorkInfoInput } from './dto/createBasickInfo.input';
 import { CreateFixedLaborDaysInput } from './dto/createFixedLaborRule.input';
 import { CreateMaximumLaberInput } from './dto/createMaximumLaborRule.input';
@@ -51,15 +52,17 @@ export class WorkInfoResolver {
 
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  @Mutation(() => WorkInfo, { description: '맴버에게 근로정보 부여' })
+  @Mutation(() => Member, { description: '맴버에게 근로정보 부여' })
   async insertWorkInfo(
-    @Args('email') email: string, //
-    @Args('name') name: string,
+    @Args('memberId') memberId: string, //
+    @Args('workInfoName') workInfoName: string,
+    @Args('appiedFrom') appiedFrom: string,
     @Context() context: IContext,
   ) {
     return await this.workInfoService.insertWorkInfo({
-      email,
-      name,
+      memberId,
+      workInfoName,
+      appiedFrom,
       companyId: context.req.user.company,
     });
   }
@@ -75,27 +78,27 @@ export class WorkInfoResolver {
     });
   }
 
-  @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @Mutation(() => WorkInfo, { description: '맴버 근로정보 수정' })
-  async updateWorkInfo(
-    @Context() context: IContext, //
-    @Args('email', { nullable: true }) email: string,
-    @Args('memberId') memberId: string,
-    @Args('updateBasicWorkInfoInput', { nullable: true })
-    updateBasicWorkInfoInput: UpdateBasicWorkInfoInput,
-    @Args('updateFixedLaborDaysInput', { nullable: true })
-    updateFixedLaborDaysInput: UpdateFixedLaborDaysInput,
-    @Args('updateMaximumLaberInput', { nullable: true })
-    updateMaximumLaberInput: UpdateMaximumLaberInput,
-  ) {
-    return await this.workInfoService.updateWorkInfo({
-      memberId,
-      updateBasicWorkInfoInput,
-      updateFixedLaborDaysInput,
-      updateMaximumLaberInput,
-    });
-  }
+  // @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  // @Mutation(() => WorkInfo, { description: '맴버 근로정보 수정' })
+  // async updateWorkInfo(
+  //   @Context() context: IContext, //
+  //   @Args('email', { nullable: true }) email: string,
+  //   @Args('memberId') memberId: string,
+  //   @Args('updateBasicWorkInfoInput', { nullable: true })
+  //   updateBasicWorkInfoInput: UpdateBasicWorkInfoInput,
+  //   @Args('updateFixedLaborDaysInput', { nullable: true })
+  //   updateFixedLaborDaysInput: UpdateFixedLaborDaysInput,
+  //   @Args('updateMaximumLaberInput', { nullable: true })
+  //   updateMaximumLaberInput: UpdateMaximumLaberInput,
+  // ) {
+  //   return await this.workInfoService.updateWorkInfo({
+  //     memberId,
+  //     updateBasicWorkInfoInput,
+  //     updateFixedLaborDaysInput,
+  //     updateMaximumLaberInput,
+  //   });
+  // }
 
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Roles(Role.ADMIN)
