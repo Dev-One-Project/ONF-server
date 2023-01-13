@@ -67,7 +67,7 @@ export class VacationResolver {
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Mutation(() => [Vacation], { description: '(관리자) 휴가관리 만들기' })
   async createVacation(
-    @Args('createVacaionInput') createVacationInput: CreateVacationInput,
+    @Args('createVacationInput') createVacationInput: CreateVacationInput,
   ) {
     return await this.vacationService.create({ createVacationInput });
   }
