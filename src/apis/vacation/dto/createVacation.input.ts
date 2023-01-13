@@ -11,6 +11,6 @@ export class CreateVacationInput {
   @Field(() => String)
   vacationCategoryId: string;
 
-  @Field(() => String)
-  memberId: string;
+  @Field(() => [String])
+  memberId: string[];
 }

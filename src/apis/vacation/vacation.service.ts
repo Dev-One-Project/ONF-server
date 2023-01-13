@@ -56,7 +56,7 @@ export class VacationService {
           .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
           .where('member.id = :memberId', { memberId: member.id })
           .andWhere(
-            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
+            'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
             { startDate, endDate },
           )
           .orderBy('vacation.vacationStartDate', 'DESC')
@@ -113,7 +113,7 @@ export class VacationService {
           .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
           .where('member.id = :memberId', { memberId: member.id })
           .andWhere(
-            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
+            'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
             { startDate, endDate },
           )
           .orderBy('vacation.vacationStartDate', 'DESC')
@@ -129,38 +129,48 @@ export class VacationService {
 
   async create({ createVacationInput }) {
     // 1. 직원 조회하기
-    const member = await this.memberRepository.findOne({
-      where: { id: createVacationInput.memberId },
-      relations: ['company', 'organization'],
-    });
-    if (!member) {
-      throw new UnprocessableEntityException('해당 직원을 찾을 수 없습니다.');
-    }
+    const answer = await Promise.all(
+      createVacationInput.memberId.map(async (member: string) => {
+        const members = await this.memberRepository.findOne({
+          where: { id: member },
+          relations: ['company', 'organization'],
+        });
+        if (!members) {
+          throw new UnprocessableEntityException(
+            '해당 직원을 찾을 수 없습니다.',
+          );
+        }
 
-    // 1. 휴가 생성 시 category를 조회
-    const category = await this.vacationCategoryRepository.findOne({
-      where: { id: createVacationInput.vacationCategoryId },
-    });
-    // 2. 휴가 생성할 경우 멤버의 잔여휴가를 차감 한다.
+        // 1. 휴가 생성 시 category를 조회
+        const category = await this.vacationCategoryRepository.findOne({
+          where: { id: createVacationInput.vacationCategoryId },
+        });
+        // 2. 휴가 생성할 경우 멤버의 잔여휴가를 차감 한다.
 
-    const result = createVacationInput.vacations.map(async (date: Date) => {
-      member.leave -= category.deductionDays;
-      const vacation = this.vacationRepository.create({
-        vacationEndDate: date,
-        vacationStartDate: date,
-        description: createVacationInput.description,
-        member: member,
-        company: member.company,
-        vacationCategory: category,
-        organization: member.organization,
-      });
+        const result = await Promise.all(
+          await createVacationInput.vacations.map(async (date: Date) => {
+            members.leave -= category.deductionDays;
+            const vacation = this.vacationRepository.create({
+              vacationEndDate: date,
+              vacationStartDate: date,
+              description: createVacationInput.description,
+              member: members,
+              company: members.company,
+              vacationCategory: category,
+              organization: members.organization,
+            });
 
-      return await this.vacationRepository.save(vacation);
-    });
+            await this.memberRepository.save(members);
+            await this.vacationRepository.save(vacation);
+            return vacation;
+          }),
+        );
 
-    await this.memberRepository.save(member);
+        return result;
+      }),
+    );
 
-    return result;
+    return answer.flat();
   }
 
   async update({ vacationId, updateVacationInput }) {
