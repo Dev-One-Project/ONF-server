@@ -8,6 +8,7 @@ import {
   getDatesStartToEnd,
   getToday,
   plusNineHour,
+  timeArr,
   timeRange,
 } from 'src/common/libraries/utils';
 import { minusNineHour } from 'src/common/libraries/utils';
@@ -77,35 +78,35 @@ export class WorkCheckService {
     endDate,
     isActiveMember,
   }) {
-    endDate.setDate(endDate.getDate() + 1);
+    // endDate.setDate(endDate.getDate() + 1);
+    organizationId = organizationId.map((organizationId) => {
+      return organizationId === '' ? null : organizationId;
+    });
 
-    // 이거 만약 근무일정이 있는데 지난날짜에 결근이 있으면 업데이트 해줘야할듯
-    const result = [];
+    // console.log(organizationId);
+
+    // const result = [];
+
     if (isActiveMember) {
-      const workChecks = await Promise.all(
-        organizationId.map(async (organizationId: string) => {
-          return await this.workCheckRepository
-            .createQueryBuilder('WorkCheck')
-            .withDeleted()
-            .leftJoinAndSelect('WorkCheck.member', 'member')
-            .leftJoinAndSelect('WorkCheck.company', 'company')
-            .leftJoinAndSelect('WorkCheck.organization', 'organization')
-            .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
-            .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
-            .where('WorkCheck.company = :companyId', { companyId })
-            .andWhere('WorkCheck.organization = :organizationId', {
-              organizationId,
-            })
-            .andWhere(
-              `WorkCheck.workDay BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
-            )
-            .orderBy('WorkCheck.workDay', 'DESC')
-            .getMany();
-        }),
-      );
-      // 맴버아이디 조회 => 맴버아이디에 조인된 스캐쥴확인 => 스캐쥴 끝나는 시간이랑 현재시간이랑 비교해서 현재시간이 더크면 근무시간을 = null로 세이브 또는 업데이트
-      workChecks.flat().map((workCheck) => {
-        result.push({
+      const dateRange = timeArr(startDate, endDate);
+
+      const workChecks = await this.workCheckRepository
+        .createQueryBuilder('WorkCheck')
+        .withDeleted()
+        .leftJoinAndSelect('WorkCheck.member', 'member')
+        .leftJoinAndSelect('WorkCheck.company', 'company')
+        .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+        .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+        .where('WorkCheck.company = :companyId', { companyId })
+        .andWhere('WorkCheck.organization IN (:...organizationId)', {
+          organizationId,
+        })
+        .andWhere('WorkCheck.workDay IN (:...dateRange)', { dateRange })
+        .orderBy('WorkCheck.workDay', 'DESC')
+        .getMany();
+
+      return workChecks.map((workCheck) => {
+        return {
           ...workCheck,
           workingTimeRange: workCheck.schedule
             ? timeRange(
@@ -113,40 +114,77 @@ export class WorkCheckService {
                 workCheck.schedule.startWorkTime,
               )
             : null,
-
           endTimeRange:
-            workCheck.schedule && workCheck.quittingTime
+            workCheck.schedule && workCheck.quittingTime !== null
               ? timeRange(
                   plusNineHour(workCheck.quittingTime),
                   workCheck.schedule.endWorkTime,
                 )
               : null,
-        });
+        };
       });
+
+      // const workChecks = await Promise.all(
+      //   organizationId.map(async (organizationId: string) => {
+      //     return await this.workCheckRepository
+      //       .createQueryBuilder('WorkCheck')
+      //       .withDeleted()
+      //       .leftJoinAndSelect('WorkCheck.member', 'member')
+      //       .leftJoinAndSelect('WorkCheck.company', 'company')
+      //       .leftJoinAndSelect('WorkCheck.organization', 'organization')
+      //       .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+      //       .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+      //       .where('WorkCheck.company = :companyId', { companyId })
+      //       .andWhere('WorkCheck.organization = :organizationId', {
+      //         organizationId,
+      //       })
+      //       .andWhere(
+      //         `WorkCheck.workDay BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
+      //       )
+      //       .orderBy('WorkCheck.workDay', 'DESC')
+      //       .getMany();
+      //   }),
+      // );
+
+      // workChecks.flat().map((workCheck) => {
+      //   result.push({
+      //     ...workCheck,
+      //     workingTimeRange: workCheck.schedule
+      //       ? timeRange(
+      //           plusNineHour(workCheck.workingTime),
+      //           workCheck.schedule.startWorkTime,
+      //         )
+      //       : null,
+
+      //     endTimeRange:
+      //       workCheck.schedule && workCheck.quittingTime
+      //         ? timeRange(
+      //             plusNineHour(workCheck.quittingTime),
+      //             workCheck.schedule.endWorkTime,
+      //           )
+      //         : null,
+      //   });
+      // });
     } else {
-      const workChecks = await Promise.all(
-        organizationId.map(async (organizationId: string) => {
-          return await this.workCheckRepository
-            .createQueryBuilder('WorkCheck')
-            .innerJoinAndSelect('WorkCheck.member', 'member')
-            .leftJoinAndSelect('WorkCheck.company', 'company')
-            .leftJoinAndSelect('WorkCheck.organization', 'organization')
-            .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
-            .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
-            .where('member.deletedAt IS NULL')
-            .andWhere('WorkCheck.company = :companyId', { companyId })
-            .andWhere('WorkCheck.organization = :organizationId', {
-              organizationId,
-            })
-            .andWhere(
-              `WorkCheck.workDay BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
-            )
-            .orderBy('WorkCheck.workDay', 'DESC')
-            .getMany();
-        }),
-      );
-      workChecks.flat().map((workCheck) => {
-        result.push({
+      const dateRange = timeArr(startDate, endDate);
+
+      const workChecks = await this.workCheckRepository
+        .createQueryBuilder('WorkCheck')
+        .withDeleted()
+        .leftJoinAndSelect('WorkCheck.member', 'member')
+        .leftJoinAndSelect('WorkCheck.company', 'company')
+        .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+        .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+        .where('WorkCheck.company = :companyId', { companyId })
+        .andWhere('WorkCheck.organization IN (:...organizationId)', {
+          organizationId,
+        })
+        .andWhere('WorkCheck.workDay IN (:...dateRange)', { dateRange })
+        .orderBy('WorkCheck.workDay', 'DESC')
+        .getMany();
+
+      return workChecks.map((workCheck) => {
+        return {
           ...workCheck,
           workingTimeRange: workCheck.schedule
             ? timeRange(
@@ -154,18 +192,57 @@ export class WorkCheckService {
                 workCheck.schedule.startWorkTime,
               )
             : null,
-
           endTimeRange:
-            workCheck.schedule && workCheck.quittingTime
+            workCheck.schedule && workCheck.quittingTime !== null
               ? timeRange(
                   plusNineHour(workCheck.quittingTime),
                   workCheck.schedule.endWorkTime,
                 )
               : null,
-        });
+        };
       });
+      // const workChecks = await Promise.all(
+      //   organizationId.map(async (organizationId: string) => {
+      //     return await this.workCheckRepository
+      //       .createQueryBuilder('WorkCheck')
+      //       .innerJoinAndSelect('WorkCheck.member', 'member')
+      //       .leftJoinAndSelect('WorkCheck.company', 'company')
+      //       .leftJoinAndSelect('WorkCheck.organization', 'organization')
+      //       .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+      //       .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+      //       .where('member.deletedAt IS NULL')
+      //       .andWhere('WorkCheck.company = :companyId', { companyId })
+      //       .andWhere('WorkCheck.organization = :organizationId', {
+      //         organizationId,
+      //       })
+      //       .andWhere(
+      //         `WorkCheck.workDay BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
+      //       )
+      //       .orderBy('WorkCheck.workDay', 'DESC')
+      //       .getMany();
+      //   }),
+      // );
+      // workChecks.flat().map((workCheck) => {
+      //   result.push({
+      //     ...workCheck,
+      //     workingTimeRange: workCheck.schedule
+      //       ? timeRange(
+      //           plusNineHour(workCheck.workingTime),
+      //           workCheck.schedule.startWorkTime,
+      //         )
+      //       : null,
+
+      //     endTimeRange:
+      //       workCheck.schedule && workCheck.quittingTime
+      //         ? timeRange(
+      //             plusNineHour(workCheck.quittingTime),
+      //             workCheck.schedule.endWorkTime,
+      //           )
+      //         : null,
+      //   });
+      // });
     }
-    return result.flat();
+    // return result.flat();
   }
 
   async findMonth({ companyId, organizationId, month, isActiveMember }) {
@@ -369,6 +446,37 @@ export class WorkCheckService {
     return result;
   }
 
+  // async findOmission({ companyId, startDate, endDate }) {
+  //   endDate.setDate(endDate.getDate() + 1);
+
+  //   const today = new Date();
+  //   today.setHours(9, 0, 0, 0);
+
+  //   const members = await this.memberRepository.find({
+  //     where: { company: { id: companyId } },
+  //   });
+
+  //   await Promise.all(
+  //     members.map(async (member) => {
+  //       const quitOmission = await this.workCheckRepository
+  //         .createQueryBuilder('WorkCheck')
+  //         .leftJoinAndSelect('WorkCheck.member', 'member')
+  //         .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+  //         .where('WorkCheck.member = :memberId', { memberId: member.id })
+  //         .andWhere(
+  //           `WorkCheck.workDay BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
+  //         )
+  //         // .andWhere('WorkCheck.workDay = :workDay', {workDay.getDate() !== today.getDate()})
+  //         .andWhere('WorkCheck.workingTime IS NOT NULL')
+  //         .andWhere('WorkCheck.quittingTime IS NULL')
+  //         .getMany();
+  //       console.log('뭐가나오니?', quitOmission);
+
+  //       return quitOmission;
+  //     }),
+  //   );
+  // }
+
   async createAdmin({ companyId, createWorkCheckInput }) {
     const { workingTime, quittingTime, ...rest } = createWorkCheckInput;
 
@@ -436,6 +544,11 @@ export class WorkCheckService {
       throw new UnprocessableEntityException('이미 출근하셨습니다.');
     }
 
+    await this.memberRepository.update(
+      { id: memberId },
+      { isAttendence: true },
+    );
+
     const result = await this.workCheckRepository.save({
       company: memberInfo.company,
       member: memberId,
@@ -449,7 +562,7 @@ export class WorkCheckService {
     return result;
   }
 
-  async createEndWork({ workCheckId }) {
+  async createEndWork({ workCheckId, memberId }) {
     const origin = await this.workCheckRepository.findOne({
       where: { id: workCheckId },
     });
@@ -473,6 +586,11 @@ export class WorkCheckService {
     }
     // 나의 생각 : 하루에 출근기록을 여러번 했는데 퇴근하기를 하려면 여러개기 때문에 workCheckId로는 힘들거 같음 애초에 workCheckId를 받으면 안되고 그냥 context
     // 받아서 해결해야할듯 그리고 테이블하나를 추가해서 is퇴근 같은거 해서 구별해야할듯???
+
+    await this.memberRepository.update(
+      { id: memberId },
+      { isAttendence: false },
+    );
 
     return await this.workCheckRepository.save({
       ...origin,
@@ -532,8 +650,6 @@ export class WorkCheckService {
     }
 
     const updateObj = Object.assign({}, findWorkCheck, updateWorkCheckInput);
-
-    console.log(updateObj);
 
     const { organizationId, roleCategoryId, ...rest } = updateObj;
 

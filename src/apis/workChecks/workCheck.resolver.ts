@@ -95,7 +95,7 @@ export class WorkCheckResolver {
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Query(() => [mainPageWorkCheckOutput], {
-    description: '출근,지각,미출근,휴가 조회(카운트)',
+    description: '메인페이지 출근,지각,미출근,휴가 조회(카운트)',
   })
   async fetchMainPageWorkCheck(
     @Context() context: IContext, //
@@ -104,6 +104,23 @@ export class WorkCheckResolver {
 
     return await this.workCheckService.fetchMain({ companyId });
   }
+
+  // @Roles(Role.ADMIN)
+  // @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  // @Query(() => [WorkCheck])
+  // async fetchWorkCheckOmission(
+  //   @Context() context: IContext, //
+  //   @Args('startDate') startDate: Date,
+  //   @Args('endDate') endDate: Date,
+  // ) {
+  //   const companyId = context.req.user.company;
+
+  //   return await this.workCheckService.findOmission({
+  //     companyId,
+  //     startDate,
+  //     endDate,
+  //   });
+  // }
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
@@ -146,16 +163,21 @@ export class WorkCheckResolver {
     return result;
   }
 
-  // TODO : 파라미터로 뭘 줘야할지 고민해볼 문제,,,
   @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => WorkCheck, { description: '퇴근하기' })
   async createEndWorkCheck(
     @Args('workCheckId') workCheckId: string, //
+    @Context() context: IContext,
   ) {
-    const result = await this.workCheckService.createEndWork({ workCheckId });
+    const memberId = context.req.user.member;
 
-    plusNineHour(result.workingTime);
-    plusNineHour(result.quittingTime);
+    const result = await this.workCheckService.createEndWork({
+      workCheckId,
+      memberId,
+    });
+
+    // plusNineHour(result.workingTime);
+    // plusNineHour(result.quittingTime);
 
     return result;
   }
@@ -172,8 +194,8 @@ export class WorkCheckResolver {
       updateWorkCheckInput,
     });
 
-    plusNineHour(result.workingTime);
-    plusNineHour(result.quittingTime);
+    // plusNineHour(result.workingTime);
+    // plusNineHour(result.quittingTime);
 
     return result;
   }
@@ -209,5 +231,3 @@ export class WorkCheckResolver {
     return await this.workCheckService.deleteMany({ workCheckId });
   }
 }
-
-// TODO 출퇴근기록 수정에서 지점,직무 수정할 때 관리 - 직원수정에서 지점,직무가 없음 이면 없음에서 다른걸로 수정안됨 설정해줘야 수정됨
