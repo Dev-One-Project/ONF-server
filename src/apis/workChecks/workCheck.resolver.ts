@@ -177,13 +177,9 @@ export class WorkCheckResolver {
   @Mutation(() => WorkCheck, { description: '퇴근하기' })
   async createEndWorkCheck(
     @Args('workCheckId') workCheckId: string, //
-    @Context() context: IContext,
   ) {
-    const memberId = context.req.user.member;
-
     const result = await this.workCheckService.createEndWork({
       workCheckId,
-      memberId,
     });
 
     // plusNineHour(result.workingTime);

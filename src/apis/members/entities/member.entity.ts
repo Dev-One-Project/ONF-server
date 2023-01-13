@@ -70,11 +70,11 @@ export class Member {
   workInfo: WorkInfo;
 
   @ManyToOne(() => Organization)
-  @Field(() => Organization)
+  @Field(() => Organization, { nullable: true })
   organization: Organization;
 
   @ManyToOne(() => RoleCategory)
-  @Field(() => RoleCategory)
+  @Field(() => RoleCategory, { nullable: true })
   roleCategory: RoleCategory;
 
   @OneToOne(() => Account, (account) => account.member)

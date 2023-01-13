@@ -285,10 +285,8 @@ export class WorkCheckService {
         .where('Member.isJoin = :isJoin', { isJoin: true })
         .andWhere('Member.company = :companyId', { companyId })
         .andWhere(
-          `WorkCheck.organization IN (:...filterOrganizationId) ${
-            organizationId.includes('')
-              ? ' OR WorkCheck.organization IS NULL'
-              : ''
+          `Member.organization IN (:...filterOrganizationId) ${
+            organizationId.includes('') ? ' OR Member.organization IS NULL' : ''
           }`,
           {
             filterOrganizationId,
@@ -296,6 +294,8 @@ export class WorkCheckService {
         )
         .withDeleted()
         .getMany();
+
+      console.log(memberInOrg);
 
       await Promise.all(
         memberInOrg.map(async (member) => {
@@ -339,10 +339,8 @@ export class WorkCheckService {
         .where('Member.isJoin = :isJoin', { isJoin: true })
         .andWhere('Member.company = :companyId', { companyId })
         .andWhere(
-          `WorkCheck.organization IN (:...filterOrganizationId) ${
-            organizationId.includes('')
-              ? ' OR WorkCheck.organization IS NULL'
-              : ''
+          `Member.organization IN (:...filterOrganizationId) ${
+            organizationId.includes('') ? ' OR Member.organization IS NULL' : ''
           }`,
           {
             filterOrganizationId,
@@ -600,7 +598,7 @@ export class WorkCheckService {
     return result;
   }
 
-  async createEndWork({ workCheckId, memberId }) {
+  async createEndWork({ workCheckId }) {
     const origin = await this.workCheckRepository.findOne({
       where: { id: workCheckId },
     });

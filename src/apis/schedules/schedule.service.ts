@@ -89,9 +89,9 @@ export class ScheduleService {
           .leftJoinAndSelect('Schedule.roleCategory', 'roleCategory')
           .leftJoinAndSelect('Schedule.scheduleTemplate', 'scheduleTemplate')
           .andWhere(
-            `WorkCheck.organization IN (:...filterOrganizationId) ${
+            `Schedule.organization IN (:...filterOrganizationId) ${
               organizationId.includes('')
-                ? ' OR WorkCheck.organization IS NULL'
+                ? ' OR Schedule.organization IS NULL'
                 : ''
             }`,
             {
