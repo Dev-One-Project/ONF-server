@@ -130,11 +130,10 @@ type Member {
   memo: String
   isJoin: Boolean!
   leave: Float
-  isAttendence: Boolean!
   company: Company!
   workInfo: WorkInfo
-  organization: Organization!
-  roleCategory: RoleCategory!
+  organization: Organization
+  roleCategory: RoleCategory
 }
 
 type VacationCategory {
@@ -761,7 +760,7 @@ input CreateVacationInput {
   vacations: [DateTime!]!
   description: String
   vacationCategoryId: String!
-  memberId: String!
+  memberId: [String!]!
 }
 
 input UpdateVacationInput {

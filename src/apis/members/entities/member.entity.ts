@@ -69,12 +69,12 @@ export class Member {
   @Field(() => WorkInfo, { nullable: true })
   workInfo: WorkInfo;
 
-  @ManyToOne(() => Organization)
-  @Field(() => Organization)
+  @ManyToOne(() => Organization, { nullable: true })
+  @Field(() => Organization, { nullable: true })
   organization: Organization;
 
-  @ManyToOne(() => RoleCategory)
-  @Field(() => RoleCategory)
+  @ManyToOne(() => RoleCategory, { nullable: true })
+  @Field(() => RoleCategory, { nullable: true })
   roleCategory: RoleCategory;
 
   @OneToOne(() => Account, (account) => account.member)
