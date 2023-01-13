@@ -587,11 +587,6 @@ export class WorkCheckService {
       throw new UnprocessableEntityException('이미 출근하셨습니다.');
     }
 
-    await this.memberRepository.update(
-      { id: memberId },
-      { isAttendence: true },
-    );
-
     const result = await this.workCheckRepository.save({
       company: memberInfo.company,
       member: memberId,
@@ -629,11 +624,6 @@ export class WorkCheckService {
     }
     // 나의 생각 : 하루에 출근기록을 여러번 했는데 퇴근하기를 하려면 여러개기 때문에 workCheckId로는 힘들거 같음 애초에 workCheckId를 받으면 안되고 그냥 context
     // 받아서 해결해야할듯 그리고 테이블하나를 추가해서 is퇴근 같은거 해서 구별해야할듯???
-
-    await this.memberRepository.update(
-      { id: memberId },
-      { isAttendence: false },
-    );
 
     return await this.workCheckRepository.save({
       ...origin,
