@@ -6,9 +6,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
-  OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -94,10 +93,9 @@ export class WorkInfo {
   @Field(() => Date)
   updatedAt: Date;
 
-  @OneToOne(() => Member, { nullable: true })
-  @JoinColumn()
+  @OneToMany(() => Member, (member) => member.workInfo)
   @Field(() => Member, { nullable: true })
-  member: Member;
+  members: Member;
 
   @ManyToOne(() => Company, (company) => company.workInfo, { nullable: true })
   @Field(() => Company, { nullable: true })

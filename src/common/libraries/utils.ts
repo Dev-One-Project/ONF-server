@@ -89,6 +89,24 @@ export const getEmailTemplate = (company, code) => {
 </html>`;
 };
 
+export const getNewEmailTemplate = (newEmail, code) => {
+  return `
+  <html>
+  <div style="display: flex; flex-direction: column; align-items: center;">
+  <div width: 500px>
+      <h1>새로운 이메일 ${newEmail}으로 변경을 확인합니다.</h1>
+      <hr />
+      <div>
+          <p style="font-size: 30px; font-weight:600; color:#111;">인증코드 : ${code}</p>
+          <p style="font-size: 30px; font-weight:600; color:#111;">인증코드를 입력해주세요</p>
+
+      </div>
+      <hr />
+  </div>
+  </div>
+</html>`;
+};
+
 export const checkEmail = (email: string) => {
   const regex =
     /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;

@@ -44,82 +44,73 @@ export class WorkInfoService {
     });
   }
 
-  async insertWorkInfo({ email, companyId, name }) {
-    const user = await this.accuntRepository.find({
-      where: {
-        email: email,
-      },
-      relations: {
-        member: true,
-        company: true,
-      },
-    });
-
-    const member = await this.memberRepository.find({
-      where: { id: user[0].member.id },
+  async insertWorkInfo({
+    memberId,
+    companyId,
+    workInfoName,
+    appiedFrom,
+  }): Promise<Member> {
+    const member = await this.memberRepository.findOne({
+      where: { id: memberId },
       relations: {
         workInfo: true,
       },
     });
 
-    const workInfo = await this.workInfoRepository.find({
+    const workInfo = await this.workInfoRepository.findOne({
       where: {
-        company: { id: companyId },
-        name: name,
+        companyId,
+        name: workInfoName,
+      },
+      relations: {
+        members: true,
       },
     });
 
     await this.memberRepository
       .createQueryBuilder()
       .update(Member)
-      .set({ workInfo: { id: workInfo[0].id } })
-      .where('id=:id', { id: member[0].id })
+      .set({ workInfo: { id: workInfo.id } })
+      .where('id=:id', { id: member.id })
       .execute();
 
-    await this.workInfoRepository
+    await this.memberRepository
       .createQueryBuilder()
-      .update(WorkInfo)
-      .set({ member: { id: member[0].id } })
-      .where('id=:id', { id: workInfo[0].id })
+      .update(Member)
+      .set({ appliedFrom: appiedFrom })
+      .where('id=:id', { id: member.id })
       .execute();
 
-    const result = await this.workInfoRepository.find({
-      where: {
-        company: { id: companyId },
-        name: name,
-      },
-      relations: {
-        member: true,
-        company: true,
-      },
+    return this.memberRepository.findOne({
+      where: { id: memberId },
+      relations: { workInfo: true },
     });
-    return result[0];
   }
 
-  async updateWorkInfo({
-    memberId,
-    updateBasicWorkInfoInput,
-    updateFixedLaborDaysInput,
-    updateMaximumLaberInput,
-  }) {
-    await this.workInfoRepository
-      .createQueryBuilder('WorkInfo')
-      .innerJoinAndSelect('WorkInfo.member', 'member')
-      .update(WorkInfo)
-      .set({
-        ...updateBasicWorkInfoInput,
-        ...updateFixedLaborDaysInput,
-        ...updateMaximumLaberInput,
-      })
-      .where('member.id = :id', { id: memberId })
-      .execute();
+  // async updateWorkInfo({
+  //   memberId,
+  //   updateBasicWorkInfoInput,
+  //   updateFixedLaborDaysInput,
+  //   updateMaximumLaberInput,
+  // }) {
+  //   await this.workInfoRepository
+  //     .createQueryBuilder('WorkInfo')
+  //     .innerJoinAndSelect('WorkInfo.member', 'member')
+  //     .update(WorkInfo)
+  //     .set({
+  //       ...updateBasicWorkInfoInput,
+  //       ...updateFixedLaborDaysInput,
+  //       ...updateMaximumLaberInput,
+  //     })
+  //     .where('member.id = :id', { id: memberId })
+  //     .execute();
 
-    const result = await this.workInfoRepository.find({
-      where: { member: { id: memberId } },
-      relations: { member: true },
-    });
-    return result[0];
-  }
+  //   const result = await this.workInfoRepository.find({
+  //     where: { member: { id: memberId } },
+  //     relations: { member: true },
+  //   });
+  //   return result[0];
+  // }
 
   async findWorkInfo({ companyId }) {
     const company = await this.companyRepository.find({
@@ -137,8 +128,6 @@ export class WorkInfoService {
       .leftJoinAndSelect('member.workInfo', 'workInfo')
       .where('workInfo.id = :workInfoId', { workInfoId })
       .getMany();
-
-    console.log(members);
 
     members.forEach(async (member) => {
       await this.memberRepository.delete({ id: member.id });

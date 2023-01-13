@@ -53,11 +53,40 @@ export class AccountResolver {
 
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => [Account], { description: 'Fetch Accounts by company & role' })
-  fetchAccounts(
+  async fetchAccounts(
     @Context() context: IContext, //
   ) {
-    return this.accountService.findByCompanyId({
+    return await this.accountService.findByCompanyId({
       companyId: context.req.user.company,
+    });
+  }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Mutation(() => Account, { deprecationReason: '이름&휴대폰번호 수정' })
+  updateAccount(
+    @Context() context: IContext, //
+    @Args('name') name: string,
+    @Args('phone') phone: string,
+  ) {
+    return this.accountService.updateAccount({
+      email: context.req.user.email,
+      name,
+      phone,
+    });
+  }
+
+  @UseGuards(GqlAuthAccessGuard)
+  @Mutation(() => Account, { deprecationReason: '이메일 수정' })
+  updateEmail(
+    @Args('newEmail') newEmail: string, //
+    @Args('password') password: string,
+    @Context()
+    context: IContext,
+  ) {
+    this.accountService.updateEmail({
+      oldEmail: context.req.user.email,
+      newEmail,
+      password,
     });
   }
 }

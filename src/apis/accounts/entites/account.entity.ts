@@ -43,9 +43,9 @@ export class Account {
   member: Member;
 
   @Column()
+  @Field(() => String)
   companyId: string;
 
   @OneToMany(() => Company, (company) => company.account)
-  @Field(() => Company, { nullable: true })
   company: Company[];
 }

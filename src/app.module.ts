@@ -26,6 +26,7 @@ import { FileModule } from './apis/files/file.module';
 import { NoticeBoardModule } from './apis/noticeBoards/noticeBoard.module';
 import { RoleCategoryModule } from './apis/roleCategory/roleCategory.module';
 import { WorkInfoModule } from './apis/workInfo/workInfo.module';
+import { ValidationCodeModule } from './apis/validationCode/vaildationCode.module';
 
 const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
 @Module({
@@ -49,6 +50,7 @@ const ALLOWED_HOSTS = process.env.ALLOWED_HOSTS.split(',');
     GlobalConfigModule,
     FileModule,
     WorkInfoModule,
+    ValidationCodeModule,
     ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PeriodRange, Standard } from 'src/common/types/enum.range';
@@ -13,6 +14,7 @@ import { InvitationCode } from '../invitationCode/entities/invitationCode.entity
 import { Member } from '../members/entities/member.entity';
 import { WorkInfo } from '../workInfo/entites/workInfo.entity';
 import { Account } from './entites/account.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AccountService {
@@ -244,4 +246,41 @@ export class AccountService {
       await this.invitationCodeRepository.delete({ invitationCode });
     }
   }
+  async updateAccount({
+    email, //
+    name,
+    phone,
+  }) {
+    await this.accountRepository
+      .createQueryBuilder('account')
+      .update(Account)
+      .set({ name: name, phone: phone })
+      .where('email = :email', { email })
+      .execute();
+
+    const account: Account = await this.accountRepository.findOne({
+      where: { email },
+    });
+    return account;
+  }
+  async updateEmail({
+    oldEmail, //
+    newEmail,
+    password,
+  }) {
+    const user = await this.accountRepository.findOne({
+      where: { email: oldEmail },
+    });
+    const isAuth = await bcrypt.compare(password, user.password);
+
+    if (!isAuth) throw new UnprocessableEntityException('암호가 틀렸습니다.');
+
+    this.accountRepository
+      .createQueryBuilder('account')
+      .update(Account)
+      .set({ email: newEmail })
+      .where('email = :oldEmail', { oldEmail })
+      .execute();
+  }
+  updatePassword() {}
 }
