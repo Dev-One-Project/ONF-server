@@ -76,6 +76,8 @@ export class ScheduleService {
   async listFind({ startDate, endDate, organizationId }) {
     endDate.setDate(endDate.getDate() + 1);
 
+    const filterOrganizationId = organizationId.filter((el) => el !== '');
+
     const result = await Promise.all(
       organizationId.map(async (organizationId) => {
         return await this.scheduleRepository
@@ -86,7 +88,16 @@ export class ScheduleService {
           .leftJoinAndSelect('Schedule.organization', 'organization')
           .leftJoinAndSelect('Schedule.roleCategory', 'roleCategory')
           .leftJoinAndSelect('Schedule.scheduleTemplate', 'scheduleTemplate')
-          .where('Schedule.organization = :organizationId', { organizationId })
+          .andWhere(
+            `WorkCheck.organization IN (:...filterOrganizationId) ${
+              organizationId.includes('')
+                ? ' OR WorkCheck.organization IS NULL'
+                : ''
+            }`,
+            {
+              filterOrganizationId,
+            },
+          )
           .andWhere(
             `Schedule.date BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'`,
           )

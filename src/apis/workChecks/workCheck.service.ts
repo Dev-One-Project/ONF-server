@@ -79,11 +79,8 @@ export class WorkCheckService {
     isActiveMember,
   }) {
     // endDate.setDate(endDate.getDate() + 1);
-    organizationId = organizationId.map((organizationId) => {
-      return organizationId === '' ? null : organizationId;
-    });
 
-    // console.log(organizationId);
+    const filterOrganizationId = organizationId.filter((el) => el !== '');
 
     // const result = [];
 
@@ -98,9 +95,16 @@ export class WorkCheckService {
         .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
         .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
         .where('WorkCheck.company = :companyId', { companyId })
-        .andWhere('WorkCheck.organization IN (:...organizationId)', {
-          organizationId,
-        })
+        .andWhere(
+          `WorkCheck.organization IN (:...filterOrganizationId) ${
+            organizationId.includes('')
+              ? ' OR WorkCheck.organization IS NULL'
+              : ''
+          }`,
+          {
+            filterOrganizationId,
+          },
+        )
         .andWhere('WorkCheck.workDay IN (:...dateRange)', { dateRange })
         .orderBy('WorkCheck.workDay', 'DESC')
         .getMany();
@@ -176,9 +180,16 @@ export class WorkCheckService {
         .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
         .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
         .where('WorkCheck.company = :companyId', { companyId })
-        .andWhere('WorkCheck.organization IN (:...organizationId)', {
-          organizationId,
-        })
+        .andWhere(
+          `WorkCheck.organization IN (:...filterOrganizationId) ${
+            organizationId.includes('')
+              ? ' OR WorkCheck.organization IS NULL'
+              : ''
+          }`,
+          {
+            filterOrganizationId,
+          },
+        )
         .andWhere('WorkCheck.workDay IN (:...dateRange)', { dateRange })
         .orderBy('WorkCheck.workDay', 'DESC')
         .getMany();
@@ -250,14 +261,23 @@ export class WorkCheckService {
 
     const result = [];
 
+    const filterOrganizationId = organizationId.filter((el) => el !== '');
+
     if (isActiveMember) {
       const memberInOrg = await this.memberRepository
         .createQueryBuilder('Member')
         .where('Member.isJoin = :isJoin', { isJoin: true })
         .andWhere('Member.company = :companyId', { companyId })
-        .andWhere('Member.organization IN (:...organizationId)', {
-          organizationId,
-        })
+        .andWhere(
+          `WorkCheck.organization IN (:...filterOrganizationId) ${
+            organizationId.includes('')
+              ? ' OR WorkCheck.organization IS NULL'
+              : ''
+          }`,
+          {
+            filterOrganizationId,
+          },
+        )
         .withDeleted()
         .getMany();
 
@@ -302,9 +322,16 @@ export class WorkCheckService {
         .createQueryBuilder('Member')
         .where('Member.isJoin = :isJoin', { isJoin: true })
         .andWhere('Member.company = :companyId', { companyId })
-        .andWhere('Member.organization IN (:...organizationId)', {
-          organizationId,
-        })
+        .andWhere(
+          `WorkCheck.organization IN (:...filterOrganizationId) ${
+            organizationId.includes('')
+              ? ' OR WorkCheck.organization IS NULL'
+              : ''
+          }`,
+          {
+            filterOrganizationId,
+          },
+        )
         .getMany();
 
       await Promise.all(
