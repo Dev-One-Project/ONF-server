@@ -55,13 +55,13 @@ export class WorkInfoResolver {
   @Mutation(() => Member, { description: '맴버에게 근로정보 부여' })
   async insertWorkInfo(
     @Args('memberId') memberId: string, //
-    @Args('workInfoName') workInfoName: string,
+    @Args('workInfoId') workInfoId: string,
     @Args('appiedFrom') appiedFrom: string,
     @Context() context: IContext,
   ) {
     return await this.workInfoService.insertWorkInfo({
       memberId,
-      workInfoName,
+      workInfoId,
       appiedFrom,
       companyId: context.req.user.company,
     });
@@ -100,14 +100,15 @@ export class WorkInfoResolver {
   //   });
   // }
 
-  @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @Mutation(() => WorkInfo, { description: '회사 근로정보 삭제(완전삭제)' })
-  async deleteCompanyWorkInfo(
-    @Args('workInfoId') workInfoId: string, //
-  ) {
-    return this.workInfoService.deleteCompanyWorkInfo({
-      workInfoId,
-    });
-  }
+  //TODO : 미구현 에러뜸.
+  // @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  // @Mutation(() => WorkInfo, { description: '회사 근로정보 삭제(완전삭제)' })
+  // async deleteCompanyWorkInfo(
+  //   @Args('workInfoId') workInfoId: string, //
+  // ) {
+  //   return this.workInfoService.deleteCompanyWorkInfo({
+  //     workInfoId,
+  //   });
+  // }
 }

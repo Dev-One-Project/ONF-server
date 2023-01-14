@@ -15,6 +15,7 @@ import { InvitationCodeService } from '../invitationCode/invitationCode.service'
 import { Member } from '../members/entities/member.entity';
 import { Organization } from '../organization/entities/organization.entity';
 import { RoleCategory } from '../roleCategory/entities/roleCategory.entity';
+import { ValidationCode } from '../validationCode/entities/vaildationCode.entity';
 import { WorkInfo } from '../workInfo/entites/workInfo.entity';
 import { AuthController } from './auth.controller';
 import { AuthResolver } from './auth.resolver';
@@ -32,6 +33,7 @@ import { AuthService } from './auth.service';
       GlobalConfig,
       InvitationCode,
       WorkInfo,
+      ValidationCode,
     ]),
   ],
   providers: [
