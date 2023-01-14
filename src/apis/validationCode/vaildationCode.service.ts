@@ -71,15 +71,19 @@ export class ValidationCodeServcie {
     });
     return '전송완료';
   }
+
   async check({ validationCode, email }) {
     const saveCode = await this.validationCodeRepository.findOne({
       where: { email },
     });
+
     if (saveCode.validationCode !== validationCode)
       throw new ConflictException('인증 코드가 일치하지 않습니다.');
-    await this.validationCodeRepository.save({
-      isValid: true,
-    });
+
+    await this.validationCodeRepository.update(
+      { id: saveCode.id },
+      { isValid: true },
+    );
     return '인증코드 확인완료';
   }
 }

@@ -47,7 +47,7 @@ export class WorkInfoService {
   async insertWorkInfo({
     memberId,
     companyId,
-    workInfoName,
+    workInfoId,
     appiedFrom,
   }): Promise<Member> {
     const member = await this.memberRepository.findOne({
@@ -60,7 +60,7 @@ export class WorkInfoService {
     const workInfo = await this.workInfoRepository.findOne({
       where: {
         companyId,
-        name: workInfoName,
+        id: workInfoId,
       },
       relations: {
         members: true,

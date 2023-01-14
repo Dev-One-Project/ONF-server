@@ -15,6 +15,7 @@ import { Member } from '../members/entities/member.entity';
 import { WorkInfo } from '../workInfo/entites/workInfo.entity';
 import { Account } from './entites/account.entity';
 import * as bcrypt from 'bcrypt';
+import { ValidationCode } from '../validationCode/entities/vaildationCode.entity';
 
 @Injectable()
 export class AccountService {
@@ -36,6 +37,9 @@ export class AccountService {
 
     @InjectRepository(WorkInfo)
     private readonly workInfoRepository: Repository<WorkInfo>,
+
+    @InjectRepository(ValidationCode)
+    private readonly validationCodeRepository: Repository<ValidationCode>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -263,6 +267,7 @@ export class AccountService {
     });
     return account;
   }
+
   async updateEmail({
     oldEmail, //
     newEmail,
@@ -271,6 +276,7 @@ export class AccountService {
     const user = await this.accountRepository.findOne({
       where: { email: oldEmail },
     });
+
     const isAuth = await bcrypt.compare(password, user.password);
 
     if (!isAuth) throw new UnprocessableEntityException('암호가 틀렸습니다.');
@@ -281,6 +287,46 @@ export class AccountService {
       .set({ email: newEmail })
       .where('email = :oldEmail', { oldEmail })
       .execute();
+
+    const isTrue = await this.validationCodeRepository.findOne({
+      where: { email: oldEmail },
+    });
+    if (isTrue.isValid !== true)
+      throw new ConflictException('인증코드가 검증되지 않았습니다.');
+
+    this.accountRepository.update(
+      { email: oldEmail }, //
+      { email: newEmail },
+    );
+
+    const result = await this.accountRepository.findOne({
+      where: { email: newEmail },
+    });
+
+    return result;
   }
-  updatePassword() {}
+  async updatePassword({ email, password, newPassword, checkPassword }) {
+    const user = await this.accountRepository.findOne({
+      where: { email },
+    });
+    const isAuth = await bcrypt.compare(password, user.password);
+
+    if (!isAuth)
+      throw new UnprocessableEntityException('비밀번호가 틀렸습니다.');
+
+    if (newPassword !== checkPassword)
+      throw new Error('입력하신 비밀번호가 일치하지 않습니다.');
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.accountRepository.update(
+      {
+        email: email,
+      },
+      {
+        password: hashedPassword,
+      },
+    );
+    return '비밀번호가 변경되었습니다.';
+  }
 }
