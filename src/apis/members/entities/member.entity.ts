@@ -52,8 +52,8 @@ export class Member {
   @Field(() => Float, { nullable: true })
   leave: number;
 
-  @Column()
-  @Field(() => String)
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
   appliedFrom: string;
 
   @CreateDateColumn()

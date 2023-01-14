@@ -75,7 +75,6 @@ export class VacationIssuesResolver {
     description: '관리자 기준일자 기준으로 앞에 발생된 휴가 목록 조회',
   })
   async fetchVacationIssueDetailDate(
-    @Args('baseDate') baseDate: Date,
     @Args({ name: 'organizationId', type: () => [String] })
     organizationId: string[],
     @Args('startDate', { nullable: true }) startDate: Date,
@@ -86,7 +85,7 @@ export class VacationIssuesResolver {
       startDate,
       endDate,
       companyId: ctx.req.user.company,
-      baseDate,
+
       organizationId,
     });
   }
@@ -97,7 +96,6 @@ export class VacationIssuesResolver {
     description: '관리자 기준일자 기준으로 앞에 발생된 휴가 퇴사자랑 같이 조회',
   })
   async fetchVacationIssueDetailDateDelete(
-    @Args('baseDate') baseDate: Date,
     @Args('startDate', { nullable: true }) startDate: Date,
     @Args('endDate', { nullable: true }) endDate: Date,
     @Args({ name: 'organizationId', type: () => [String] })
@@ -108,7 +106,6 @@ export class VacationIssuesResolver {
       startDate,
       endDate,
       companyId: ctx.req.user.company,
-      baseDate,
       organizationId,
     });
   }
