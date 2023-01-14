@@ -41,6 +41,7 @@ export class VacationService {
     const members = await this.memberRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.company', 'company')
+      .leftJoinAndSelect('member.organization', 'organization')
       .where('company.id = :companyId', { companyId })
       .getMany();
 
@@ -53,10 +54,11 @@ export class VacationService {
           .createQueryBuilder('vacation')
           .leftJoinAndSelect('vacation.member', 'member')
           .leftJoinAndSelect('vacation.company', 'company')
+          .leftJoinAndSelect('vacation.organization', 'organization')
           .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
           .where('member.id = :memberId', { memberId: member.id })
           .andWhere(
-            'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
+            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
             { startDate, endDate },
           )
           .orderBy('vacation.vacationStartDate', 'DESC')
@@ -110,10 +112,11 @@ export class VacationService {
           .withDeleted()
           .leftJoinAndSelect('vacation.member', 'member')
           .leftJoinAndSelect('vacation.company', 'company')
+          .leftJoinAndSelect('vacation.organization', 'organization')
           .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
           .where('member.id = :memberId', { memberId: member.id })
           .andWhere(
-            'vacation.vacationStartDate BETWEEN :StartDate AND :EndDate',
+            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
             { startDate, endDate },
           )
           .orderBy('vacation.vacationStartDate', 'DESC')

@@ -67,6 +67,7 @@ export class VacationIssuesService {
           .andWhere('vacation.vacationStartDate <= :baseDate', { baseDate })
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
           .addSelect('member.id', 'member')
+          .orderBy('vacation.vacationStartDate', 'DESC')
           .getRawMany();
         for (let i = 0; i < Use.flat().length; i++) {
           if (Use.flat()[i].member !== null) {
@@ -185,9 +186,10 @@ export class VacationIssuesService {
           .andWhere('vacation.vacationStartDate <= :baseDate', { baseDate })
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
           .addSelect('member.id', 'member')
+          .orderBy('vacation.vacationStartDate', 'DESC')
           .getRawMany();
         for (let i = 0; i < Use.flat().length; i++) {
-          if (Use.flat()[i].member !== null || Use.flat()[i].length > 0) {
+          if (Use.flat()[i].member !== null) {
             answer.push(Use.flat()[i]);
           }
         }
@@ -273,13 +275,7 @@ export class VacationIssuesService {
     return result1;
   }
 
-  async findWithDetailDate({
-    startDate,
-    endDate,
-    companyId,
-    baseDate,
-    organizationId,
-  }) {
+  async findWithDetailDate({ startDate, endDate, companyId, organizationId }) {
     await this.findWithOrganization({ companyId, organizationId });
 
     const members = await this.memberRepository
@@ -299,17 +295,26 @@ export class VacationIssuesService {
           .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
           .leftJoinAndSelect('vacation.company', 'company')
           .where('member.id = :member', { member: member.id })
+          .andWhere(
+            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
+            {
+              startDate,
+              endDate,
+            },
+          )
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
           .addSelect('member.id', 'member')
+          .orderBy('vacation.vacationStartDate', 'DESC')
           .getRawMany();
 
         for (let i = 0; i < Use.flat().length; i++) {
-          if (Use.flat()[i].member !== null || Use.flat()[i].length > 0) {
+          if (Use.flat()[i].member !== null) {
             answer.push(Use.flat()[i]);
           }
         }
       }),
     );
+    console.log(answer);
 
     const result = [];
     await Promise.all(
@@ -321,9 +326,6 @@ export class VacationIssuesService {
           .leftJoinAndSelect('vacationIssue.organization', 'organization')
           .where('member.id = :membersId', {
             membersId: member.id,
-          })
-          .andWhere('vacationIssue.startingPoint <= :baseDate', {
-            baseDate,
           })
           .andWhere(
             'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
@@ -340,21 +342,37 @@ export class VacationIssuesService {
         if (temp.length > 0) result.push(temp);
       }),
     );
+    const result1 = [];
+    const leave = [];
     for (let i = 0; i < result.flat().length; i++) {
-      if (result.flat()[i].member.id === answer.flat()[i].member) {
+      console.log('result =', result.flat());
+      console.log('answer =', result.flat()[i].member.id && answer.flat()[i]);
+
+      if (
+        result.flat()[i].member.id &&
+        answer.flat()[i] &&
+        result.flat()[i].member.id === answer.flat()[i].member
+      ) {
         result.flat()[i].useVacation = answer.flat()[i].useVacation;
         result.flat()[i].remaining =
           result.flat()[i].vacationAll - result.flat()[i].useVacation;
+
+        leave.push(result.flat()[i]);
+      } else if (answer.flat()[i] === undefined) {
+        leave.push(result.flat()[i]);
+      } else {
+        leave.push(result.flat()[i]);
       }
     }
 
-    return result;
+    result1.push(leave);
+
+    return result1;
   }
   async findWithDetailDateDelete({
     startDate,
     endDate,
     companyId,
-    baseDate,
     organizationId,
   }) {
     await this.findWithOrganization({ companyId, organizationId });
@@ -376,13 +394,21 @@ export class VacationIssuesService {
           .leftJoinAndSelect('vacation.member', 'member')
           .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
           .leftJoinAndSelect('vacation.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
           .where('member.id = :member', { member: member.id })
+          .andWhere(
+            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
+            {
+              startDate,
+              endDate,
+            },
+          )
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
           .addSelect('member.id', 'member')
           .getRawMany();
 
         for (let i = 0; i < Use.flat().length; i++) {
-          if (Use.flat()[i].member !== null || Use.flat()[i].length > 0) {
+          if (Use.flat()[i].member !== null) {
             answer.push(Use.flat()[i]);
           }
         }
@@ -400,9 +426,6 @@ export class VacationIssuesService {
           .where('member.id = :membersId', {
             membersId: member.id,
           })
-          .andWhere('vacationIssue.startingPoint <= :baseDate', {
-            baseDate,
-          })
           .andWhere(
             'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
             {
@@ -418,13 +441,27 @@ export class VacationIssuesService {
         if (temp.length > 0) result.push(temp);
       }),
     );
+    const result1 = [];
+    const leave = [];
     for (let i = 0; i < result.flat().length; i++) {
-      if (result.flat()[i].member.id === answer.flat()[i].member) {
+      if (
+        result.flat()[i].member.id &&
+        answer.flat()[i] &&
+        result.flat()[i].member.id === answer.flat()[i].member
+      ) {
         result.flat()[i].useVacation = answer.flat()[i].useVacation;
         result.flat()[i].remaining =
           result.flat()[i].vacationAll - result.flat()[i].useVacation;
+
+        leave.push(result.flat()[i]);
+      } else if (answer.flat()[i] === undefined) {
+        leave.push(result.flat()[i]);
+      } else {
+        leave.push(result.flat()[i]);
       }
     }
+
+    result1.push(leave);
     return result;
   }
 
