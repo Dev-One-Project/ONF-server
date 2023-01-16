@@ -29,6 +29,12 @@ export class ScheduleService {
 
     const result = await this.scheduleRepository
       .createQueryBuilder('Schedule')
+      .leftJoinAndSelect('Schedule.scheduleCategory', 'scheduleCategory')
+      .leftJoinAndSelect('Schedule.company', 'company')
+      .leftJoinAndSelect('Schedule.member', 'member')
+      .leftJoinAndSelect('Schedule.organization', 'organization')
+      .leftJoinAndSelect('Schedule.roleCategory', 'roleCategory')
+      .leftJoinAndSelect('Schedule.scheduleTemplate', 'scheduleTemplate')
       .where('Schedule.member = :memberId', { memberId })
       .andWhere(
         `Schedule.date BETWEEN '${date.toISOString()}' AND '${endDate.toISOString()}'`,
@@ -204,6 +210,20 @@ export class ScheduleService {
     const { scheduleCategoryId, organizationId, roleCategoryId, ...rest } =
       updateScheduleInput;
 
+    organizationId
+      ? await this.memberRepository.update(
+          { id: origin.member.id },
+          { organization: organizationId },
+        )
+      : false;
+
+    roleCategoryId
+      ? await this.memberRepository.update(
+          { id: origin.member.id },
+          { roleCategory: roleCategoryId },
+        )
+      : false;
+
     return await this.scheduleRepository.save({
       ...origin,
       id: scheduleId,
@@ -231,6 +251,20 @@ export class ScheduleService {
 
         const { scheduleCategoryId, organizationId, roleCategoryId, ...rest } =
           updateScheduleInput;
+
+        organizationId
+          ? await this.memberRepository.update(
+              { id: origin.member.id },
+              { organization: organizationId },
+            )
+          : false;
+
+        roleCategoryId
+          ? await this.memberRepository.update(
+              { id: origin.member.id },
+              { roleCategory: roleCategoryId },
+            )
+          : false;
 
         return await this.scheduleRepository.save({
           ...origin,
