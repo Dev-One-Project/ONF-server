@@ -14,9 +14,9 @@ export class CreateMemberInput {
   @Field(() => String, { nullable: true })
   memo: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   organizationId: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   roleCategoryId: string;
 }
