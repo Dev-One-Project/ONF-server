@@ -29,6 +29,12 @@ export class ScheduleService {
 
     const result = await this.scheduleRepository
       .createQueryBuilder('Schedule')
+      .leftJoinAndSelect('Schedule.scheduleCategory', 'scheduleCategory')
+      .leftJoinAndSelect('Schedule.company', 'company')
+      .leftJoinAndSelect('Schedule.member', 'member')
+      .leftJoinAndSelect('Schedule.organization', 'organization')
+      .leftJoinAndSelect('Schedule.roleCategory', 'roleCategory')
+      .leftJoinAndSelect('Schedule.scheduleTemplate', 'scheduleTemplate')
       .where('Schedule.member = :memberId', { memberId })
       .andWhere(
         `Schedule.date BETWEEN '${date.toISOString()}' AND '${endDate.toISOString()}'`,
