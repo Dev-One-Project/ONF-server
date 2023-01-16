@@ -204,6 +204,20 @@ export class ScheduleService {
     const { scheduleCategoryId, organizationId, roleCategoryId, ...rest } =
       updateScheduleInput;
 
+    organizationId
+      ? await this.memberRepository.update(
+          { id: origin.member.id },
+          { organization: organizationId },
+        )
+      : false;
+
+    roleCategoryId
+      ? await this.memberRepository.update(
+          { id: origin.member.id },
+          { roleCategory: roleCategoryId },
+        )
+      : false;
+
     return await this.scheduleRepository.save({
       ...origin,
       id: scheduleId,
@@ -231,6 +245,20 @@ export class ScheduleService {
 
         const { scheduleCategoryId, organizationId, roleCategoryId, ...rest } =
           updateScheduleInput;
+
+        organizationId
+          ? await this.memberRepository.update(
+              { id: origin.member.id },
+              { organization: organizationId },
+            )
+          : false;
+
+        roleCategoryId
+          ? await this.memberRepository.update(
+              { id: origin.member.id },
+              { roleCategory: roleCategoryId },
+            )
+          : false;
 
         return await this.scheduleRepository.save({
           ...origin,

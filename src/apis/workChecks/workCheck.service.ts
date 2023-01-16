@@ -96,9 +96,27 @@ export class WorkCheckService {
   }) {
     // endDate.setDate(endDate.getDate() + 1);
 
-    const filterOrganizationId = organizationId.filter((el) => el !== '');
+    const filterOrganizationId = organizationId.filter(
+      (el: string) => el !== '',
+    );
 
     // const result = [];
+
+    const schedules = await this.scheduleRepository
+      .createQueryBuilder('Schedule')
+      .where('Schedule.date >= :startDate', { startDate })
+      .leftJoinAndSelect('Schedule.member', 'member')
+      .andWhere('Schedule.date < :endDate', { endDate })
+      .getMany();
+
+    const notWorkChecks = schedules.filter((schedule) => schedule.id === null);
+
+    const result = notWorkChecks.map((schedule) => {
+      return {
+        schedule: schedule,
+        member: schedule.member,
+      };
+    });
 
     if (isActiveMember) {
       const dateRange = timeArr(startDate, endDate);
@@ -125,7 +143,7 @@ export class WorkCheckService {
         .orderBy('WorkCheck.workDay', 'DESC')
         .getMany();
 
-      return workChecks.map((workCheck) => {
+      const workCheckResult = workChecks.map((workCheck) => {
         return {
           ...workCheck,
           workingTimeRange: workCheck.schedule
@@ -143,6 +161,7 @@ export class WorkCheckService {
               : null,
         };
       });
+      return [...result, ...workCheckResult];
 
       // const workChecks = await Promise.all(
       //   organizationId.map(async (organizationId: string) => {
@@ -294,8 +313,6 @@ export class WorkCheckService {
         )
         .withDeleted()
         .getMany();
-
-      console.log(memberInOrg);
 
       await Promise.all(
         memberInOrg.map(async (member) => {
@@ -620,8 +637,6 @@ export class WorkCheckService {
     if (checkWorkCheck.quittingTime) {
       throw new UnprocessableEntityException('이미 퇴근하셨습니다.');
     }
-    // 나의 생각 : 하루에 출근기록을 여러번 했는데 퇴근하기를 하려면 여러개기 때문에 workCheckId로는 힘들거 같음 애초에 workCheckId를 받으면 안되고 그냥 context
-    // 받아서 해결해야할듯 그리고 테이블하나를 추가해서 is퇴근 같은거 해서 구별해야할듯???
 
     return await this.workCheckRepository.save({
       ...origin,
@@ -684,6 +699,20 @@ export class WorkCheckService {
 
     const { organizationId, roleCategoryId, ...rest } = updateObj;
 
+    organizationId
+      ? await this.memberRepository.update(
+          { id: findWorkCheck.member.id },
+          { organization: organizationId },
+        )
+      : false;
+
+    roleCategoryId
+      ? await this.memberRepository.update(
+          { id: findWorkCheck.member.id },
+          { roleCategory: roleCategoryId },
+        )
+      : false;
+
     return await this.workCheckRepository.save({
       ...findWorkCheck,
       id: workCheckId,
@@ -700,6 +729,7 @@ export class WorkCheckService {
           where: { id: workCheckId },
           relations: {
             schedule: true,
+            member: true,
           },
         });
 
@@ -717,19 +747,33 @@ export class WorkCheckService {
 
         const { organizationId, roleCategoryId, ...rest } = updateObj;
 
+        organizationId
+          ? await this.memberRepository.update(
+              { id: origin.member.id },
+              { organization: organizationId },
+            )
+          : false;
+
+        roleCategoryId
+          ? await this.memberRepository.update(
+              { id: origin.member.id },
+              { roleCategory: roleCategoryId },
+            )
+          : false;
+
         if (origin.schedule === null) {
-          return await this.workCheckRepository.save({
-            ...origin,
-            id: workCheckId,
-            ...rest,
-          });
-        } else {
           return await this.workCheckRepository.save({
             ...origin,
             id: workCheckId,
             ...rest,
             organization: organizationId,
             roleCategory: roleCategoryId,
+          });
+        } else {
+          return await this.workCheckRepository.save({
+            ...origin,
+            id: workCheckId,
+            ...rest,
           });
         }
       }),

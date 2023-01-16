@@ -87,7 +87,7 @@ type WorkInfo {
   companyId: String!
   createdAt: DateTime!
   updatedAt: DateTime!
-  member: Member
+  members: Member
   company: Company
 }
 
@@ -118,7 +118,7 @@ type Account {
   name: String!
   phone: String
   member: Member
-  company: Company
+  companyId: String!
 }
 
 type Member {
@@ -130,6 +130,7 @@ type Member {
   memo: String
   isJoin: Boolean!
   leave: Float
+  appliedFrom: String
   company: Company!
   workInfo: WorkInfo
   organization: Organization
@@ -284,10 +285,10 @@ type Query {
   fetchVacationIssueWithBaseDateDelete(baseDate: DateTime!, organizationId: [String!]!, startDate: DateTime, endDate: DateTime): [[VacationIssue!]!]!
 
   """관리자 기준일자 기준으로 앞에 발생된 휴가 목록 조회"""
-  fetchVacationIssueDetailDate(baseDate: DateTime!, organizationId: [String!]!, startDate: DateTime, endDate: DateTime): [[VacationIssue!]!]!
+  fetchVacationIssueDetailDate(organizationId: [String!]!, startDate: DateTime, endDate: DateTime): [[VacationIssue!]!]!
 
   """관리자 기준일자 기준으로 앞에 발생된 휴가 퇴사자랑 같이 조회"""
-  fetchVacationIssueDetailDateDelete(baseDate: DateTime!, startDate: DateTime, endDate: DateTime, organizationId: [String!]!): [[VacationIssue!]!]!
+  fetchVacationIssueDetailDateDelete(startDate: DateTime, endDate: DateTime, organizationId: [String!]!): [[VacationIssue!]!]!
 
   """member개인(나)의 출퇴근 기록 조회 - 직원모드"""
   fetchMemberWorkChecks(startDate: DateTime!, endDate: DateTime!): [WorkCheckOutput!]!
@@ -521,6 +522,9 @@ type Mutation {
   """(관리자) 휴가 완전 삭제"""
   deleteManyVacation(vacationId: [String!]!): Boolean!
   createAccount(email: String!, password: String!, name: String!, phone: String, createCompanyInput: CreateCompanyInput, invitationCode: String): Account!
+  changeAccount(name: String!, phone: String!): Account! @deprecated(reason: "이름&휴대폰번호 수정")
+  changeEmail(newEmail: String!, password: String!): Account! @deprecated(reason: "이메일 수정")
+  changePassword(password: String!, newPassword: String!, checkPassword: String!): String! @deprecated(reason: "비빌번호 변경")
 
   """근무일정 생성"""
   createSchedule(dates: [DateTime!]!, createScheduleInput: CreateScheduleInput!): [Schedule!]!
@@ -567,13 +571,9 @@ type Mutation {
   ): WorkInfo!
 
   """맴버에게 근로정보 부여"""
-  insertWorkInfo(email: String!, name: String!): WorkInfo!
-
-  """맴버 근로정보 수정"""
-  updateWorkInfo(email: String, memberId: String!, updateBasicWorkInfoInput: UpdateBasicWorkInfoInput, updateFixedLaborDaysInput: UpdateFixedLaborDaysInput, updateMaximumLaberInput: UpdateMaximumLaberInput): WorkInfo!
-
-  """회사 근로정보 삭제(완전삭제)"""
-  deleteCompanyWorkInfo(workInfoId: String!): WorkInfo!
+  insertWorkInfo(memberId: String!, workInfoId: String!, appiedFrom: String!): Member!
+  sendToValidationCode(newEmail: String!): String! @deprecated(reason: "이메일 변경 인증코드발송")
+  checkValidationCode(validationCode: String!): String! @deprecated(reason: "이메일 검증코드 확인")
 }
 
 input CreateNoticeBoardInput {
@@ -723,8 +723,8 @@ input CreateMemberInput {
   joinDate: DateTime
   exitDate: DateTime
   memo: String
-  organizationId: String
-  roleCategoryId: String
+  organizationId: String!
+  roleCategoryId: String!
 }
 
 input UpdateMemberInput {
@@ -845,27 +845,6 @@ enum PeriodRange {
 }
 
 input CreateMaximumLaberInput {
-  maximumStandard: Standard
-  maximumHours: String
-  maximumUnitPeriod: String
-  maximumPeriodRange: PeriodRange
-}
-
-input UpdateBasicWorkInfoInput {
-  name: String
-  fixedLabor: String
-  weekOffDays: String
-  memo: String
-}
-
-input UpdateFixedLaborDaysInput {
-  fixedStandard: Standard
-  fixedHours: String
-  fixedUnitPeriod: String
-  fixedPeriodRange: PeriodRange
-}
-
-input UpdateMaximumLaberInput {
   maximumStandard: Standard
   maximumHours: String
   maximumUnitPeriod: String

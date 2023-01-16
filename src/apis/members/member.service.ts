@@ -17,13 +17,13 @@ export class MemberService {
           company: { id: companyId },
           deletedAt: Not(IsNull()),
         },
-        relations: ['company', 'roleCategory', 'organization'],
+        relations: ['company', 'roleCategory', 'organization', 'workInfo'],
         withDeleted: true,
       });
     } else {
       return await this.memberRepository.find({
         where: { company: { id: companyId } },
-        relations: ['company', 'roleCategory', 'organization'],
+        relations: ['company', 'roleCategory', 'organization', 'workInfo'],
       });
     }
   }
