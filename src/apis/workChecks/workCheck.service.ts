@@ -102,21 +102,21 @@ export class WorkCheckService {
 
     // const result = [];
 
-    const schedules = await this.scheduleRepository
-      .createQueryBuilder('Schedule')
-      .where('Schedule.date >= :startDate', { startDate })
-      .leftJoinAndSelect('Schedule.member', 'member')
-      .andWhere('Schedule.date < :endDate', { endDate })
-      .getMany();
+    // const schedules = await this.scheduleRepository
+    //   .createQueryBuilder('Schedule')
+    //   .where('Schedule.date >= :startDate', { startDate })
+    //   .leftJoinAndSelect('Schedule.member', 'member')
+    //   .andWhere('Schedule.date < :endDate', { endDate })
+    //   .getMany();
 
-    const notWorkChecks = schedules.filter((schedule) => schedule.id === null);
+    // const notWorkChecks = schedules.filter((schedule) => schedule.id === null);
 
-    const result = notWorkChecks.map((schedule) => {
-      return {
-        schedule: schedule,
-        member: schedule.member,
-      };
-    });
+    // const result = notWorkChecks.map((schedule) => {
+    //   return {
+    //     schedule: schedule,
+    //     member: schedule.member,
+    //   };
+    // });
 
     if (isActiveMember) {
       const dateRange = timeArr(startDate, endDate);
@@ -143,7 +143,7 @@ export class WorkCheckService {
         .orderBy('WorkCheck.workDay', 'DESC')
         .getMany();
 
-      const workCheckResult = workChecks.map((workCheck) => {
+      return workChecks.map((workCheck) => {
         return {
           ...workCheck,
           workingTimeRange: workCheck.schedule
@@ -161,7 +161,7 @@ export class WorkCheckService {
               : null,
         };
       });
-      return [...result, ...workCheckResult];
+      // return [...result, ...workCheckResult];
 
       // const workChecks = await Promise.all(
       //   organizationId.map(async (organizationId: string) => {
