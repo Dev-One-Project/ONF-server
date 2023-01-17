@@ -76,6 +76,7 @@ export class VacationIssuesService {
         }
       }),
     );
+    // 휴가 id의
     console.log(answer);
     const result = [];
     await Promise.all(
@@ -286,36 +287,6 @@ export class VacationIssuesService {
 
     const memberArr = await Promise.all(members);
 
-    const answer = [];
-    await Promise.all(
-      memberArr.map(async (member) => {
-        const Use = await this.vacationRepository
-          .createQueryBuilder('vacation')
-          .leftJoinAndSelect('vacation.member', 'member')
-          .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
-          .leftJoinAndSelect('vacation.company', 'company')
-          .where('member.id = :member', { member: member.id })
-          .andWhere(
-            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
-            {
-              startDate,
-              endDate,
-            },
-          )
-          .select('SUM(vacationCategory.deductionDays)', 'useVacation')
-          .addSelect('member.id', 'member')
-          .orderBy('vacation.vacationStartDate', 'DESC')
-          .getRawMany();
-
-        for (let i = 0; i < Use.flat().length; i++) {
-          if (Use.flat()[i].member !== null) {
-            answer.push(Use.flat()[i]);
-          }
-        }
-      }),
-    );
-    console.log(answer);
-
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
@@ -342,32 +313,8 @@ export class VacationIssuesService {
         if (temp.length > 0) result.push(temp);
       }),
     );
-    const result1 = [];
-    const leave = [];
-    for (let i = 0; i < result.flat().length; i++) {
-      console.log('result =', result.flat());
-      console.log('answer =', result.flat()[i].member.id && answer.flat()[i]);
 
-      if (
-        result.flat()[i].member.id &&
-        answer.flat()[i] &&
-        result.flat()[i].member.id === answer.flat()[i].member
-      ) {
-        result.flat()[i].useVacation = answer.flat()[i].useVacation;
-        result.flat()[i].remaining =
-          result.flat()[i].vacationAll - result.flat()[i].useVacation;
-
-        leave.push(result.flat()[i]);
-      } else if (answer.flat()[i] === undefined) {
-        leave.push(result.flat()[i]);
-      } else {
-        leave.push(result.flat()[i]);
-      }
-    }
-
-    result1.push(leave);
-
-    return result1;
+    return result;
   }
   async findWithDetailDateDelete({
     startDate,
@@ -385,35 +332,6 @@ export class VacationIssuesService {
       .getMany();
     const memberArr = await Promise.all(members);
 
-    const answer = [];
-    await Promise.all(
-      memberArr.map(async (member) => {
-        const Use = await this.vacationRepository
-          .createQueryBuilder('vacation')
-          .withDeleted()
-          .leftJoinAndSelect('vacation.member', 'member')
-          .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
-          .leftJoinAndSelect('vacation.company', 'company')
-          .leftJoinAndSelect('vacationIssue.organization', 'organization')
-          .where('member.id = :member', { member: member.id })
-          .andWhere(
-            'vacation.vacationStartDate BETWEEN :startDate AND :endDate',
-            {
-              startDate,
-              endDate,
-            },
-          )
-          .select('SUM(vacationCategory.deductionDays)', 'useVacation')
-          .addSelect('member.id', 'member')
-          .getRawMany();
-
-        for (let i = 0; i < Use.flat().length; i++) {
-          if (Use.flat()[i].member !== null) {
-            answer.push(Use.flat()[i]);
-          }
-        }
-      }),
-    );
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
@@ -441,27 +359,7 @@ export class VacationIssuesService {
         if (temp.length > 0) result.push(temp);
       }),
     );
-    const result1 = [];
-    const leave = [];
-    for (let i = 0; i < result.flat().length; i++) {
-      if (
-        result.flat()[i].member.id &&
-        answer.flat()[i] &&
-        result.flat()[i].member.id === answer.flat()[i].member
-      ) {
-        result.flat()[i].useVacation = answer.flat()[i].useVacation;
-        result.flat()[i].remaining =
-          result.flat()[i].vacationAll - result.flat()[i].useVacation;
 
-        leave.push(result.flat()[i]);
-      } else if (answer.flat()[i] === undefined) {
-        leave.push(result.flat()[i]);
-      } else {
-        leave.push(result.flat()[i]);
-      }
-    }
-
-    result1.push(leave);
     return result;
   }
 

@@ -34,7 +34,7 @@ export class VacationCategory {
   @Field(() => Int)
   paidTime: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
   @Field(() => Number)
   deductionDays: number;
 

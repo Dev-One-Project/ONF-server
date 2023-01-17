@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Company } from '../companies/entities/company.entity';
 import { Member } from '../members/entities/member.entity';
 import { VacationCategory } from '../vacationCategory/entities/vacationCategory.entity';
+import { VacationIssue } from '../vacationIssues/entities/vacationIssue.entity';
 
 import { Vacation } from './entities/vacation.entity';
 
@@ -21,6 +22,9 @@ export class VacationService {
 
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
+
+    @InjectRepository(VacationIssue)
+    private readonly vacationIssueRepository: Repository<VacationIssue>,
   ) {}
 
   async findOne({ vacationId }) {
@@ -148,11 +152,21 @@ export class VacationService {
         const category = await this.vacationCategoryRepository.findOne({
           where: { id: createVacationInput.vacationCategoryId },
         });
+        const leave = await this.vacationIssueRepository
+          .createQueryBuilder('vacationIssue')
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('member.id = :member', { member: members.id })
+          .getOne();
         // 2. 휴가 생성할 경우 멤버의 잔여휴가를 차감 한다.
 
         const result = await Promise.all(
           await createVacationInput.vacations.map(async (date: Date) => {
-            members.leave -= category.deductionDays;
+            leave.useVacation =
+              Number(leave.useVacation) + Number(category.deductionDays);
+
+            leave.remaining = leave.vacationAll - leave.useVacation;
             const vacation = this.vacationRepository.create({
               vacationEndDate: date,
               vacationStartDate: date,
@@ -163,7 +177,7 @@ export class VacationService {
               organization: members.organization,
             });
 
-            await this.memberRepository.save(members);
+            await this.vacationIssueRepository.save(leave);
             await this.vacationRepository.save(vacation);
             return vacation;
           }),
@@ -210,13 +224,29 @@ export class VacationService {
         '설정하신 날짜는 이미 기간 내에 포함되어 있습니다.',
       );
     }
+    const issue = await this.vacationIssueRepository
+      .createQueryBuilder('vacationIssue')
+      .leftJoinAndSelect('vacationIssue.member', 'member')
+      .leftJoinAndSelect('vacationIssue.company', 'company')
+      .leftJoinAndSelect('vacationIssue.organization', 'organization')
+      .where('member.id = :member', { member: member.id })
+      .getOne();
 
-    // console.log(double);
-    if (
-      Number(leave.vacationCategory.deductionDays) !== category.deductionDays
+    if (Number(leave.vacationCategory.deductionDays) > category.deductionDays) {
+      issue.useVacation =
+        Number(issue.useVacation) -
+        (Number(leave.vacationCategory.deductionDays) -
+          Number(category.deductionDays));
+      issue.remaining = issue.vacationAll - issue.useVacation;
+    } else if (
+      Number(leave.vacationCategory.deductionDays) < category.deductionDays
     ) {
-      member.leave +=
-        Number(leave.vacationCategory.deductionDays) - category.deductionDays;
+      issue.useVacation =
+        Number(issue.useVacation) +
+        (Number(category.deductionDays) -
+          Number(leave.vacationCategory.deductionDays));
+
+      issue.remaining = issue.vacationAll - issue.useVacation;
     }
     const result = await this.vacationRepository.save({
       ...leave,
@@ -226,8 +256,10 @@ export class VacationService {
       vacationCategory: category,
     });
 
-    await this.memberRepository.save({
-      ...member,
+    await this.vacationIssueRepository.save({
+      ...issue,
+      useVacation: issue.useVacation,
+      remaining: issue.remaining,
     });
     console.log(result);
     return result;
@@ -248,20 +280,46 @@ export class VacationService {
           throw new UnprocessableEntityException('선택사항을 수정해주세요.');
         }
 
+        const issue = await this.vacationIssueRepository
+          .createQueryBuilder('vacationIssue')
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('member.id = :member', {
+            member: updateVacationInput.member.id,
+          })
+          .getOne();
+
         if (
-          Number(findVacation.vacationCategory.deductionDays) !==
+          Number(findVacation.vacationCategory.deductionDays) >
           category.deductionDays
         ) {
-          findVacation.member.leave +=
-            Number(findVacation.vacationCategory.deductionDays) -
-            category.deductionDays;
+          issue.useVacation =
+            Number(issue.useVacation) -
+            (Number(findVacation.vacationCategory.deductionDays) -
+              Number(category.deductionDays));
+          issue.remaining = issue.vacationAll - issue.useVacation;
+        } else if (
+          Number(findVacation.vacationCategory.deductionDays) <
+          category.deductionDays
+        ) {
+          issue.useVacation =
+            Number(issue.useVacation) +
+            (Number(category.deductionDays) -
+              Number(findVacation.vacationCategory.deductionDays));
+
+          issue.remaining = issue.vacationAll - issue.useVacation;
         }
         const result = await this.vacationRepository.save({
           ...findVacation,
           id: vacationId,
           vacationCategory: category,
         });
-        await this.memberRepository.save({ ...findVacation.member });
+        await this.vacationIssueRepository.save({
+          ...issue,
+          useVacation: issue.useVacation,
+          remaining: issue.remaining,
+        });
 
         return result;
       }),
@@ -277,6 +335,29 @@ export class VacationService {
   }
 
   async delete({ vacationId }) {
+    const vacation = await this.vacationRepository.findOne({
+      where: { id: vacationId },
+      relations: ['member', 'organization', 'vacationCategory'],
+    });
+
+    const issue = await this.vacationIssueRepository
+      .createQueryBuilder('vacationIssue')
+      .leftJoinAndSelect('vacationIssue.company', 'company')
+      .leftJoinAndSelect('vacationIssue.member', 'member')
+      .leftJoinAndSelect('vacationIssue.organization', 'organization')
+      .where('member.id = :member', { member: vacation.member.id })
+      .getOne();
+
+    issue.useVacation =
+      Number(issue.useVacation) -
+      Number(vacation.vacationCategory.deductionDays);
+    issue.remaining = issue.vacationAll - issue.useVacation;
+
+    await this.vacationIssueRepository.save({
+      ...issue,
+      useVacation: issue.useVacation,
+      remaining: issue.remaining,
+    });
     const result = await this.vacationRepository.delete({
       id: vacationId,
     });
@@ -286,6 +367,29 @@ export class VacationService {
   async deleteMany({ vacationId }) {
     let result = true;
     for await (const id of vacationId) {
+      const vacation = await this.vacationRepository.findOne({
+        where: { id },
+        relations: ['member', 'organization', 'vacationCategory'],
+      });
+
+      const issue = await this.vacationIssueRepository
+        .createQueryBuilder('vacationIssue')
+        .leftJoinAndSelect('vacationIssue.company', 'company')
+        .leftJoinAndSelect('vacationIssue.member', 'member')
+        .leftJoinAndSelect('vacationIssue.organization', 'organization')
+        .where('member.id = :member', { member: vacation.member.id })
+        .getOne();
+
+      issue.useVacation =
+        Number(issue.useVacation) -
+        Number(vacation.vacationCategory.deductionDays);
+      issue.remaining = issue.vacationAll - issue.useVacation;
+
+      await this.vacationIssueRepository.save({
+        ...issue,
+        useVacation: issue.useVacation,
+        remaining: issue.remaining,
+      });
       const deletes = await this.vacationRepository.delete({ id });
 
       if (!deletes.affected) result = false;
