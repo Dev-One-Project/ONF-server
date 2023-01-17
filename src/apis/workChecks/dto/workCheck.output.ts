@@ -22,9 +22,6 @@ export class WorkCheckOutput {
   @Field(() => String, { nullable: true })
   workCheckMemo: string;
 
-  @Field(() => Boolean, { defaultValue: false })
-  isComfirmed: boolean;
-
   @Field(() => String, { nullable: true })
   workingTimeRange: string;
 

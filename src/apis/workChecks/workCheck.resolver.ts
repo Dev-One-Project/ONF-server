@@ -20,6 +20,18 @@ export class WorkCheckResolver {
     private readonly workCheckService: WorkCheckService, //
   ) {}
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Query(() => WorkCheck)
+  async fetchOneMemberWorkCheck(
+    @Args('date') date: Date, //
+    @Args('memberId') memberId: string,
+    @Context() context: IContext,
+  ) {
+    const companyId = context.req.user.company;
+    return await this.workCheckService.findOne({ date, memberId, companyId });
+  }
+
   @UseGuards(GqlAuthAccessGuard)
   @Query(() => [WorkCheckOutput], {
     description: 'member개인(나)의 출퇴근 기록 조회 - 직원모드',
@@ -157,7 +169,6 @@ export class WorkCheckResolver {
     });
   }
 
-  // TODO : 무일정근무일 때 출근하기랑 근무일정 배정되었을 떄 출근하기가 다름
   @UseGuards(GqlAuthAccessGuard)
   @Mutation(() => WorkCheck, { description: '출근하기' })
   async createStartWorkCheck(
@@ -167,8 +178,8 @@ export class WorkCheckResolver {
       memberId: context.req.user.member,
     });
 
-    plusNineHour(result.workDay);
-    plusNineHour(result.workingTime);
+    // plusNineHour(result.workDay);
+    // plusNineHour(result.workingTime);
 
     return result;
   }

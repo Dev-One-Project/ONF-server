@@ -17,9 +17,6 @@ export class CreateWorkCheckInput {
   @Field(() => String, { nullable: true })
   workCheckMemo: Date;
 
-  @Field(() => Boolean, { defaultValue: false })
-  isComfirmed: boolean;
-
   @Field(() => String, { nullable: false })
   memberId: string;
 

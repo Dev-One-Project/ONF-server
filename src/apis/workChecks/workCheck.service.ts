@@ -1,11 +1,12 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Equal, LessThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { Member } from '../members/entities/member.entity';
 import { WorkCheck } from './entities/workCheck.entity';
 import {
   changeTime,
   getDatesStartToEnd,
+  getEndDate,
   getToday,
   plusNineHour,
   timeArr,
@@ -31,6 +32,46 @@ export class WorkCheckService {
     private readonly vacationRepository: Repository<Vacation>,
   ) {}
 
+  async findOne({ date, memberId, companyId }) {
+    // const copyDate = new Date(date);
+    // const endDate = new Date(copyDate);
+    // endDate.setDate(endDate.getDate() + 1);
+
+    // return await this.workCheckRepository
+    //   .createQueryBuilder('WorkCheck')
+    //   .leftJoinAndSelect('WorkCheck.company', 'company')
+    //   .leftJoinAndSelect('WorkCheck.organization', 'organization')
+    //   .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
+    //   .leftJoinAndSelect('WorkCheck.member', 'member')
+    //   .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
+    //   .where('WorkCheck.company = :companyId', { companyId })
+    //   .andWhere('WorkCehck.member = :memberId', { memberId })
+    //   .andWhere(
+    //     `WorkCheck.workDay BETWEEN '${date.toISOString()}' AND '${endDate.toISOString()}'`,
+    //   )
+    //   .getOne();
+    const startDate = new Date(date);
+    startDate.setHours(9, 0, 0, 0);
+    const endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 1);
+    endDate.setHours(9, 0, 0, 0);
+
+    return await this.workCheckRepository.findOne({
+      where: {
+        company: { id: companyId },
+        member: { id: memberId },
+        workDay: Between(startDate, endDate),
+      },
+      relations: [
+        'company',
+        'organization',
+        'roleCategory',
+        'member',
+        'schedule',
+      ],
+    });
+  }
+
   async checkStatus({ memberId }) {
     const result = await this.workCheckRepository
       .createQueryBuilder('WorkCheck')
@@ -42,7 +83,7 @@ export class WorkCheckService {
         today: new Date(),
       })
       .getOne();
-    console.log(result);
+
     if (!result) return false;
     else return true;
   }
@@ -294,8 +335,6 @@ export class WorkCheckService {
         )
         .withDeleted()
         .getMany();
-
-      console.log(memberInOrg);
 
       await Promise.all(
         memberInOrg.map(async (member) => {
