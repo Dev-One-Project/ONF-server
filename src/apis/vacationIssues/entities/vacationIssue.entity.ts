@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Company } from 'src/apis/companies/entities/company.entity';
 import { Member } from 'src/apis/members/entities/member.entity';
 import { Organization } from 'src/apis/organization/entities/organization.entity';
@@ -31,19 +31,13 @@ export class VacationIssue {
   @Field(() => Int)
   vacationAll: number;
 
-  @Column({
-    type: 'decimal',
-    precision: 10,
-    scale: 2,
-    default: 0,
-    nullable: true,
-  })
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
   @Field(() => Number, { nullable: true })
   useVacation: number;
 
   @Column({
     type: 'decimal',
-    precision: 10,
+    precision: 5,
     scale: 2,
     default: 0,
     nullable: true,
