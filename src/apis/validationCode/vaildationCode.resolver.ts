@@ -11,7 +11,7 @@ export class ValidationCodeResolver {
   ) {}
 
   @UseGuards(GqlAuthAccessGuard)
-  @Mutation(() => String, { deprecationReason: '이메일 변경 인증코드발송' })
+  @Mutation(() => String, { description: '이메일 변경 인증코드발송' })
   async sendToValidationCode(
     @Context() context: IContext, //
     @Args('newEmail') newEmail: string,
@@ -23,7 +23,7 @@ export class ValidationCodeResolver {
   }
 
   @UseGuards(GqlAuthAccessGuard)
-  @Mutation(() => String, { deprecationReason: '이메일 검증코드 확인' })
+  @Mutation(() => String, { description: '이메일 검증코드 확인' })
   async checkValidationCode(
     @Args('validationCode') validationCode: string, //
     @Context() context: IContext,
