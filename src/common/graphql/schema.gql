@@ -288,7 +288,6 @@ type Query {
 
   """관리자 기준일자 기준으로 앞에 발생된 휴가 퇴사자랑 같이 조회"""
   fetchVacationIssueDetailDateDelete(startDate: DateTime, endDate: DateTime, organizationId: [String!]!): [[VacationIssue!]!]!
-  fetchOneMemberWorkCheck(date: DateTime!, memberId: String!): WorkCheck!
 
   """member개인(나)의 출퇴근 기록 조회 - 직원모드"""
   fetchMemberWorkChecks(startDate: DateTime!, endDate: DateTime!): [WorkCheckOutput!]!
@@ -721,8 +720,8 @@ input CreateMemberInput {
   joinDate: DateTime
   exitDate: DateTime
   memo: String
-  organizationId: String
-  roleCategoryId: String
+  organizationId: String!
+  roleCategoryId: String!
 }
 
 input UpdateMemberInput {
