@@ -62,11 +62,11 @@ export class AccountResolver {
   }
 
   @UseGuards(GqlAuthAccessGuard)
-  @Mutation(() => Account, { deprecationReason: '이름&휴대폰번호 수정' })
+  @Mutation(() => Account, { description: '이름&휴대폰번호 수정' })
   changeAccount(
     @Context() context: IContext, //
-    @Args('name') name: string,
-    @Args('phone') phone: string,
+    @Args('name', { nullable: true }) name: string,
+    @Args('phone', { nullable: true }) phone: string,
   ) {
     return this.accountService.updateAccount({
       email: context.req.user.email,
@@ -76,7 +76,7 @@ export class AccountResolver {
   }
 
   @UseGuards(GqlAuthAccessGuard)
-  @Mutation(() => Account, { deprecationReason: '이메일 수정' })
+  @Mutation(() => Account, { description: '이메일 수정' })
   async changeEmail(
     @Args('newEmail') newEmail: string, //
     @Args('password') password: string,
@@ -90,7 +90,7 @@ export class AccountResolver {
     });
   }
   @UseGuards(GqlAuthAccessGuard)
-  @Mutation(() => String, { deprecationReason: '비빌번호 변경' })
+  @Mutation(() => String, { description: '비빌번호 변경' })
   async changePassword(
     @Context() context: IContext, //
     @Args('password') password: string,
