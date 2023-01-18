@@ -208,3 +208,7 @@ export const timeArr = (start, end) => {
   }
   return result;
 };
+
+export const getEndDate = (date: Date) => {
+  return new Date(new Date(date).setDate(date.getDate() + 1));
+};

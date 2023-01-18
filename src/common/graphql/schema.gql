@@ -203,7 +203,6 @@ type WorkCheckOutput {
   workingTime: DateTime
   quittingTime: DateTime
   workCheckMemo: String
-  isComfirmed: Boolean!
   workingTimeRange: String
   endTimeRange: String
   createdAt: DateTime
@@ -660,7 +659,6 @@ input CreateWorkCheckInput {
   quittingTime: String
   isWorking: Boolean = false
   workCheckMemo: String
-  isComfirmed: Boolean = false
   memberId: String!
   scheduleId: String
   organizationId: String
@@ -673,7 +671,6 @@ input UpdateWorkCheckInput {
   quittingTime: String
   isWorking: Boolean = false
   workCheckMemo: String
-  isComfirmed: Boolean = false
   memberId: String
   scheduleId: String
   organizationId: String
