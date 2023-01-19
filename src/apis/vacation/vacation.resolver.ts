@@ -18,6 +18,13 @@ export class VacationResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Query(() => [Vacation], { description: '휴가 모두 보여주기' })
+  async fetchVacations() {
+    return await this.vacationService.findAll();
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Query(() => Vacation, { description: '(관리자) 휴가 ID를 통한 휴가 조회' })
   async fetchVacation(
     @Args('vacationId') vacationId: string, //

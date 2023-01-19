@@ -27,6 +27,12 @@ export class VacationService {
     private readonly vacationIssueRepository: Repository<VacationIssue>,
   ) {}
 
+  async findAll() {
+    return await this.vacationRepository.find({
+      relations: ['member', 'company', 'vacationCategory'],
+    });
+  }
+
   async findOne({ vacationId }) {
     return this.vacationRepository.findOne({
       where: { id: vacationId },

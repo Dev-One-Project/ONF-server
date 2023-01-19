@@ -22,13 +22,22 @@ export class VacationIssuesService {
     private readonly vacationRepository: Repository<Vacation>,
   ) {}
 
-  async findAll({ companyId }) {
-    await this.companyRepository.findOne({
-      where: { id: companyId },
-    });
-    return this.vacationIssueRepository.find({
+  async findAll() {
+    const result = await this.vacationIssueRepository.find({
       relations: ['member', 'company', 'organization'],
     });
+    return result;
+  }
+
+  async find({ memberId }) {
+    const manyVacationId = await this.vacationIssueRepository
+      .createQueryBuilder('vacationIssue')
+      .leftJoinAndSelect('vacationIssue.member', 'member')
+      .leftJoinAndSelect('vacationIssue.company', 'company')
+      .leftJoinAndSelect('vacationIssue.organization', 'organization')
+      .where('member.id = :member', { member: memberId })
+      .getMany();
+    return manyVacationId;
   }
 
   async findOne({ vacationIssueId }) {
@@ -55,7 +64,7 @@ export class VacationIssuesService {
 
     const memberArr = await Promise.all(members);
 
-    const answer = [];
+    const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
         const Use = await this.vacationRepository
@@ -66,21 +75,8 @@ export class VacationIssuesService {
           .where('member.id = :member', { member: member.id })
           .andWhere('vacation.vacationStartDate <= :baseDate', { baseDate })
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
-          .addSelect('member.id', 'member')
-          .orderBy('vacation.vacationStartDate', 'DESC')
-          .getRawMany();
-        for (let i = 0; i < Use.flat().length; i++) {
-          if (Use.flat()[i].member !== null) {
-            answer.push(Use.flat()[i]);
-          }
-        }
-      }),
-    );
-    // 휴가 id의
-    console.log(answer);
-    const result = [];
-    await Promise.all(
-      memberArr.map(async (member) => {
+          .getRawOne();
+
         if (!startDate && !endDate) {
           const temp = await this.vacationIssueRepository
             .createQueryBuilder('vacationIssue')
@@ -93,14 +89,33 @@ export class VacationIssuesService {
             .andWhere('vacationIssue.startingPoint <= :baseDate', {
               baseDate,
             })
+            .andWhere(
+              'vacationIssue.remaining = vacationIssue.vacationAll - vacationIssue.useVacation',
+            )
             .orderBy('vacationIssue.startingPoint', 'DESC')
             .getMany()
             .then((res) => {
               return res;
             });
-          for (let i = 0; i < temp.length; i++) {
-            temp[i].expirationDate = baseDate;
+
+          // TODO: 다 구한값에서 Use.useVacation 빼주기
+          // TODO: 만약 null 일경우 0으로 바꿔주기
+          if (Use.useVacation === null) {
+            for (let i = 0; i < temp.length; i++) {
+              temp[i].expirationDate = baseDate;
+              temp[i].useVacation =
+                Number(temp[i].useVacation) - Number(temp[i].useVacation);
+              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
+            }
+          } else {
+            for (let i = 0; i < temp.length; i++) {
+              temp[i].expirationDate = baseDate;
+              temp[i].useVacation = Use.useVacation;
+
+              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
+            }
           }
+
           if (temp.length > 0) result.push(temp);
         } else {
           const temp = await this.vacationIssueRepository
@@ -126,34 +141,26 @@ export class VacationIssuesService {
             .then((res) => {
               return res;
             });
-          for (let i = 0; i < temp.length; i++) {
-            temp[i].expirationDate = baseDate;
+          if (Use.useVacation === null) {
+            for (let i = 0; i < temp.length; i++) {
+              temp[i].expirationDate = baseDate;
+              temp[i].useVacation =
+                Number(temp[i].useVacation) - Number(temp[i].useVacation);
+              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
+            }
+          } else {
+            for (let i = 0; i < temp.length; i++) {
+              temp[i].expirationDate = baseDate;
+              temp[i].useVacation = Use.useVacation;
+              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
+            }
           }
           if (temp.length > 0) result.push(temp);
         }
       }),
     );
-    const result1 = [];
-    const leave = [];
-    for (let i = 0; i < result.flat().length; i++) {
-      if (
-        result.flat()[i].member.id &&
-        answer.flat()[i] &&
-        result.flat()[i].member.id === answer.flat()[i].member
-      ) {
-        result.flat()[i].useVacation = answer.flat()[i].useVacation;
-        result.flat()[i].remaining =
-          result.flat()[i].vacationAll - result.flat()[i].useVacation;
-        leave.push(result.flat()[i]);
-      } else if (answer.flat()[i] === undefined) {
-        leave.push(result.flat()[i]);
-      } else {
-        leave.push(result.flat()[i]);
-      }
-    }
-    result1.push(leave);
 
-    return result1;
+    return result;
   }
 
   async fetchVacationIssueWithBaseDateDelete({
@@ -174,7 +181,7 @@ export class VacationIssuesService {
 
     const memberArr = await Promise.all(members);
 
-    const answer = [];
+    const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
         const Use = await this.vacationRepository
@@ -186,19 +193,7 @@ export class VacationIssuesService {
           .where('member.id = :member', { member: member.id })
           .andWhere('vacation.vacationStartDate <= :baseDate', { baseDate })
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
-          .addSelect('member.id', 'member')
-          .orderBy('vacation.vacationStartDate', 'DESC')
-          .getRawMany();
-        for (let i = 0; i < Use.flat().length; i++) {
-          if (Use.flat()[i].member !== null) {
-            answer.push(Use.flat()[i]);
-          }
-        }
-      }),
-    );
-    const result = [];
-    await Promise.all(
-      memberArr.map(async (member) => {
+          .getRawOne();
         if (!startDate && !endDate) {
           const temp = await this.vacationIssueRepository
             .createQueryBuilder('vacationIssue')
@@ -217,8 +212,20 @@ export class VacationIssuesService {
             .then((res) => {
               return res;
             });
-          for (let i = 0; i < temp.length; i++) {
-            temp[i].expirationDate = baseDate;
+          if (Use.useVacation === null) {
+            for (let i = 0; i < temp.length; i++) {
+              temp[i].expirationDate = baseDate;
+              temp[i].useVacation =
+                Number(temp[i].useVacation) - Number(temp[i].useVacation);
+              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
+            }
+          } else {
+            for (let i = 0; i < temp.length; i++) {
+              temp[i].expirationDate = baseDate;
+              temp[i].useVacation = Use.useVacation;
+
+              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
+            }
           }
           if (temp.length > 0) result.push(temp);
         } else {
@@ -246,34 +253,27 @@ export class VacationIssuesService {
             .then((res) => {
               return res;
             });
-          for (let i = 0; i < temp.length; i++) {
-            temp[i].expirationDate = baseDate;
+          if (Use.useVacation === null) {
+            for (let i = 0; i < temp.length; i++) {
+              temp[i].expirationDate = baseDate;
+              temp[i].useVacation =
+                Number(temp[i].useVacation) - Number(temp[i].useVacation);
+              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
+            }
+          } else {
+            for (let i = 0; i < temp.length; i++) {
+              temp[i].expirationDate = baseDate;
+              temp[i].useVacation = Use.useVacation;
+
+              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
+            }
           }
           if (temp.length > 0) result.push(temp);
         }
       }),
     );
-    const result1 = [];
-    const leave = [];
-    for (let i = 0; i < result.flat().length; i++) {
-      if (
-        result.flat()[i].member.id &&
-        answer.flat()[i] &&
-        result.flat()[i].member.id === answer.flat()[i].member
-      ) {
-        result.flat()[i].useVacation = answer.flat()[i].useVacation;
-        result.flat()[i].remaining =
-          result.flat()[i].vacationAll - result.flat()[i].useVacation;
-        leave.push(result.flat()[i]);
-      } else if (answer.flat()[i] === undefined) {
-        leave.push(result.flat()[i]);
-      } else {
-        leave.push(result.flat()[i]);
-      }
-    }
-    result1.push(leave);
 
-    return result1;
+    return result;
   }
 
   async findWithDetailDate({ startDate, endDate, companyId, organizationId }) {
