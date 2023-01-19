@@ -16,6 +16,24 @@ export class VacationIssuesResolver {
     private readonly vacationIssuesService: VacationIssuesService, //
   ) {}
 
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Query(() => [VacationIssue], { description: '휴가발생 모두 보여주기' })
+  async fetchVacationIssues() {
+    return await this.vacationIssuesService.findAll();
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Query(() => [VacationIssue], {
+    description: '한 아이디의 휴가발생 모두보여주기',
+  })
+  async fetchManyVacationIssue(@Args('memberId') memberId: string) {
+    return await this.vacationIssuesService.find({ memberId });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
   @Query(() => VacationIssue, { description: '관리자 휴가 발생Id 조회' })
   async fetchVacationIssue(
     @Args('vacationIssueId') vacationIssueId: string, //
@@ -146,7 +164,7 @@ export class VacationIssuesResolver {
   @Mutation(() => [VacationIssue], {
     description: '관리자 휴가발생 다수 수정하기 ',
   })
-  async UpdateManyVacationsIssue(
+  async updateManyVacationsIssue(
     @Args({ name: 'vacationIssueId', type: () => [String] })
     vacationIssueId: string[],
     @Args('updateVacationIssueInput', { nullable: true })
