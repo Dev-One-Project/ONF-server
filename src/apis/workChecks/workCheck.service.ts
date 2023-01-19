@@ -1,12 +1,11 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Equal, LessThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Member } from '../members/entities/member.entity';
 import { WorkCheck } from './entities/workCheck.entity';
 import {
   changeTime,
   getDatesStartToEnd,
-  getEndDate,
   getToday,
   plusNineHour,
   timeArr,
@@ -337,7 +336,9 @@ export class WorkCheckService {
 
     const result = [];
 
-    const filterOrganizationId = organizationId.filter((el) => el !== '');
+    const filterOrganizationId = organizationId.filter(
+      (el: string) => el !== '',
+    );
 
     if (isActiveMember) {
       const memberInOrg = await this.memberRepository
@@ -722,42 +723,76 @@ export class WorkCheckService {
     //   organization: updateWorkCheckInput?.organizationId,
     //   roleCategory: updateWorkCheckInput?.roleCategoryId,
     // });
-    const { workingTime, quittingTime, isWorking } = updateWorkCheckInput;
+    let { workDay, workingTime, quittingTime } = updateWorkCheckInput;
 
-    if (isWorking) {
-      findWorkCheck.quittingTime = null;
+    if (updateWorkCheckInput.isWorking) {
+      quittingTime = null;
     }
 
-    if (workingTime) {
-      workingTime.setHours(workingTime.getHours() - 9);
+    if (workDay) {
+      workDay = new Date(workDay);
+      if (workingTime) {
+        workingTime = minusNineHour(changeTime(workDay, workingTime));
+      }
+      if (quittingTime) {
+        quittingTime = minusNineHour(changeTime(workDay, quittingTime));
+      }
+      if (!workingTime && !quittingTime) {
+        workingTime = new Date(findWorkCheck.workingTime);
+        workingTime.setFullYear(workDay.getFullYear());
+        workingTime.setMonth(workDay.getMonth());
+        workingTime.setDate(workDay.getDate());
+        if (findWorkCheck.quittingTime) {
+          quittingTime = new Date(findWorkCheck.quittingTime);
+          quittingTime.setFullYear(workDay.getFullYear());
+          quittingTime.setMonth(workDay.getMonth());
+          quittingTime.setDate(workDay.getDate());
+        }
+      }
     }
 
-    if (quittingTime) {
-      quittingTime.setHours(quittingTime.getHours() - 9);
+    if (workingTime && quittingTime && !workDay) {
+      workingTime = minusNineHour(
+        changeTime(new Date(findWorkCheck.workDay), workingTime),
+      );
+      quittingTime = minusNineHour(
+        changeTime(new Date(findWorkCheck.workDay), quittingTime),
+      );
+    } else if (workingTime && !workDay) {
+      workingTime = minusNineHour(
+        changeTime(new Date(findWorkCheck.workDay), workingTime),
+      );
+    } else if (quittingTime && !workDay) {
+      quittingTime = minusNineHour(
+        changeTime(new Date(findWorkCheck.workDay), quittingTime),
+      );
     }
 
     const updateObj = Object.assign({}, findWorkCheck, updateWorkCheckInput);
 
     const { organizationId, roleCategoryId, ...rest } = updateObj;
 
-    organizationId
-      ? await this.memberRepository.update(
-          { id: findWorkCheck.member.id },
-          { organization: organizationId },
-        )
-      : false;
+    if (organizationId !== findWorkCheck.organization) {
+      await this.memberRepository.update(
+        { id: findWorkCheck.member.id },
+        { organization: organizationId },
+      );
+    }
 
-    roleCategoryId
-      ? await this.memberRepository.update(
-          { id: findWorkCheck.member.id },
-          { roleCategory: roleCategoryId },
-        )
-      : false;
+    if (roleCategoryId !== findWorkCheck.roleCategory) {
+      await this.memberRepository.update(
+        { id: findWorkCheck.member.id },
+        { roleCategory: roleCategoryId },
+      );
+    }
 
     return await this.workCheckRepository.save({
       ...findWorkCheck,
       id: workCheckId,
       ...rest,
+      workDay,
+      workingTime,
+      quittingTime,
       organization: organizationId,
       roleCategory: roleCategoryId,
     });
@@ -776,37 +811,39 @@ export class WorkCheckService {
 
         const updateObj = Object.assign({}, origin, updateWorkCheckInput);
 
-        const { workingTime, quittingTime } = updateWorkCheckInput;
+        let { workingTime, quittingTime } = updateWorkCheckInput;
 
         if (workingTime) {
-          workingTime.setHours(workingTime.getHours() - 9);
+          workingTime = minusNineHour(changeTime(new Date(), workingTime));
         }
 
         if (quittingTime) {
-          quittingTime.setHours(quittingTime.getHours() - 9);
+          quittingTime = minusNineHour(changeTime(new Date(), quittingTime));
         }
 
         const { organizationId, roleCategoryId, ...rest } = updateObj;
 
-        organizationId
-          ? await this.memberRepository.update(
-              { id: origin.member.id },
-              { organization: organizationId },
-            )
-          : false;
+        if (organizationId !== origin.organization) {
+          await this.memberRepository.update(
+            { id: origin.member.id },
+            { organization: organizationId },
+          );
+        }
 
-        roleCategoryId
-          ? await this.memberRepository.update(
-              { id: origin.member.id },
-              { roleCategory: roleCategoryId },
-            )
-          : false;
+        if (roleCategoryId !== origin.roleCategory) {
+          await this.memberRepository.update(
+            { id: origin.member.id },
+            { roleCategory: roleCategoryId },
+          );
+        }
 
         if (origin.schedule === null) {
           return await this.workCheckRepository.save({
             ...origin,
             id: workCheckId,
             ...rest,
+            workingTime,
+            quittingTime,
             organization: organizationId,
             roleCategory: roleCategoryId,
           });
@@ -815,6 +852,8 @@ export class WorkCheckService {
             ...origin,
             id: workCheckId,
             ...rest,
+            workingTime,
+            quittingTime,
           });
         }
       }),
