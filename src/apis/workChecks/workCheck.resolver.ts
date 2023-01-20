@@ -27,7 +27,7 @@ export class WorkCheckResolver {
     @Args('date') date: Date, //
     @Args('memberId') memberId: string,
     @Context() context: IContext,
-  ) {
+  ): Promise<WorkCheck> {
     const companyId = context.req.user.company;
     return await this.workCheckService.findOne({ date, memberId, companyId });
   }
@@ -40,7 +40,7 @@ export class WorkCheckResolver {
     @Context() context: IContext, //
     @Args('startDate') startDate: Date,
     @Args('endDate') endDate: Date,
-  ) {
+  ): Promise<WorkCheckOutput[]> {
     const result = await this.workCheckService.findMemberWorkCheck({
       memberId: context.req.user.member,
       startDate,
@@ -66,7 +66,7 @@ export class WorkCheckResolver {
     organizationId: string[],
     @Args('month') month: string,
     @Args('isActiveMember', { defaultValue: false }) isActiveMember: boolean,
-  ) {
+  ): Promise<WorkCheckMemberOutput[]> {
     const result = await this.workCheckService.findMonth({
       companyId: context.req.user.company,
       organizationId,
@@ -94,7 +94,7 @@ export class WorkCheckResolver {
     @Args('startDate') startDate: Date,
     @Args('endDate') endDate: Date,
     @Args('isActiveMember', { defaultValue: false }) isActiveMember: boolean,
-  ) {
+  ): Promise<WorkCheckOutput[]> {
     return await this.workCheckService.findDateMemberWorkCheck({
       companyId: context.req.user.company,
       organizationId,
@@ -108,7 +108,7 @@ export class WorkCheckResolver {
   @Query(() => Boolean, { description: '현재 출퇴근 여부 확인' })
   async checkWorkStatus(
     @Context() context: IContext, //
-  ) {
+  ): Promise<boolean> {
     return await this.workCheckService.checkStatus({
       memberId: context.req.user.member,
     });
