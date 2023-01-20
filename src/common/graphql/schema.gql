@@ -259,7 +259,10 @@ type NoticeBoard {
 }
 
 type Query {
+  """공지사항 게시글 전부 조회"""
   fetchAllNoticeBoards: [NoticeBoard!]!
+
+  """공지사항 게시글 단일 조회"""
   fetchOneNoticeBoard(noticeBoardId: String!): NoticeBoard!
 
   """Fetch RoleCategory"""
@@ -273,6 +276,12 @@ type Query {
 
   """근무일정 유형 전체 조회"""
   fetchAllScheduleCategories: [ScheduleCategory!]!
+
+  """휴가발생 모두 보여주기"""
+  fetchVacationIssues: [VacationIssue!]!
+
+  """한 아이디의 휴가발생 모두보여주기"""
+  fetchManyVacationIssue(memberId: String!): [VacationIssue!]!
 
   """관리자 휴가 발생Id 조회"""
   fetchVacationIssue(vacationIssueId: String!): VacationIssue!
@@ -338,6 +347,9 @@ type Query {
   """(관리자) 휴가유형ID를 적어서 하나의 유형 찾기"""
   fetchVacationCategory(vacationCategoryId: String!): VacationCategory!
 
+  """휴가 모두 보여주기"""
+  fetchVacations: [Vacation!]!
+
   """(관리자) 휴가 ID를 통한 휴가 조회"""
   fetchVacation(vacationId: String!): Vacation!
 
@@ -372,8 +384,13 @@ type Query {
 }
 
 type Mutation {
+  """공지사항 게시글 생성"""
   createNoticeBoard(createNoticeBoardInput: CreateNoticeBoardInput!): NoticeBoard!
+
+  """공지사항 게시글 수정"""
   updateNoticeBoard(noticeBoardId: String!, updateNoticeBoardInput: UpdateNoticeBoardInput!): NoticeBoard!
+
+  """공지사항 게시글 삭제"""
   deleteNoticeBoard(noticeBoardId: String!): Boolean!
 
   """Create RoleCategory"""
@@ -422,7 +439,7 @@ type Mutation {
   updateVacationIssue(vacationIssueId: String!, updateVacationIssueInput: UpdateVacationIssueInput!): VacationIssue!
 
   """관리자 휴가발생 다수 수정하기 """
-  UpdateManyVacationsIssue(vacationIssueId: [String!]!, updateVacationIssueInput: UpdateVacationIssueInput): [VacationIssue!]!
+  updateManyVacationsIssue(vacationIssueId: [String!]!, updateVacationIssueInput: UpdateVacationIssueInput): [VacationIssue!]!
 
   """관리자 휴가 발생 삭제하기"""
   deleteVacationIssue(vacationIssueId: String!): Boolean!
@@ -522,9 +539,15 @@ type Mutation {
   """(관리자) 휴가 완전 삭제"""
   deleteManyVacation(vacationId: [String!]!): Boolean!
   createAccount(email: String!, password: String!, name: String!, phone: String, createCompanyInput: CreateCompanyInput, invitationCode: String): Account!
-  changeAccount(name: String!, phone: String!): Account! @deprecated(reason: "이름&휴대폰번호 수정")
-  changeEmail(newEmail: String!, password: String!): Account! @deprecated(reason: "이메일 수정")
-  changePassword(password: String!, newPassword: String!, checkPassword: String!): String! @deprecated(reason: "비빌번호 변경")
+
+  """이름&휴대폰번호 수정"""
+  changeAccount(name: String, phone: String): Account!
+
+  """이메일 수정"""
+  changeEmail(newEmail: String!, password: String!): Account!
+
+  """비빌번호 변경"""
+  changePassword(password: String!, newPassword: String!, checkPassword: String!): String!
 
   """근무일정 생성"""
   createSchedule(dates: [DateTime!]!, createScheduleInput: CreateScheduleInput!): [Schedule!]!
@@ -572,8 +595,12 @@ type Mutation {
 
   """맴버에게 근로정보 부여"""
   insertWorkInfo(memberId: String!, workInfoId: String!, appiedFrom: String!): Member!
-  sendToValidationCode(newEmail: String!): String! @deprecated(reason: "이메일 변경 인증코드발송")
-  checkValidationCode(validationCode: String!): String! @deprecated(reason: "이메일 검증코드 확인")
+
+  """이메일 변경 인증코드발송"""
+  sendToValidationCode(newEmail: String!): String!
+
+  """이메일 검증코드 확인"""
+  checkValidationCode(validationCode: String!): String!
 }
 
 input CreateNoticeBoardInput {
@@ -661,9 +688,7 @@ input CreateWorkCheckInput {
   isWorking: Boolean = false
   workCheckMemo: String
   memberId: String!
-  scheduleId: String
-  organizationId: String
-  roleCategoryId: String
+  scheduleId: String!
 }
 
 input UpdateWorkCheckInput {
@@ -674,8 +699,6 @@ input UpdateWorkCheckInput {
   workCheckMemo: String
   memberId: String
   scheduleId: String
-  organizationId: String
-  roleCategoryId: String
 }
 
 input CreateCompanyInput {

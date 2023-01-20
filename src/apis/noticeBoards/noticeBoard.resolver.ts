@@ -17,30 +17,30 @@ export class NoticeBoardResolver {
   ) {}
 
   @UseGuards(GqlAuthAccessGuard)
-  @Query(() => [NoticeBoard])
+  @Query(() => [NoticeBoard], { description: '공지사항 게시글 전부 조회' })
   async fetchAllNoticeBoards(
     @Context() context: IContext, //
-  ) {
+  ): Promise<NoticeBoard[]> {
     return await this.noticeBoardService.findAll({
       companyId: context.req.user.company,
     });
   }
 
-  @Query(() => NoticeBoard)
+  @Query(() => NoticeBoard, { description: '공지사항 게시글 단일 조회' })
   async fetchOneNoticeBoard(
     @Args('noticeBoardId') noticeBoardId: string, //
-  ) {
+  ): Promise<NoticeBoard> {
     return await this.noticeBoardService.findOne({ noticeBoardId });
   }
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Mutation(() => NoticeBoard)
+  @Mutation(() => NoticeBoard, { description: '공지사항 게시글 생성' })
   async createNoticeBoard(
     @Context() context: IContext,
     @Args('createNoticeBoardInput')
     createNoticeBoardInput: CreateNoticeBoardInput, //
-  ) {
+  ): Promise<CreateNoticeBoardInput> {
     const userId = context.req.user.id;
 
     return await this.noticeBoardService.create({
@@ -51,12 +51,12 @@ export class NoticeBoardResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Mutation(() => NoticeBoard)
+  @Mutation(() => NoticeBoard, { description: '공지사항 게시글 수정' })
   async updateNoticeBoard(
     @Args('noticeBoardId') noticeBoardId: string, //
     @Args('updateNoticeBoardInput')
     updateNoticeBoardInput: UpdateNoticeBoardInput,
-  ) {
+  ): Promise<UpdateNoticeBoardInput> {
     return await this.noticeBoardService.update({
       noticeBoardId,
       updateNoticeBoardInput,
@@ -65,10 +65,10 @@ export class NoticeBoardResolver {
 
   @Roles(Role.ADMIN)
   @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { description: '공지사항 게시글 삭제' })
   async deleteNoticeBoard(
     @Args('noticeBoardId') noticeBoardId: string, //
-  ) {
+  ): Promise<boolean> {
     return await this.noticeBoardService.delete({ noticeBoardId });
   }
 }

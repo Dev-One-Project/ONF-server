@@ -1,4 +1,8 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Member } from '../members/entities/member.entity';
@@ -32,23 +36,6 @@ export class WorkCheckService {
   ) {}
 
   async findOne({ date, memberId, companyId }) {
-    // const copyDate = new Date(date);
-    // const endDate = new Date(copyDate);
-    // endDate.setDate(endDate.getDate() + 1);
-
-    // return await this.workCheckRepository
-    //   .createQueryBuilder('WorkCheck')
-    //   .leftJoinAndSelect('WorkCheck.company', 'company')
-    //   .leftJoinAndSelect('WorkCheck.organization', 'organization')
-    //   .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
-    //   .leftJoinAndSelect('WorkCheck.member', 'member')
-    //   .leftJoinAndSelect('WorkCheck.schedule', 'schedule')
-    //   .where('WorkCheck.company = :companyId', { companyId })
-    //   .andWhere('WorkCehck.member = :memberId', { memberId })
-    //   .andWhere(
-    //     `WorkCheck.workDay BETWEEN '${date.toISOString()}' AND '${endDate.toISOString()}'`,
-    //   )
-    //   .getOne();
     const startDate = new Date(date);
     startDate.setHours(9, 0, 0, 0);
     const endDate = new Date(date);
@@ -366,9 +353,13 @@ export class WorkCheckService {
             .leftJoinAndSelect('WorkCheck.organization', 'organization')
             .leftJoinAndSelect('WorkCheck.schedule', 'schuedule')
             .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
-            .where('WorkCheck.workDay IN (:...monthStartToEnd)', {
-              monthStartToEnd,
-            })
+            .andWhere(
+              'DATE(WorkCheck.workDay) BETWEEN DATE(:start) AND DATE(:end)',
+              {
+                start: monthStartToEnd[0],
+                end: monthStartToEnd[monthStartToEnd.length - 1],
+              },
+            )
             .andWhere('WorkCheck.member = :memberId', { memberId: member.id })
             .orderBy('WorkCheck.workday', 'ASC')
             .addOrderBy('member.name', 'ASC')
@@ -416,10 +407,14 @@ export class WorkCheckService {
             .leftJoinAndSelect('WorkCheck.organization', 'organization')
             .leftJoinAndSelect('WorkCheck.schedule', 'schuedule')
             .leftJoinAndSelect('WorkCheck.roleCategory', 'roleCategory')
-            .where('WorkCheck.workDay IN (:...monthStartToEnd)', {
-              monthStartToEnd,
-            })
-            .andWhere('WorkCheck.member = :memberId', { memberId: member.id })
+            .where('WorkCheck.member = :memberId', { memberId: member.id })
+            .andWhere(
+              'DATE(WorkCheck.workDay) BETWEEN DATE(:start) AND DATE(:end)',
+              {
+                start: monthStartToEnd[0],
+                end: monthStartToEnd[monthStartToEnd.length - 1],
+              },
+            )
             .orderBy('WorkCheck.workday', 'ASC')
             .addOrderBy('member.name', 'ASC')
             .getMany();
@@ -578,25 +573,52 @@ export class WorkCheckService {
   // }
 
   async createAdmin({ companyId, createWorkCheckInput }) {
-    const { workingTime, quittingTime, ...rest } = createWorkCheckInput;
+    const { workDay, workingTime, quittingTime, ...rest } =
+      createWorkCheckInput;
+
+    const startDate = new Date(workDay);
+    startDate.setHours(9, 0, 0, 0);
+    const endDate = new Date(workDay);
+    endDate.setDate(endDate.getDate() + 1);
+    endDate.setHours(9, 0, 0, 0);
+
+    const schedule = await this.scheduleRepository.findOne({
+      where: {
+        company: { id: companyId },
+        member: { id: createWorkCheckInput.memberId },
+        date: Between(startDate, endDate),
+      },
+      relations: ['organization', 'roleCategory'],
+    });
+
+    if (!schedule) {
+      throw new UnprocessableEntityException('근무일정이 존재하지 않습니다.');
+    }
+
+    if (schedule.id !== createWorkCheckInput.scheduleId) {
+      throw new ConflictException('해당 근무일정 날짜와 일치하지 않습니다.');
+    }
 
     const start = workingTime
       ? minusNineHour(changeTime(createWorkCheckInput.workDay, workingTime))
-      : undefined;
+      : null;
 
     const end = quittingTime
       ? minusNineHour(changeTime(createWorkCheckInput.workDay, quittingTime))
-      : undefined;
+      : null;
 
     return await this.workCheckRepository.save({
       ...rest,
+      workDay,
       workingTime: start,
       quittingTime: end,
       company: companyId,
       member: createWorkCheckInput.memberId,
       schedule: createWorkCheckInput.scheduleId,
-      organization: createWorkCheckInput.organizationId,
-      roleCategory: createWorkCheckInput.roleCategoryId,
+      organization: schedule.organization,
+      roleCategory: schedule.roleCategory,
+      // organization: createWorkCheckInput.organizationId,
+      // roleCategory: createWorkCheckInput.roleCategoryId,
     });
   }
 
