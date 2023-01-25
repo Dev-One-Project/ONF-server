@@ -78,27 +78,40 @@ export class WorkInfoResolver {
     });
   }
 
-  // @UseGuards(GqlAuthAccessGuard, RolesGuard)
-  // @Roles(Role.ADMIN)
-  // @Mutation(() => WorkInfo, { description: '맴버 근로정보 수정' })
-  // async updateWorkInfo(
-  //   @Context() context: IContext, //
-  //   @Args('email', { nullable: true }) email: string,
-  //   @Args('memberId') memberId: string,
-  //   @Args('updateBasicWorkInfoInput', { nullable: true })
-  //   updateBasicWorkInfoInput: UpdateBasicWorkInfoInput,
-  //   @Args('updateFixedLaborDaysInput', { nullable: true })
-  //   updateFixedLaborDaysInput: UpdateFixedLaborDaysInput,
-  //   @Args('updateMaximumLaberInput', { nullable: true })
-  //   updateMaximumLaberInput: UpdateMaximumLaberInput,
-  // ) {
-  //   return await this.workInfoService.updateWorkInfo({
-  //     memberId,
-  //     updateBasicWorkInfoInput,
-  //     updateFixedLaborDaysInput,
-  //     updateMaximumLaberInput,
-  //   });
-  // }
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Mutation(() => Member, { description: '맴버 근로정보 수정' })
+  async updateWorkInfoByMember(
+    @Context() context: IContext,
+    @Args('memberId') memberId: string, //
+    @Args('workInfoId') workInfoId: string,
+  ) {
+    return await this.workInfoService.updateWorkInfoByMember({
+      memberId,
+      workInfoId,
+      companyId: context.req.user.company,
+    });
+  }
+
+  @UseGuards(GqlAuthAccessGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Mutation(() => WorkInfo, { description: '회사 근로정보 수정' })
+  async updateWorkInfo(
+    @Args('workInfoId') workInfoId: string, //
+    @Args('updateBasicWorkInfoInput', { nullable: true })
+    updateBasicWorkInfoInput: UpdateBasicWorkInfoInput,
+    @Args('updateFixedLaborDaysInput', { nullable: true })
+    updateFixedLaborDaysInput: UpdateFixedLaborDaysInput,
+    @Args('updateMaximumLaberInput', { nullable: true })
+    updateMaximumLaberInput: UpdateMaximumLaberInput,
+  ): Promise<WorkInfo> {
+    return await this.workInfoService.updateWorkInfo({
+      workInfoId,
+      updateBasicWorkInfoInput,
+      updateFixedLaborDaysInput,
+      updateMaximumLaberInput,
+    });
+  }
 
   //TODO : 미구현 에러뜸.
   // @UseGuards(GqlAuthAccessGuard, RolesGuard)

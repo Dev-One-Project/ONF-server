@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 import { Account } from '../accounts/entites/account.entity';
 import { Company } from '../companies/entities/company.entity';
 import { Member } from '../members/entities/member.entity';
+import { UpdateBasicWorkInfoInput } from './dto/updateBasickInfo.input';
+import { UpdateFixedLaborDaysInput } from './dto/updateFixedLaborRule.input';
+import { UpdateMaximumLaberInput } from './dto/updateMaximumLaborRule.input';
 import { WorkInfo } from './entites/workInfo.entity';
 
 @Injectable()
@@ -87,30 +90,56 @@ export class WorkInfoService {
     });
   }
 
-  // async updateWorkInfo({
-  //   memberId,
-  //   updateBasicWorkInfoInput,
-  //   updateFixedLaborDaysInput,
-  //   updateMaximumLaberInput,
-  // }) {
-  //   await this.workInfoRepository
-  //     .createQueryBuilder('WorkInfo')
-  //     .innerJoinAndSelect('WorkInfo.member', 'member')
-  //     .update(WorkInfo)
-  //     .set({
-  //       ...updateBasicWorkInfoInput,
-  //       ...updateFixedLaborDaysInput,
-  //       ...updateMaximumLaberInput,
-  //     })
-  //     .where('member.id = :id', { id: memberId })
-  //     .execute();
+  async updateWorkInfoByMember({
+    memberId,
+    workInfoId,
+    companyId, //
+  }: {
+    memberId: string;
+    workInfoId: string;
+    companyId: string;
+  }) {
+    const memberWorkInfo: Member = await this.memberRepository.findOne({
+      where: {
+        id: memberId, //
+        company: { id: companyId },
+      },
+      relations: ['workInfo', 'company'],
+    });
 
-  //   const result = await this.workInfoRepository.find({
-  //     where: { member: { id: memberId } },
-  //     relations: { member: true },
-  //   });
-  //   return result[0];
-  // }
+    const newWorkInfo = {
+      ...memberWorkInfo,
+      id: memberId,
+      workInfo: { id: workInfoId },
+    };
+    await this.memberRepository.save(newWorkInfo);
+    return memberWorkInfo;
+  }
+
+  async updateWorkInfo({
+    workInfoId,
+    updateBasicWorkInfoInput,
+    updateFixedLaborDaysInput,
+    updateMaximumLaberInput,
+  }: {
+    workInfoId: string;
+    updateBasicWorkInfoInput: UpdateBasicWorkInfoInput;
+    updateFixedLaborDaysInput: UpdateFixedLaborDaysInput;
+    updateMaximumLaberInput: UpdateMaximumLaberInput;
+  }): Promise<WorkInfo> {
+    const companyWorkInfo: WorkInfo = await this.workInfoRepository.findOne({
+      where: { id: workInfoId },
+    });
+
+    const newWorkInfo: WorkInfo = {
+      ...companyWorkInfo,
+      id: workInfoId,
+      ...updateBasicWorkInfoInput,
+      ...updateFixedLaborDaysInput,
+      ...updateMaximumLaberInput,
+    };
+    return await this.workInfoRepository.save(newWorkInfo);
+  }
 
   async findWorkInfo({ companyId }) {
     const company = await this.companyRepository.find({

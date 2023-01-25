@@ -596,6 +596,12 @@ type Mutation {
   """맴버에게 근로정보 부여"""
   insertWorkInfo(memberId: String!, workInfoId: String!, appiedFrom: String!): Member!
 
+  """맴버 근로정보 수정"""
+  updateWorkInfoByMember(memberId: String!, workInfoId: String!): Member!
+
+  """회사 근로정보 수정"""
+  updateWorkInfo(workInfoId: String!, updateBasicWorkInfoInput: UpdateBasicWorkInfoInput, updateFixedLaborDaysInput: UpdateFixedLaborDaysInput, updateMaximumLaberInput: UpdateMaximumLaberInput): WorkInfo!
+
   """이메일 변경 인증코드발송"""
   sendToValidationCode(newEmail: String!): String!
 
@@ -866,6 +872,27 @@ enum PeriodRange {
 }
 
 input CreateMaximumLaberInput {
+  maximumStandard: Standard
+  maximumHours: String
+  maximumUnitPeriod: String
+  maximumPeriodRange: PeriodRange
+}
+
+input UpdateBasicWorkInfoInput {
+  name: String
+  fixedLabor: String
+  weekOffDays: String
+  memo: String
+}
+
+input UpdateFixedLaborDaysInput {
+  fixedStandard: Standard
+  fixedHours: String
+  fixedUnitPeriod: String
+  fixedPeriodRange: PeriodRange
+}
+
+input UpdateMaximumLaberInput {
   maximumStandard: Standard
   maximumHours: String
   maximumUnitPeriod: String
