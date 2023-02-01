@@ -23,6 +23,6 @@ export class CreateOrganizationInput {
   @Field(() => String, { nullable: true })
   description: string;
 
-  @Field(() => String, { nullable: false })
+  @Field(() => String, { nullable: true })
   color: string;
 }

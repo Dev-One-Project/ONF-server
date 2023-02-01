@@ -56,13 +56,13 @@ export class WorkInfoResolver {
   async insertWorkInfo(
     @Args('memberId') memberId: string, //
     @Args('workInfoId') workInfoId: string,
-    @Args('appiedFrom') appiedFrom: string,
+    @Args('appliedFrom') appliedFrom: string,
     @Context() context: IContext,
   ) {
     return await this.workInfoService.insertWorkInfo({
       memberId,
       workInfoId,
-      appiedFrom,
+      appliedFrom,
       companyId: context.req.user.company,
     });
   }

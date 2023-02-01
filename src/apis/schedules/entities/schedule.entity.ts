@@ -30,7 +30,7 @@ export class Schedule {
   endWorkTime: string;
 
   @Column({ nullable: true })
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   memo: string;
 
   @Column()

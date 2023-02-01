@@ -48,7 +48,7 @@ export class WorkInfoService {
     memberId,
     companyId,
     workInfoId,
-    appiedFrom,
+    appliedFrom,
   }): Promise<Member> {
     const member = await this.memberRepository.findOne({
       where: { id: memberId },
@@ -77,7 +77,7 @@ export class WorkInfoService {
     await this.memberRepository
       .createQueryBuilder()
       .update(Member)
-      .set({ appliedFrom: appiedFrom })
+      .set({ appliedFrom: appliedFrom })
       .where('id=:id', { id: member.id })
       .execute();
 
