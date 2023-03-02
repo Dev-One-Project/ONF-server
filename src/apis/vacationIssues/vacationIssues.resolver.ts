@@ -50,13 +50,9 @@ export class VacationIssuesResolver {
     @Args('baseDate') baseDate: Date,
     @Args({ name: 'organizationId', type: () => [String] })
     organizationId: string[],
-    @Args('startDate', { nullable: true }) startDate: Date,
-    @Args('endDate', { nullable: true }) endDate: Date,
     @Context() ctx: IContext,
   ) {
     return await this.vacationIssuesService.fetchVacationIssueBaseDate({
-      startDate,
-      endDate,
       companyId: ctx.req.user.company,
       baseDate,
       organizationId,
@@ -73,13 +69,10 @@ export class VacationIssuesResolver {
     @Args({ name: 'organizationId', type: () => [String] })
     organizationId: string[],
     @Args('startDate', { nullable: true }) startDate: Date,
-    @Args('endDate', { nullable: true }) endDate: Date,
     @Context() ctx: IContext,
   ) {
     return await this.vacationIssuesService.fetchVacationIssueWithBaseDateDelete(
       {
-        startDate,
-        endDate,
         companyId: ctx.req.user.company,
         baseDate,
         organizationId,
@@ -128,17 +121,6 @@ export class VacationIssuesResolver {
     });
   }
 
-  // @Query(() => [VacationIssue], { description: '휴가 발생특정날짜 모두조회' })
-  // async fetchVacationIssueWithDate(
-  //   @Args('startDate') startDate: Date,
-  //   @Args('endDate') endDate: Date,
-  // ) {
-  //   return await this.vacationIssuesService.findVacationIssueWithDate({
-  //     startDate,
-  //     endDate,
-  //   });
-  // }
-
   @Mutation(() => VacationIssue, { description: '관리자 휴가 발생 만들기' })
   async createVacationIssue(
     @Args('createVacationIssueInput')
@@ -167,8 +149,8 @@ export class VacationIssuesResolver {
   async updateManyVacationsIssue(
     @Args({ name: 'vacationIssueId', type: () => [String] })
     vacationIssueId: string[],
-    @Args('updateVacationIssueInput', { nullable: true })
-    updateVacationIssueInput: UpdateVacationIssueInput,
+    @Args('updateVacationIssueInput')
+    updateVacationIssueInput?: UpdateVacationIssueInput,
   ) {
     return await this.vacationIssuesService.updateMany({
       vacationIssueId,
