@@ -22,6 +22,10 @@ export class VacationIssuesService {
     private readonly vacationRepository: Repository<Vacation>,
   ) {}
 
+  member = this.memberRepository
+    .createQueryBuilder('member')
+    .leftJoinAndSelect('member.company', 'company');
+
   async findAll() {
     const result = await this.vacationIssueRepository.find({
       relations: ['member', 'company', 'organization'],
@@ -47,27 +51,20 @@ export class VacationIssuesService {
     });
   }
 
-  async fetchVacationIssueBaseDate({
-    startDate,
-    endDate,
-    companyId,
-    organizationId,
-    baseDate,
-  }) {
+  async fetchVacationIssueBaseDate({ companyId, organizationId, baseDate }) {
     await this.findWithOrganization({ companyId, organizationId });
 
-    const members = await this.memberRepository
-      .createQueryBuilder('member')
-      .leftJoinAndSelect('member.company', 'company')
-      .where('company.id = :companyId', { companyId })
-      .getMany();
-
-    const memberArr = await Promise.all(members);
-
+    const members = await this.memberRepository.find({
+      where: {
+        company: { id: companyId },
+        organization: { id: organizationId },
+      },
+      relations: ['company', 'organization'],
+    });
     const result = [];
     await Promise.all(
-      memberArr.map(async (member) => {
-        const Use = await this.vacationRepository
+      members.map(async (member) => {
+        const vacationUse = await this.vacationRepository
           .createQueryBuilder('vacation')
           .leftJoinAndSelect('vacation.member', 'member')
           .leftJoinAndSelect('vacation.vacationCategory', 'vacationCategory')
@@ -77,86 +74,40 @@ export class VacationIssuesService {
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
           .getRawOne();
 
-        if (!startDate && !endDate) {
-          const temp = await this.vacationIssueRepository
-            .createQueryBuilder('vacationIssue')
-            .leftJoinAndSelect('vacationIssue.member', 'member')
-            .leftJoinAndSelect('vacationIssue.company', 'company')
-            .leftJoinAndSelect('vacationIssue.organization', 'organization')
-            .where('member.id = :membersId', {
-              membersId: member.id,
-            })
-            .andWhere('vacationIssue.startingPoint <= :baseDate', {
-              baseDate,
-            })
-            .andWhere(
-              'vacationIssue.remaining = vacationIssue.vacationAll - vacationIssue.useVacation',
-            )
-            .orderBy('vacationIssue.startingPoint', 'DESC')
-            .getMany()
-            .then((res) => {
-              return res;
-            });
+        const vacationIssues = await this.vacationIssueRepository
+          .createQueryBuilder('vacationIssue')
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('member.id = :membersId', {
+            membersId: member.id,
+          })
+          .andWhere('vacationIssue.startingPoint <= :baseDate', {
+            baseDate,
+          })
+          .orderBy('vacationIssue.startingPoint', 'DESC')
+          .getMany()
+          .then((res) => {
+            return res;
+          });
 
-          // TODO: 다 구한값에서 Use.useVacation 빼주기
-          // TODO: 만약 null 일경우 0으로 바꿔주기
-          if (Use.useVacation === null) {
-            for (let i = 0; i < temp.length; i++) {
-              temp[i].expirationDate = baseDate;
-              temp[i].useVacation =
-                Number(temp[i].useVacation) - Number(temp[i].useVacation);
-              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
-            }
-          } else {
-            for (let i = 0; i < temp.length; i++) {
-              temp[i].expirationDate = baseDate;
-              temp[i].useVacation = Use.useVacation;
-
-              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
-            }
+        if (vacationUse.useVacation === null) {
+          for (let i = 0; i < vacationIssues.length; i++) {
+            vacationIssues[i].expirationDate = baseDate;
+            vacationIssues[i].useVacation = 0;
+            vacationIssues[i].remaining =
+              vacationIssues[i].vacationAll - vacationIssues[i].useVacation;
           }
-
-          if (temp.length > 0) result.push(temp);
         } else {
-          const temp = await this.vacationIssueRepository
-            .createQueryBuilder('vacationIssue')
-            .leftJoinAndSelect('vacationIssue.member', 'member')
-            .leftJoinAndSelect('vacationIssue.company', 'company')
-            .leftJoinAndSelect('vacationIssue.organization', 'organization')
-            .where('member.id = :membersId', {
-              membersId: member.id,
-            })
-            .andWhere('vacationIssue.startingPoint <= :baseDate', {
-              baseDate,
-            })
-            .andWhere(
-              'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
-              {
-                startDate,
-                endDate,
-              },
-            )
-            .orderBy('vacationIssue.startingPoint', 'DESC')
-            .getMany()
-            .then((res) => {
-              return res;
-            });
-          if (Use.useVacation === null) {
-            for (let i = 0; i < temp.length; i++) {
-              temp[i].expirationDate = baseDate;
-              temp[i].useVacation =
-                Number(temp[i].useVacation) - Number(temp[i].useVacation);
-              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
-            }
-          } else {
-            for (let i = 0; i < temp.length; i++) {
-              temp[i].expirationDate = baseDate;
-              temp[i].useVacation = Use.useVacation;
-              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
-            }
+          for (let i = 0; i < vacationIssues.length; i++) {
+            vacationIssues[i].expirationDate = baseDate;
+            vacationIssues[i].useVacation = vacationUse.useVacation;
+            vacationIssues[i].remaining =
+              vacationIssues[i].vacationAll - vacationIssues[i].useVacation;
           }
-          if (temp.length > 0) result.push(temp);
         }
+
+        if (vacationIssues.length > 0) result.push(vacationIssues);
       }),
     );
 
@@ -164,27 +115,25 @@ export class VacationIssuesService {
   }
 
   async fetchVacationIssueWithBaseDateDelete({
-    startDate,
-    endDate,
     companyId,
     baseDate,
     organizationId,
   }) {
     await this.findWithOrganization({ companyId, organizationId });
 
-    const members = await this.memberRepository
-      .createQueryBuilder('member')
-      .withDeleted()
-      .leftJoinAndSelect('member.company', 'company')
-      .where('company.id = :companyId', { companyId })
-      .getMany();
-
-    const memberArr = await Promise.all(members);
+    const members = await this.memberRepository.find({
+      where: {
+        company: { id: companyId },
+        organization: { id: organizationId },
+      },
+      withDeleted: true,
+      relations: ['company', 'organization'],
+    });
 
     const result = [];
     await Promise.all(
-      memberArr.map(async (member) => {
-        const Use = await this.vacationRepository
+      members.map(async (member) => {
+        const useVacationWithDelete = await this.vacationRepository
           .createQueryBuilder('vacation')
           .withDeleted()
           .leftJoinAndSelect('vacation.member', 'member')
@@ -194,82 +143,44 @@ export class VacationIssuesService {
           .andWhere('vacation.vacationStartDate <= :baseDate', { baseDate })
           .select('SUM(vacationCategory.deductionDays)', 'useVacation')
           .getRawOne();
-        if (!startDate && !endDate) {
-          const temp = await this.vacationIssueRepository
-            .createQueryBuilder('vacationIssue')
-            .withDeleted()
-            .leftJoinAndSelect('vacationIssue.member', 'member')
-            .leftJoinAndSelect('vacationIssue.company', 'company')
-            .leftJoinAndSelect('vacationIssue.organization', 'organization')
-            .where('member.id = :membersId', {
-              membersId: member.id,
-            })
-            .andWhere('vacationIssue.startingPoint <= :baseDate', {
-              baseDate,
-            })
-            .orderBy('vacationIssue.startingPoint', 'DESC')
-            .getMany()
-            .then((res) => {
-              return res;
-            });
-          if (Use.useVacation === null) {
-            for (let i = 0; i < temp.length; i++) {
-              temp[i].expirationDate = baseDate;
-              temp[i].useVacation =
-                Number(temp[i].useVacation) - Number(temp[i].useVacation);
-              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
-            }
-          } else {
-            for (let i = 0; i < temp.length; i++) {
-              temp[i].expirationDate = baseDate;
-              temp[i].useVacation = Use.useVacation;
 
-              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
-            }
+        const WithDeleteVacationIssues = await this.vacationIssueRepository
+          .createQueryBuilder('vacationIssue')
+          .withDeleted()
+          .leftJoinAndSelect('vacationIssue.member', 'member')
+          .leftJoinAndSelect('vacationIssue.company', 'company')
+          .leftJoinAndSelect('vacationIssue.organization', 'organization')
+          .where('member.id = :membersId', {
+            membersId: member.id,
+          })
+          .andWhere('vacationIssue.startingPoint <= :baseDate', {
+            baseDate,
+          })
+          .orderBy('vacationIssue.startingPoint', 'DESC')
+          .getMany()
+          .then((res) => {
+            return res;
+          });
+        if (useVacationWithDelete.useVacation === null) {
+          for (let i = 0; i < WithDeleteVacationIssues.length; i++) {
+            WithDeleteVacationIssues[i].expirationDate = baseDate;
+            WithDeleteVacationIssues[i].useVacation = 0;
+            WithDeleteVacationIssues[i].remaining =
+              WithDeleteVacationIssues[i].vacationAll -
+              WithDeleteVacationIssues[i].useVacation;
           }
-          if (temp.length > 0) result.push(temp);
         } else {
-          const temp = await this.vacationIssueRepository
-            .createQueryBuilder('vacationIssue')
-            .withDeleted()
-            .leftJoinAndSelect('vacationIssue.member', 'member')
-            .leftJoinAndSelect('vacationIssue.company', 'company')
-            .leftJoinAndSelect('vacationIssue.organization', 'organization')
-            .where('member.id = :membersId', {
-              membersId: member.id,
-            })
-            .andWhere('vacationIssue.startingPoint <= :baseDate', {
-              baseDate,
-            })
-            .andWhere(
-              'vacationIssue.startingPoint BETWEEN :startDate AND :endDate',
-              {
-                startDate,
-                endDate,
-              },
-            )
-            .orderBy('vacationIssue.startingPoint', 'DESC')
-            .getMany()
-            .then((res) => {
-              return res;
-            });
-          if (Use.useVacation === null) {
-            for (let i = 0; i < temp.length; i++) {
-              temp[i].expirationDate = baseDate;
-              temp[i].useVacation =
-                Number(temp[i].useVacation) - Number(temp[i].useVacation);
-              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
-            }
-          } else {
-            for (let i = 0; i < temp.length; i++) {
-              temp[i].expirationDate = baseDate;
-              temp[i].useVacation = Use.useVacation;
-
-              temp[i].remaining = temp[i].vacationAll - temp[i].useVacation;
-            }
+          for (let i = 0; i < WithDeleteVacationIssues.length; i++) {
+            WithDeleteVacationIssues[i].expirationDate = baseDate;
+            WithDeleteVacationIssues[i].useVacation =
+              useVacationWithDelete.useVacation;
+            WithDeleteVacationIssues[i].remaining =
+              WithDeleteVacationIssues[i].vacationAll -
+              WithDeleteVacationIssues[i].useVacation;
           }
-          if (temp.length > 0) result.push(temp);
         }
+        if (WithDeleteVacationIssues.length > 0)
+          result.push(WithDeleteVacationIssues);
       }),
     );
 
@@ -279,18 +190,18 @@ export class VacationIssuesService {
   async findWithDetailDate({ startDate, endDate, companyId, organizationId }) {
     await this.findWithOrganization({ companyId, organizationId });
 
-    const members = await this.memberRepository
-      .createQueryBuilder('member')
-      .leftJoinAndSelect('member.company', 'company')
-      .where('company.id = :companyId', { companyId })
-      .getMany();
-
-    const memberArr = await Promise.all(members);
+    const members = await this.memberRepository.find({
+      where: {
+        company: { id: companyId },
+        organization: { id: organizationId },
+      },
+      relations: ['company', 'organization'],
+    });
 
     const result = [];
     await Promise.all(
-      memberArr.map(async (member) => {
-        const temp = await this.vacationIssueRepository
+      members.map(async (member) => {
+        const vacationIssues = await this.vacationIssueRepository
           .createQueryBuilder('vacationIssue')
           .leftJoinAndSelect('vacationIssue.member', 'member')
           .leftJoinAndSelect('vacationIssue.company', 'company')
@@ -310,7 +221,7 @@ export class VacationIssuesService {
           .then((res) => {
             return res;
           });
-        if (temp.length > 0) result.push(temp);
+        if (vacationIssues.length > 0) result.push(vacationIssues);
       }),
     );
 
@@ -324,18 +235,20 @@ export class VacationIssuesService {
   }) {
     await this.findWithOrganization({ companyId, organizationId });
 
-    const members = await this.memberRepository
-      .createQueryBuilder('member')
-      .withDeleted()
-      .leftJoinAndSelect('member.company', 'company')
-      .where('company.id = :companyId', { companyId })
-      .getMany();
+    const members = await this.memberRepository.find({
+      where: {
+        company: { id: companyId },
+        organization: { id: organizationId },
+      },
+      withDeleted: true,
+      relations: ['company', 'organization'],
+    });
     const memberArr = await Promise.all(members);
 
     const result = [];
     await Promise.all(
       memberArr.map(async (member) => {
-        const temp = await this.vacationIssueRepository
+        const WithDeleteVacationIssue = await this.vacationIssueRepository
           .createQueryBuilder('vacationIssue')
           .withDeleted()
           .leftJoinAndSelect('vacationIssue.member', 'member')
@@ -356,7 +269,8 @@ export class VacationIssuesService {
           .then((res) => {
             return res;
           });
-        if (temp.length > 0) result.push(temp);
+        if (WithDeleteVacationIssue.length > 0)
+          result.push(WithDeleteVacationIssue);
       }),
     );
 
