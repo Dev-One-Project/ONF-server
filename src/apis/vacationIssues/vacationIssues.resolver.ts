@@ -68,7 +68,6 @@ export class VacationIssuesResolver {
     @Args('baseDate') baseDate: Date,
     @Args({ name: 'organizationId', type: () => [String] })
     organizationId: string[],
-    @Args('startDate', { nullable: true }) startDate: Date,
     @Context() ctx: IContext,
   ) {
     return await this.vacationIssuesService.fetchVacationIssueWithBaseDateDelete(

@@ -71,7 +71,10 @@ export class VacationIssuesService {
           .leftJoinAndSelect('vacation.company', 'company')
           .where('member.id = :member', { member: member.id })
           .andWhere('vacation.vacationStartDate <= :baseDate', { baseDate })
-          .select('SUM(vacationCategory.deductionDays)', 'useVacation')
+          .select(
+            'ifnull(SUM(vacationCategory.deductionDays),0)',
+            'useVacation',
+          )
           .getRawOne();
 
         const vacationIssues = await this.vacationIssueRepository
@@ -91,20 +94,11 @@ export class VacationIssuesService {
             return res;
           });
 
-        if (vacationUse.useVacation === null) {
-          for (let i = 0; i < vacationIssues.length; i++) {
-            vacationIssues[i].expirationDate = baseDate;
-            vacationIssues[i].useVacation = 0;
-            vacationIssues[i].remaining =
-              vacationIssues[i].vacationAll - vacationIssues[i].useVacation;
-          }
-        } else {
-          for (let i = 0; i < vacationIssues.length; i++) {
-            vacationIssues[i].expirationDate = baseDate;
-            vacationIssues[i].useVacation = vacationUse.useVacation;
-            vacationIssues[i].remaining =
-              vacationIssues[i].vacationAll - vacationIssues[i].useVacation;
-          }
+        for (let i = 0; i < vacationIssues.length; i++) {
+          vacationIssues[i].expirationDate = baseDate;
+          vacationIssues[i].useVacation = vacationUse.useVacation;
+          vacationIssues[i].remaining =
+            vacationIssues[i].vacationAll - vacationIssues[i].useVacation;
         }
 
         if (vacationIssues.length > 0) result.push(vacationIssues);
@@ -141,7 +135,10 @@ export class VacationIssuesService {
           .leftJoinAndSelect('vacation.company', 'company')
           .where('member.id = :member', { member: member.id })
           .andWhere('vacation.vacationStartDate <= :baseDate', { baseDate })
-          .select('SUM(vacationCategory.deductionDays)', 'useVacation')
+          .select(
+            'ifnull(SUM(vacationCategory.deductionDays),0)',
+            'useVacation',
+          )
           .getRawOne();
 
         const WithDeleteVacationIssues = await this.vacationIssueRepository
@@ -161,24 +158,16 @@ export class VacationIssuesService {
           .then((res) => {
             return res;
           });
-        if (useVacationWithDelete.useVacation === null) {
-          for (let i = 0; i < WithDeleteVacationIssues.length; i++) {
-            WithDeleteVacationIssues[i].expirationDate = baseDate;
-            WithDeleteVacationIssues[i].useVacation = 0;
-            WithDeleteVacationIssues[i].remaining =
-              WithDeleteVacationIssues[i].vacationAll -
-              WithDeleteVacationIssues[i].useVacation;
-          }
-        } else {
-          for (let i = 0; i < WithDeleteVacationIssues.length; i++) {
-            WithDeleteVacationIssues[i].expirationDate = baseDate;
-            WithDeleteVacationIssues[i].useVacation =
-              useVacationWithDelete.useVacation;
-            WithDeleteVacationIssues[i].remaining =
-              WithDeleteVacationIssues[i].vacationAll -
-              WithDeleteVacationIssues[i].useVacation;
-          }
+
+        for (let i = 0; i < WithDeleteVacationIssues.length; i++) {
+          WithDeleteVacationIssues[i].expirationDate = baseDate;
+          WithDeleteVacationIssues[i].useVacation =
+            useVacationWithDelete.useVacation;
+          WithDeleteVacationIssues[i].remaining =
+            WithDeleteVacationIssues[i].vacationAll -
+            WithDeleteVacationIssues[i].useVacation;
         }
+
         if (WithDeleteVacationIssues.length > 0)
           result.push(WithDeleteVacationIssues);
       }),
@@ -243,11 +232,10 @@ export class VacationIssuesService {
       withDeleted: true,
       relations: ['company', 'organization'],
     });
-    const memberArr = await Promise.all(members);
 
     const result = [];
     await Promise.all(
-      memberArr.map(async (member) => {
+      members.map(async (member) => {
         const WithDeleteVacationIssue = await this.vacationIssueRepository
           .createQueryBuilder('vacationIssue')
           .withDeleted()
