@@ -22,10 +22,6 @@ export class VacationIssuesService {
     private readonly vacationRepository: Repository<Vacation>,
   ) {}
 
-  member = this.memberRepository
-    .createQueryBuilder('member')
-    .leftJoinAndSelect('member.company', 'company');
-
   async findAll() {
     const result = await this.vacationIssueRepository.find({
       relations: ['member', 'company', 'organization'],
@@ -57,7 +53,6 @@ export class VacationIssuesService {
     const members = await this.memberRepository.find({
       where: {
         company: { id: companyId },
-        organization: { id: organizationId },
       },
       relations: ['company', 'organization'],
     });
@@ -118,7 +113,6 @@ export class VacationIssuesService {
     const members = await this.memberRepository.find({
       where: {
         company: { id: companyId },
-        organization: { id: organizationId },
       },
       withDeleted: true,
       relations: ['company', 'organization'],
@@ -182,7 +176,6 @@ export class VacationIssuesService {
     const members = await this.memberRepository.find({
       where: {
         company: { id: companyId },
-        organization: { id: organizationId },
       },
       relations: ['company', 'organization'],
     });
@@ -227,7 +220,6 @@ export class VacationIssuesService {
     const members = await this.memberRepository.find({
       where: {
         company: { id: companyId },
-        organization: { id: organizationId },
       },
       withDeleted: true,
       relations: ['company', 'organization'],

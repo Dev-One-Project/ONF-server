@@ -166,7 +166,11 @@ export class VacationService {
           .where('member.id = :member', { member: members.id })
           .getOne();
         // 2. 휴가 생성할 경우 멤버의 잔여휴가를 차감 한다.
-
+        if (!leave) {
+          throw new UnprocessableEntityException(
+            '휴가 발생이 없는 멤버입니다. 휴가 발생 후 다시 이용해주세요',
+          );
+        }
         const result = await Promise.all(
           await createVacationInput.vacations.map(async (date: Date) => {
             leave.useVacation =
@@ -238,19 +242,17 @@ export class VacationService {
       .where('member.id = :member', { member: member.id })
       .getOne();
 
-    if (Number(leave.vacationCategory.deductionDays) > category.deductionDays) {
+    if (leave.vacationCategory.deductionDays > category.deductionDays) {
       issue.useVacation =
-        Number(issue.useVacation) -
-        (Number(leave.vacationCategory.deductionDays) -
-          Number(category.deductionDays));
+        issue.useVacation -
+        leave.vacationCategory.deductionDays -
+        category.deductionDays;
       issue.remaining = issue.vacationAll - issue.useVacation;
-    } else if (
-      Number(leave.vacationCategory.deductionDays) < category.deductionDays
-    ) {
+    } else if (leave.vacationCategory.deductionDays < category.deductionDays) {
       issue.useVacation =
-        Number(issue.useVacation) +
-        (Number(category.deductionDays) -
-          Number(leave.vacationCategory.deductionDays));
+        issue.useVacation +
+        category.deductionDays -
+        leave.vacationCategory.deductionDays;
 
       issue.remaining = issue.vacationAll - issue.useVacation;
     }
@@ -297,22 +299,20 @@ export class VacationService {
           .getOne();
 
         if (
-          Number(findVacation.vacationCategory.deductionDays) >
-          category.deductionDays
+          findVacation.vacationCategory.deductionDays > category.deductionDays
         ) {
           issue.useVacation =
-            Number(issue.useVacation) -
-            (Number(findVacation.vacationCategory.deductionDays) -
-              Number(category.deductionDays));
+            issue.useVacation -
+            findVacation.vacationCategory.deductionDays -
+            category.deductionDays;
           issue.remaining = issue.vacationAll - issue.useVacation;
         } else if (
-          Number(findVacation.vacationCategory.deductionDays) <
-          category.deductionDays
+          findVacation.vacationCategory.deductionDays < category.deductionDays
         ) {
           issue.useVacation =
-            Number(issue.useVacation) +
-            (Number(category.deductionDays) -
-              Number(findVacation.vacationCategory.deductionDays));
+            issue.useVacation +
+            category.deductionDays -
+            findVacation.vacationCategory.deductionDays;
 
           issue.remaining = issue.vacationAll - issue.useVacation;
         }
@@ -377,7 +377,6 @@ export class VacationService {
         where: { id },
         relations: ['member', 'organization', 'vacationCategory'],
       });
-
       const issue = await this.vacationIssueRepository
         .createQueryBuilder('vacationIssue')
         .leftJoinAndSelect('vacationIssue.company', 'company')
@@ -386,16 +385,22 @@ export class VacationService {
         .where('member.id = :member', { member: vacation.member.id })
         .getOne();
 
-      issue.useVacation =
-        Number(issue.useVacation) -
-        Number(vacation.vacationCategory.deductionDays);
-      issue.remaining = issue.vacationAll - issue.useVacation;
+      if (issue) {
+        issue.useVacation =
+          issue.useVacation - vacation.vacationCategory.deductionDays;
+        issue.remaining = issue.vacationAll - issue.useVacation;
 
-      await this.vacationIssueRepository.save({
-        ...issue,
-        useVacation: issue.useVacation,
-        remaining: issue.remaining,
-      });
+        await this.vacationIssueRepository.save({
+          ...issue,
+          useVacation: issue.useVacation,
+          remaining: issue.remaining,
+        });
+      } else {
+        throw new UnprocessableEntityException(
+          '휴가 발생건이 없습니다. 확인하고 다시 실행해주세요',
+        );
+      }
+
       const deletes = await this.vacationRepository.delete({ id });
 
       if (!deletes.affected) result = false;
