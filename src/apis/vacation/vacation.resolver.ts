@@ -98,7 +98,7 @@ export class VacationResolver {
   async updateManyVacation(
     @Args({ name: 'vacationId', type: () => [String] }) vacationId: string[],
     @Args('updateVacationInput', { nullable: true })
-    updateVacationInput: UpdateVacationInput,
+    updateVacationInput?: UpdateVacationInput,
   ) {
     return await this.vacationService.UpdateManyVacation({
       vacationId,

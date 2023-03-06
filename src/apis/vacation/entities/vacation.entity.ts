@@ -33,10 +33,12 @@ export class Vacation {
   @Field(() => String, { nullable: true })
   description: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ nullable: true })
+  @Field(() => Date, { nullable: true })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ nullable: true })
+  @Field(() => Date, { nullable: true })
   updatedAt: Date;
 
   @DeleteDateColumn()

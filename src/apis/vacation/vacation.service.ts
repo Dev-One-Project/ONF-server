@@ -277,6 +277,7 @@ export class VacationService {
     const vacations = await Promise.all(
       vacationId.map(async (vacationId: string) => {
         const findVacation = await this.findOne({ vacationId });
+
         if (!findVacation) {
           throw new UnprocessableEntityException('존재하지 않은 휴가입니다.');
         }
@@ -284,17 +285,17 @@ export class VacationService {
         const category = await this.vacationCategoryRepository.findOne({
           where: { id: updateVacationInput.vacationCategoryId },
         });
+        console.log(category);
         if (!category) {
           throw new UnprocessableEntityException('선택사항을 수정해주세요.');
         }
-
         const issue = await this.vacationIssueRepository
           .createQueryBuilder('vacationIssue')
           .leftJoinAndSelect('vacationIssue.member', 'member')
           .leftJoinAndSelect('vacationIssue.company', 'company')
           .leftJoinAndSelect('vacationIssue.organization', 'organization')
           .where('member.id = :member', {
-            member: updateVacationInput.member.id,
+            member: findVacation.member.id,
           })
           .getOne();
 
